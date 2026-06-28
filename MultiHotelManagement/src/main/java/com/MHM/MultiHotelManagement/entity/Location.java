@@ -22,6 +22,7 @@ public class Location {
 
     private String name;    // লোকেশনের নাম
     private String image;   // লোকেশনের ছবি
+    private String city;
 
     // Location ↔ Hotel (One-to-Many)
     @JsonIgnore

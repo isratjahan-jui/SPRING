@@ -27,6 +27,8 @@ public class ExtraService {
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
+    
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

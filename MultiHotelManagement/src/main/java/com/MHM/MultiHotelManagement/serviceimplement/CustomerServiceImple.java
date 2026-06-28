@@ -8,6 +8,7 @@ import com.MHM.MultiHotelManagement.repository.CustomerRepository;
 import com.MHM.MultiHotelManagement.service.CustomerService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,11 +31,11 @@ public class CustomerServiceImple implements CustomerService {
 
     @Override
     public CustomerResponseDTO getCustomerByUserId(Long userId) {
-        Customer customer = customerRepository.findCustomerByUser_Id(userId.intValue());
-        if (customer == null) {
+        Optional<Customer> customer = customerRepository.findCustomerByUser_Id(userId.longValue());
+        if (customer.isEmpty()) {
             throw new EntityNotFoundException("Customer not found for user ID: " + userId);
         }
-        return CustomerMapperDTO.toResponseDTO(customer);
+        return CustomerMapperDTO.toResponseDTO(customer.orElse(null));
     }
 
     @Override
@@ -49,19 +50,19 @@ public class CustomerServiceImple implements CustomerService {
     }
 
     @Override
-    public CustomerResponseDTO saveCustomer(CustomerRequestDTO customerRequestDTO) {
+    public CustomerResponseDTO saveCustomer(CustomerRequestDTO customerRequestDTO, MultipartFile image) {
         Customer customer = CustomerMapperDTO.toEntity(customerRequestDTO);
         Customer savedCustomer = customerRepository.save(customer);
         return CustomerMapperDTO.toResponseDTO(savedCustomer);
     }
 
     @Override
-    public CustomerResponseDTO updateCustomer(Long id, CustomerRequestDTO customerRequestDTO) {
+    public CustomerResponseDTO updateCustomer(Long id, CustomerRequestDTO customerRequestDTO,MultipartFile image) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Customer not found with id: " + id));
 
         // Update fields
-        customer.setName(customerRequestDTO.getName());
+        customer.setCustomerName(customerRequestDTO.getName());
         customer.setEmail(customerRequestDTO.getEmail());
         customer.setPhone(customerRequestDTO.getPhone());
         customer.setAddress(customerRequestDTO.getAddress());

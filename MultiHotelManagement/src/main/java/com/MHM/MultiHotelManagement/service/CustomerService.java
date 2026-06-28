@@ -17,7 +17,7 @@ public interface CustomerService {
 
     List<CustomerResponseDTO> getAllCustomers();
 
-    CustomerResponseDTO saveCustomer(CustomerRequestDTO customerRequestDTO);
+    CustomerResponseDTO saveCustomer(CustomerRequestDTO customerRequestDTO,MultipartFile image);
 
     CustomerResponseDTO updateCustomer(Long id, CustomerRequestDTO customerRequestDTO, MultipartFile image);
 

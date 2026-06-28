@@ -1,5 +1,6 @@
 package com.MHM.MultiHotelManagement.entity;
 
+import com.MHM.MultiHotelManagement.enums.BookingStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -36,6 +37,10 @@ public class Booking {
     private double totalAmount;
     private double advanceAmount;
     private double dueAmount;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private BookingStatus status;
+
 
     // একজন Customer অনেকগুলো Booking করতে পারে
     @ManyToOne(fetch = FetchType.LAZY)

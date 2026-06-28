@@ -35,6 +35,7 @@ public class User implements UserDetails {
     private String password;
 
     private String image;
+    private String verificationToken;
 
     @Enumerated(EnumType.STRING)
     private Role role;

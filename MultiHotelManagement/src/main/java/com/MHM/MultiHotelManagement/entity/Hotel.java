@@ -1,4 +1,5 @@
 package com.MHM.MultiHotelManagement.entity;
+import com.MHM.MultiHotelManagement.enums.HotelStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,7 +26,10 @@ public class Hotel {
     private String description;
     private String rating;        // রেটিং (স্টার বা স্কোর)
     private String image;         // হোটেলের ছবি
-    private Boolean approved;   // Admin approval status
+
+    @Enumerated(EnumType.STRING)
+    private HotelStatus status;
+//    private Boolean approved;   // Admin approval status
 
     // Location ↔ Hotel (Many-to-One)
     @ManyToOne(fetch = FetchType.LAZY)
@@ -57,9 +61,7 @@ public class Hotel {
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<FoodItem> foodItems = new ArrayList<>();
 
-//    // Hotel ↔ HotelAmenities (One-to-One)
-//    @OneToOne(mappedBy = "hotel", cascade = CascadeType.ALL)
-//    private HotelAmenities hotelAmenities;
+
 
     // Hotel ↔ HotelInformation (One-to-One)
     @OneToOne(mappedBy = "hotel", cascade = CascadeType.ALL)

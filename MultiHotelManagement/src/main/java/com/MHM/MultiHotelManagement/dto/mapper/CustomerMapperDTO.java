@@ -10,7 +10,7 @@ public class CustomerMapperDTO {
     // RequestDTO → Entity
     public static Customer toEntity(CustomerRequestDTO dto) {
         Customer customer = new Customer();
-        customer.setName(dto.getName());
+        customer.setCustomerName(dto.getName());
         customer.setEmail(dto.getEmail());
         customer.setPhone(dto.getPhone());
         customer.setAddress(dto.getAddress());
@@ -24,7 +24,7 @@ public class CustomerMapperDTO {
     public static CustomerResponseDTO toResponseDTO(Customer customer) {
         return new CustomerResponseDTO(
                 customer.getId(),
-                customer.getName(),
+                customer.getCustomerName(),
                 customer.getEmail(),
                 customer.getPhone(),
                 customer.getAddress(),
