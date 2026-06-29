@@ -1,0 +1,18 @@
+package com.MHM.MultiHotelManagement.repository;
+
+import com.MHM.MultiHotelManagement.entity.Notification;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+
+public interface NotificationRepository extends JpaRepository<Notification, Long> {
+
+    // User er  notification
+    List<Notification> findByUser_Id(Long userId);
+
+    // User er unread/read notification
+    List<Notification> findByUser_IdAndReadStatus(Long userId, Boolean readStatus);
+}
