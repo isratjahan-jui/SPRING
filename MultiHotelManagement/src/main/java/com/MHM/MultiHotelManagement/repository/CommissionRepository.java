@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CommissionRepository
-        extends JpaRepository<Commission, Long> {
+public interface CommissionRepository extends JpaRepository<Commission, Long> {
 
     // ── Booking দিয়ে খোঁজো ──────────────────────────────────────
     Optional<Commission> findByBooking_Id(Long bookingId);
