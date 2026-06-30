@@ -11,9 +11,13 @@ public class HotelResponseDTO {
         private String description;
         private String rating;
         private String image;
+        private String status;
+        private Long locationId;
+        private Long ownerId;
+    
         private String locationName;
         private String ownerName;
-        private String status;
+
     }
 
 

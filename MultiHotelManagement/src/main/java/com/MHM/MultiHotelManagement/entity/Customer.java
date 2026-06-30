@@ -1,12 +1,12 @@
 package com.MHM.MultiHotelManagement.entity;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Date;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,8 +30,8 @@ public class Customer {
     private String address;
     private String gender;
 
-    @Temporal(TemporalType.DATE)
-    private Date dateOfBirth;
+    // LocalDate ব্যবহার করো — @Temporal লাগবে না
+    private LocalDate dateOfBirth;
 
     private String image;
 
@@ -42,8 +42,9 @@ public class Customer {
 
     // একজন Customer অনেকগুলো Booking করতে পারে
     @JsonIgnore
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "customer",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY)
     private List<Booking> bookings = new ArrayList<>();
-
-
 }

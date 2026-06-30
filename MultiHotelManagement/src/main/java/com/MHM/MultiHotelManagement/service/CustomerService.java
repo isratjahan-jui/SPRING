@@ -5,21 +5,25 @@ import com.MHM.MultiHotelManagement.dto.response.CustomerResponseDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface CustomerService {
 
-    CustomerResponseDTO getCustomerById(Long id);
+    CustomerResponseDTO create(
+            CustomerRequestDTO dto,
+            MultipartFile image
+    );
 
-    CustomerResponseDTO getCustomerByUserId(Long userId);
+    List<CustomerResponseDTO> getAll();
 
-    Optional<CustomerResponseDTO> getCustomerByEmail(String email);
+    CustomerResponseDTO getById(Long id);
 
-    List<CustomerResponseDTO> getAllCustomers();
+    CustomerResponseDTO getByUserId(Long userId);
 
-    CustomerResponseDTO saveCustomer(CustomerRequestDTO customerRequestDTO,MultipartFile image);
+    CustomerResponseDTO update(
+            Long id,
+            CustomerRequestDTO dto,
+            MultipartFile image
+    );
 
-    CustomerResponseDTO updateCustomer(Long id, CustomerRequestDTO customerRequestDTO, MultipartFile image);
-
-    void deleteCustomer(Long id);
+    void delete(Long id);
 }

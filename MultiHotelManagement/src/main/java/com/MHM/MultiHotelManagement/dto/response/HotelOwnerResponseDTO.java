@@ -1,23 +1,20 @@
 package com.MHM.MultiHotelManagement.dto.response;
 
 import lombok.Data;
+import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
-public class CustomerResponseDTO {
-
+public class HotelOwnerResponseDTO {
     private Long id;
-
-    // From User (auth account)
-    private Long userId;
     private String name;
     private String email;
     private String phone;
-    private String role;
-
-    // Customer profile
-    private String customerName;
     private String address;
     private String gender;
-    private String dateOfBirth;
+    private Date dateOfBirth;
     private String image;
+    private Long userId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
