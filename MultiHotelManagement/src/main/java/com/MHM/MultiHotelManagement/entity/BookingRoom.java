@@ -16,10 +16,10 @@ public class BookingRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int numberOfRooms;   // কতগুলো রুম বুক করা হয়েছে
-    private int adults;          // কতজন প্রাপ্তবয়স্ক
-    private int children;        // কতজন শিশু
-    private Double price;        // রুমের মোট দাম
+    private int numberOfRooms;   // kotogulo room book kora hoyeche
+    private int adults;          // koyjon adults
+    private int children;        // koyjon children
+    private Double price;        // total room price
 
     // BookingRoom ↔ Booking (Many-to-One)
     @ManyToOne(fetch = FetchType.LAZY)

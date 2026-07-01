@@ -20,11 +20,11 @@ public class Commission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Double commissionRate;     // কমিশন শতাংশ
-    private Double adminEarnings;      // অ্যাডমিনের আয়
-    private Double hotelOwnerEarnings;      // হোটেল মালিকের আয়
+    private Double commissionRate;
+    private Double adminEarnings;
+    private Double hotelOwnerEarnings;
 
-    // প্রতিটি Commission একটি Booking এর সাথে যুক্ত
+    // protiti Commission ekti Booking er sathe jukto
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
