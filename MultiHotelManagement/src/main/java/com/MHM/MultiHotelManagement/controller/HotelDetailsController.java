@@ -35,6 +35,7 @@ public class HotelDetailsController {
     }
 
 
+
 //    @GetMapping("/hotel/{hotelId}")
 //    public ResponseEntity<Optional<HotelDetailsResponseDTO>> getByHotelId(@PathVariable Long hotelId) {
 //        return ResponseEntity.ok(hotelDetailsService.getHotelDetailsByHotelId(hotelId));

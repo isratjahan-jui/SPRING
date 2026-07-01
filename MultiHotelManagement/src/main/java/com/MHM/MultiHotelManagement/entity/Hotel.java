@@ -22,10 +22,10 @@ public class Hotel {
     private Long id;
 
     private String hotelName;
-    private String address;            //ঠিকানা
+    private String address;
     private String description;
-    private String rating;        // রেটিং (স্টার বা স্কোর)
-    private String image;         // হোটেলের ছবি
+    private String rating;
+    private String image;
 
     @Enumerated(EnumType.STRING)
     private HotelStatus status;

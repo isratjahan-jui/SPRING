@@ -20,8 +20,8 @@ public class Location {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;    // লোকেশনের নাম
-    private String image;   // লোকেশনের ছবি
+    private String locationName;
+    private String locationImage;  
     private String city;
 
     // Location ↔ Hotel (One-to-Many)

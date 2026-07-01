@@ -20,7 +20,7 @@ public class HotelMapper {
         dto.setOwnerId(hotel.getOwner() != null ? hotel.getOwner().getId() : null);
 
         // নতুন ফিল্ড সেট করা
-        dto.setLocationName(hotel.getLocation() != null ? hotel.getLocation().getName() : null);
+        dto.setLocationName(hotel.getLocation() != null ? hotel.getLocation().getLocationName() : null);
         dto.setOwnerName(hotel.getOwner() != null ? hotel.getOwner().getName() : null);
 
         return dto;
