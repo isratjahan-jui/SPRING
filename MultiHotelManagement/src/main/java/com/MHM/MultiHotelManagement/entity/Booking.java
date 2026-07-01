@@ -42,22 +42,22 @@ public class Booking {
     private BookingStatus status;
 
 
-    // একজন Customer অনেকগুলো Booking করতে পারে
+    // one Customer many Booking korte parbe
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    // একটি Hotel এ অনেক Booking হতে পারে
+    // one Hotel  many Booking korte parbe
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id", nullable = false)
     private Hotel hotel;
 
-    // একটি Room এ অনেক Booking হতে পারে
+    // one Room many Booking korte parbe
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
 
-    // Future: Payment entity এর সাথে সম্পর্ক
+    // Future: Payment entity er sathe relation
     @JsonIgnore
 
     // Booking ↔ Payment (One-to-One)
