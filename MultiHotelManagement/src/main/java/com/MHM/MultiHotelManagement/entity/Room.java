@@ -26,7 +26,8 @@ public class Room {
     private int totalRooms;
     private int adults;
     private int children;
-    private Double price;
+    private Double pricePerNight;
+    ;
     private int availableRooms;
     private int bookedRooms;
 

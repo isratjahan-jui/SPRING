@@ -7,7 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 @Entity
@@ -37,6 +39,11 @@ public class Booking {
     private double totalAmount;
     private double advanceAmount;
     private double dueAmount;
+
+    // Food Cancel policy fields
+    private Date foodCancellableUntil;
+    private Boolean foodCancelled = false;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private BookingStatus status;
@@ -63,6 +70,31 @@ public class Booking {
     // Booking ↔ Payment (One-to-One)
     @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private Payment payment;
+
+
+    // Booking ↔ FoodItem (Many-to-Many)
+    @ManyToMany
+    @JoinTable(
+            name = "booking_food_items",
+            joinColumns = @JoinColumn(name = "booking_id"),
+            inverseJoinColumns = @JoinColumn(name = "food_item_id")
+    )
+    private List<FoodItem> foodItems = new ArrayList<>();
+
+
+
+
+    // Convenience methods
+    public void addFoodItem(FoodItem foodItem) {
+        foodItems.add(foodItem);
+        foodItem.getBookings().add(this);
+    }
+
+    public void removeFoodItem(FoodItem foodItem) {
+        foodItems.remove(foodItem);
+        foodItem.getBookings().remove(this);
+    }
+
 
 
 }

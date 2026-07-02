@@ -2,6 +2,7 @@ package com.MHM.MultiHotelManagement.dto.request;
 
 import lombok.Data;
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class BookingRequestDTO {
@@ -14,4 +15,5 @@ public class BookingRequestDTO {
     private int totalGuests;
     private double discountRate;
     private double advanceAmount;
+    private List<Long> foodItemIds;
 }

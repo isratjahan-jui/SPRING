@@ -46,9 +46,11 @@ public class LocationMapper {
                                         .HotelBasicInfo();
                                 info.setId(hotel.getId());
                                 info.setName(hotel.getHotelName());
+
                                 info.setPricePerNight(
                                         hotel.getPricePerNight()
                                 );
+
                                 info.setRating(hotel.getRating());
                                 info.setStatus(
                                         hotel.getStatus() != null

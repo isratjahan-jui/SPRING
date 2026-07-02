@@ -2,6 +2,7 @@ package com.MHM.MultiHotelManagement.dto.response;
 
 import lombok.Data;
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class BookingResponseDTO {
@@ -16,4 +17,5 @@ public class BookingResponseDTO {
     private double totalAmount;
     private double dueAmount;
     private String status;
+    private List<String> foodItems;
 }

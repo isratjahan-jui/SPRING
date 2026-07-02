@@ -1,5 +1,7 @@
 package com.MHM.MultiHotelManagement.entity;
 
+import com.MHM.MultiHotelManagement.enums.BookingStatus;
+import com.MHM.MultiHotelManagement.enums.ServiceStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,14 +22,25 @@ public class ExtraService {
 
     private String serviceType;   // Laundry, Transport, Spa ইত্যাদি
     private Double price;
-    private String status;        // PENDING, COMPLETED, CANCELLED
+
+
+    // Enum ব্যবহার করলে ভুল status এড়ানো যাবে
+    @Enumerated(EnumType.STRING)
+    private ServiceStatus serviceStatus;   // PENDING, COMPLETED, CANCELLED
 
     // প্রতিটি ExtraService একটি Booking এর সাথে যুক্ত
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
-    
+    // Cancel policy fields
+    private Boolean cancelled = false;
+    private LocalDateTime cancellableUntil;
+    private LocalDateTime cancelledAt;
+
+    // Audit fields
+    private String createdBy;
+    private String updatedBy;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -42,5 +55,5 @@ public class ExtraService {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-}
 
+}

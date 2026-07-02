@@ -25,7 +25,7 @@ public class LocationResponseDTO {
         private Long id;
         private String name;
         private Double pricePerNight;
-        private Double rating;
+        private String rating;
         private String status;
     }
 }

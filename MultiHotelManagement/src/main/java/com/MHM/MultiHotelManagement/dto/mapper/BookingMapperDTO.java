@@ -3,6 +3,7 @@ package com.MHM.MultiHotelManagement.dto.mapper;
 import com.MHM.MultiHotelManagement.dto.request.BookingRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.BookingResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Booking;
+import com.MHM.MultiHotelManagement.entity.FoodItem;
 
 public class BookingMapperDTO {
 
@@ -30,6 +31,16 @@ public class BookingMapperDTO {
         response.setTotalAmount(booking.getTotalAmount());
         response.setDueAmount(booking.getDueAmount());
         response.setStatus(booking.getStatus().name());
+
+        // নতুন অংশ: FoodItem নামগুলো response এ যোগ করা
+        if (booking.getFoodItems() != null) {
+            response.setFoodItems(
+                    booking.getFoodItems().stream()
+                            .map(FoodItem::getItemName)
+                            .toList()
+            );
+        }
+
         return response;
     }
 }

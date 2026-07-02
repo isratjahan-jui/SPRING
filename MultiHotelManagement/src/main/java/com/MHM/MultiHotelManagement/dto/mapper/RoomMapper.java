@@ -15,7 +15,7 @@ public class RoomMapper {
         dto.setDescription(room.getDescription());
         dto.setAmenities(room.getAmenities());
         dto.setImage(room.getImage());
-        dto.setPrice(room.getPrice());
+        dto.setPrice(room.getPricePerNight());
         dto.setTotalRooms(room.getTotalRooms());
         dto.setAvailableRooms(room.getAvailableRooms());
         dto.setBookedRooms(room.getBookedRooms());
@@ -40,7 +40,7 @@ public class RoomMapper {
         room.setRoomType(dto.getRoomType());
         room.setDescription(dto.getDescription());
         room.setAmenities(dto.getAmenities());
-        room.setPrice(dto.getPrice());
+        room.setPricePerNight(dto.getPrice());
 
         room.setTotalRooms(
                 dto.getTotalRooms() != null

@@ -129,7 +129,7 @@ public class RoomServiceImpl implements RoomService {
             room.setAmenities(dto.getAmenities());
 
         if (dto.getPrice() != null)
-            room.setPrice(dto.getPrice());
+            room.setPricePerNight(dto.getPrice());
 
         if (dto.getTotalRooms() != null)
             room.setTotalRooms(dto.getTotalRooms());

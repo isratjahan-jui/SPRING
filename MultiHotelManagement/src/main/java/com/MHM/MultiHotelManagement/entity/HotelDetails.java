@@ -30,6 +30,8 @@ public class HotelDetails {
     @Column(length = 1000)
     private String hotelPolicy;
 
+    private Double    pricePerNight;
+
     // Check-in / Check-out সময়
     private String checkInTime;
     private String checkOutTime;

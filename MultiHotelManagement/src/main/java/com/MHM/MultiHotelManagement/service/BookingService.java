@@ -15,11 +15,10 @@ public interface BookingService {
     List<BookingResponseDTO> getBookingsByRoom(Long roomId);
     void deleteBooking(Long id);
 
+    BookingResponseDTO addFoodItemsToBooking(Long bookingId, List<Long> foodItemIds);
+    BookingResponseDTO cancelFoodItemsFromBooking(Long bookingId);
 
-//    List<BookingResponseDTO> findBookingsByCustomer(Long customerId);
-//    List<BookingResponseDTO> findBookingsByHotel(Long hotelId);
-//    List<BookingResponseDTO> findBookingsByRoom(Long roomId);
-//
+
 
 
 }

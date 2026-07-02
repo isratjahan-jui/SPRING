@@ -39,7 +39,7 @@ public interface RoomRepository
         SELECT r FROM Room r
         LEFT JOIN FETCH r.hotel h
         WHERE r.hotel.id = :hotelId
-        ORDER BY r.price ASC
+        ORDER BY r.pricePerNight ASC
     """)
     List<Room> findByHotelIdWithDetails(
             @Param("hotelId") Long hotelId
@@ -70,7 +70,7 @@ public interface RoomRepository
         SELECT r FROM Room r
         LEFT JOIN FETCH r.hotel h
         WHERE r.hotel.id = :hotelId
-        AND r.price BETWEEN :minPrice AND :maxPrice
+        AND r.pricePerNight BETWEEN :minPrice AND :maxPrice
     """)
     List<Room> findByHotelAndPriceRange(
             @Param("hotelId") Long hotelId,

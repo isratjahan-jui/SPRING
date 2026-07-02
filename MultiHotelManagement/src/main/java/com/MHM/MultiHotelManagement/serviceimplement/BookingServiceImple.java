@@ -7,15 +7,18 @@ import com.MHM.MultiHotelManagement.entity.Booking;
 import com.MHM.MultiHotelManagement.entity.Customer;
 import com.MHM.MultiHotelManagement.entity.Hotel;
 import com.MHM.MultiHotelManagement.entity.Room;
+import com.MHM.MultiHotelManagement.entity.FoodItem;
 import com.MHM.MultiHotelManagement.enums.BookingStatus;
 import com.MHM.MultiHotelManagement.repository.BookingRepository;
 import com.MHM.MultiHotelManagement.repository.CustomerRepository;
 import com.MHM.MultiHotelManagement.repository.HotelRepository;
 import com.MHM.MultiHotelManagement.repository.RoomRepository;
+import com.MHM.MultiHotelManagement.repository.FoodItemRepository;
 import com.MHM.MultiHotelManagement.service.BookingService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -25,15 +28,18 @@ public class BookingServiceImple implements BookingService {
     private final CustomerRepository customerRepository;
     private final HotelRepository hotelRepository;
     private final RoomRepository roomRepository;
+    private final FoodItemRepository foodItemRepository;
 
     public BookingServiceImple(BookingRepository bookingRepository,
                                CustomerRepository customerRepository,
                                HotelRepository hotelRepository,
-                               RoomRepository roomRepository) {
+                               RoomRepository roomRepository,
+                               FoodItemRepository foodItemRepository) {
         this.bookingRepository = bookingRepository;
         this.customerRepository = customerRepository;
         this.hotelRepository = hotelRepository;
         this.roomRepository = roomRepository;
+        this.foodItemRepository = foodItemRepository;
     }
 
     @Override
@@ -52,6 +58,12 @@ public class BookingServiceImple implements BookingService {
         booking.setRoom(room);
         booking.setStatus(BookingStatus.PENDING);
 
+        // FoodItem integration
+        if (dto.getFoodItemIds() != null && !dto.getFoodItemIds().isEmpty()) {
+            List<FoodItem> foodItems = foodItemRepository.findAllById(dto.getFoodItemIds());
+            booking.setFoodItems(foodItems);
+        }
+
         Booking saved = bookingRepository.save(booking);
         return BookingMapperDTO.toResponseDTO(saved);
     }
@@ -67,6 +79,12 @@ public class BookingServiceImple implements BookingService {
         booking.setTotalGuests(dto.getTotalGuests());
         booking.setDiscountRate(dto.getDiscountRate());
         booking.setAdvanceAmount(dto.getAdvanceAmount());
+
+        // FoodItem integration update
+        if (dto.getFoodItemIds() != null) {
+            List<FoodItem> foodItems = foodItemRepository.findAllById(dto.getFoodItemIds());
+            booking.setFoodItems(foodItems);
+        }
 
         Booking updated = bookingRepository.save(booking);
         return BookingMapperDTO.toResponseDTO(updated);
@@ -103,5 +121,36 @@ public class BookingServiceImple implements BookingService {
             throw new EntityNotFoundException("Booking not found");
         }
         bookingRepository.deleteById(id);
+    }
+
+    // ✅ নতুন অংশ: FoodItem integration methods
+
+    @Override
+    public BookingResponseDTO addFoodItemsToBooking(Long bookingId, List<Long> foodItemIds) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
+
+        List<FoodItem> foodItems = foodItemRepository.findAllById(foodItemIds);
+        booking.getFoodItems().addAll(foodItems);
+
+        Booking updated = bookingRepository.save(booking);
+        return BookingMapperDTO.toResponseDTO(updated);
+    }
+
+    @Override
+    public BookingResponseDTO cancelFoodItemsFromBooking(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
+
+        booking.getFoodItems().forEach(foodItem -> {
+            if (foodItem.getCancellableUntil() != null &&
+                    LocalDateTime.now().isBefore(foodItem.getCancellableUntil())) {
+                foodItem.setCancelled(true);
+                foodItem.setCancelledAt(LocalDateTime.now());
+            }
+        });
+
+        Booking updated = bookingRepository.save(booking);
+        return BookingMapperDTO.toResponseDTO(updated);
     }
 }

@@ -24,12 +24,19 @@ public class Hotel {
     private String hotelName;
     private String address;
     private String description;
+    private Double pricePerNight;
     private String rating;
     private String image;
 
     @Enumerated(EnumType.STRING)
     private HotelStatus status;
+
 //    private Boolean approved;   // Admin approval status
+
+    // Extra fields for food service
+    private Boolean foodAvailable;
+    private String foodServiceHours;
+
 
     // Location ↔ Hotel (Many-to-One)
     @ManyToOne(fetch = FetchType.LAZY)
@@ -71,5 +78,36 @@ public class Hotel {
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Gallery> galleries = new ArrayList<>();
+
+
+
+    // Convenience methods for FoodItem
+    public void addFoodItem(FoodItem foodItem) {
+        foodItems.add(foodItem);
+        foodItem.setHotel(this);
+    }
+
+    public void removeFoodItem(FoodItem foodItem) {
+        foodItems.remove(foodItem);
+        foodItem.setHotel(null);
+    }
+
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+
+
 
 }
