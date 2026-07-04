@@ -1,5 +1,6 @@
 package com.MHM.MultiHotelManagement.dto.mapper;
 
+<<<<<<< Updated upstream
 import com.MHM.MultiHotelManagement.dto.request.BookingRoomRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.BookingRoomResponseDTO;
 import com.MHM.MultiHotelManagement.entity.BookingRoom;
@@ -97,3 +98,7 @@ public class BookingRoomMapper {
         return bookingRoom;
     }
 }
+=======
+public class BookingRoomMapper {
+}
+>>>>>>> Stashed changes

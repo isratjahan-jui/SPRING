@@ -1,5 +1,6 @@
 package com.MHM.MultiHotelManagement.service;
 
+<<<<<<< Updated upstream
 import com.MHM.MultiHotelManagement.dto.request.BookingRoomRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.BookingRoomResponseDTO;
 
@@ -39,3 +40,7 @@ public interface BookingRoomService {
     // Booking এর সব BookingRoom delete করো
     void deleteAllByBookingId(Long bookingId);
 }
+=======
+public interface BookingRoomService {
+}
+>>>>>>> Stashed changes

@@ -1,5 +1,6 @@
 package com.MHM.MultiHotelManagement.serviceimplement;
 
+<<<<<<< Updated upstream
 
 import com.MHM.MultiHotelManagement.dto.mapper.BookingRoomMapper;
 import com.MHM.MultiHotelManagement.dto.request.BookingRoomRequestDTO;
@@ -273,4 +274,7 @@ public class BookingRoomServiceImpl implements BookingRoomService {
 
         bookingRoomRepo.deleteAllByBookingId(bookingId);
     }
+=======
+public class BookingRoomServiceImpl {
+>>>>>>> Stashed changes
 }

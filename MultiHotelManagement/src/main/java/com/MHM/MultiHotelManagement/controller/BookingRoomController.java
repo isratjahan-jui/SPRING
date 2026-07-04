@@ -1,5 +1,6 @@
 package com.MHM.MultiHotelManagement.controller;
 
+<<<<<<< Updated upstream
 import com.MHM.MultiHotelManagement.dto.request.BookingRoomRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.BookingRoomResponseDTO;
 import com.MHM.MultiHotelManagement.service.BookingRoomService;
@@ -114,3 +115,7 @@ public class BookingRoomController {
         return ResponseEntity.noContent().build();
     }
 }
+=======
+public class BookingRoomController {
+}
+>>>>>>> Stashed changes

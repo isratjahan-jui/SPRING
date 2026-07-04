@@ -1,5 +1,6 @@
 package com.MHM.MultiHotelManagement.dto.response;
 
+<<<<<<< Updated upstream
 import lombok.Data;
 
 @Data
@@ -33,3 +34,7 @@ public class BookingRoomResponseDTO {
     private Long customerId;
     private String customerName;
 }
+=======
+public class BookingRoomResponseDTO {
+}
+>>>>>>> Stashed changes
