@@ -10,17 +10,26 @@ import java.util.Optional;
 @Repository
 public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
 
-    //  Customer er jonno methods
-    List<Wishlist> findByCustomer_Id(Long customerId);
 
-    Boolean existsByCustomer_IdAndHotel_Id(Long customerId, Long hotelId);
-
-    Optional<Wishlist> findByCustomer_IdAndHotel_Id(Long customerId, Long hotelId);
-
-    // User er jonno methods
+    // 🔹 User ভিত্তিক methods
     List<Wishlist> findByUser_Id(Long userId);
-
     Boolean existsByUser_IdAndHotel_Id(Long userId, Long hotelId);
-
     Optional<Wishlist> findByUser_IdAndHotel_Id(Long userId, Long hotelId);
+    void deleteByUser_IdAndHotel_Id(Long userId, Long hotelId);
+
+    // 🔹 Customer ভিত্তিক methods
+    List<Wishlist> findByCustomer_Id(Long customerId);
+    Boolean existsByCustomer_IdAndHotel_Id(Long customerId, Long hotelId);
+    Optional<Wishlist> findByCustomer_IdAndHotel_Id(Long customerId, Long hotelId);
+    void deleteByCustomer_IdAndHotel_Id(Long customerId, Long hotelId);
+
+    // 🔹 Hotel ভিত্তিক methods
+    List<Wishlist> findByHotel_Id(Long hotelId);
+
+    // 🔹 Count methods (রিপোর্টিং এর জন্য)
+    Long countByUser_Id(Long userId);
+    Long countByCustomer_Id(Long customerId);
+
+
+
 }

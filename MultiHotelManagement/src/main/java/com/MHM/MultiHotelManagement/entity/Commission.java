@@ -29,6 +29,19 @@ public class Commission {
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
+    // Commission ↔ Payment (One-to-One)
+    @OneToOne
+    @JoinColumn(name = "payment_id", nullable = false)
+    private Payment payment;
+
+    // Commission ↔ ExtraService (Optional)
+    @OneToOne
+    @JoinColumn(name = "extra_service_id", nullable = true)
+    private ExtraService extraService;
+
+
+
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

@@ -12,9 +12,11 @@ public class CommissionResponseDTO {
     private Double commissionRate;
     private Double adminEarnings;
     private Double hotelOwnerEarnings;
+    private String commissionStatus; // Optional Enum: CALCULATED, PENDING, PAID
 
     // Booking info
     private Long bookingId;
+    private String bookingReference;
     private Double bookingTotalPrice;
     private String bookingStatus;
 
@@ -29,7 +31,22 @@ public class CommissionResponseDTO {
     // Customer info
     private String customerName;
 
+    // Payment info
+    private Long paymentId;
+    private String paymentMethod;
+    private String paymentStatus;
+
+    // ExtraService info
+    private Long extraServiceId;
+    private String serviceType;   // Laundry, Transport ইত্যাদি
+    private Double extraServicePrice;
+
+    // Audit info
+    private String createdBy;
+    private String updatedBy;
+
     // Timestamps
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
 }

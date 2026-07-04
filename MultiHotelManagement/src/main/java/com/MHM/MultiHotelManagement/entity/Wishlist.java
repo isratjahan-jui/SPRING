@@ -31,5 +31,28 @@ public class Wishlist {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
+    // Wishlist item এর জন্য notes/comment
+    private String notes;
+
+    // Wishlist item active আছে কিনা
+    private Boolean isActive = true;
+
+    // Audit fields
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+
+
 
 }

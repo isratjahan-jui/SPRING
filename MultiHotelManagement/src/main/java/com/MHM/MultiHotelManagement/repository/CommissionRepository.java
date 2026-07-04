@@ -17,6 +17,13 @@ public interface CommissionRepository extends JpaRepository<Commission, Long> {
     Optional<Commission> findByBooking_Id(Long bookingId);
 
     Boolean existsByBooking_Id(Long bookingId);
+    
+//    Payment ভিত্তিক Commission খোঁজা
+    Optional<Commission> findByPayment_Id(Long paymentId);
+
+//    ExtraService ভিত্তিক Commission খোঁজা
+    Optional<Commission> findByExtraService_Id(Long extraServiceId);
+
 
     // ── Hotel Owner দিয়ে খোঁজো ──────────────────────────────────
     @Query("""

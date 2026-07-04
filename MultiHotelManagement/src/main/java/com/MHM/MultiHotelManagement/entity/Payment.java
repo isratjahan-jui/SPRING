@@ -1,4 +1,5 @@
 package com.MHM.MultiHotelManagement.entity;
+import com.MHM.MultiHotelManagement.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,14 +20,27 @@ public class Payment {
 
     private String method;     // CARD, CASH, BKASH ইত্যাদি
     private Double amount;
-    private String status;     // PENDING, SUCCESS, FAILED
+
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status; // PENDING, SUCCESS, FAILED
+
 
     // Payment ↔ Booking (One-to-One)
     @OneToOne
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
+    // Payment ↔ ExtraService (Optional)
+    @OneToOne
+    @JoinColumn(name = "extra_service_id", nullable = true)
+    private ExtraService extraService;
 
+    // Payment ↔ Commission (One-to-One)
+    @OneToOne(mappedBy = "payment", cascade = CascadeType.ALL)
+    private Commission commission;
+
+ 
 
 
     private LocalDateTime createdAt;

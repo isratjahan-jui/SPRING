@@ -24,6 +24,11 @@ public class ExtraService {
     private Double price;
 
 
+    // Cancel policy fields
+    private Boolean cancelled = false;
+    private LocalDateTime cancellableUntil;
+    private LocalDateTime cancelledAt;
+
     // Enum ব্যবহার করলে ভুল status এড়ানো যাবে
     @Enumerated(EnumType.STRING)
     private ServiceStatus serviceStatus;   // PENDING, COMPLETED, CANCELLED
@@ -33,10 +38,11 @@ public class ExtraService {
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
-    // Cancel policy fields
-    private Boolean cancelled = false;
-    private LocalDateTime cancellableUntil;
-    private LocalDateTime cancelledAt;
+    // ExtraService ↔ Payment (Optional)
+    @OneToOne(mappedBy = "extraService")
+    private Payment payment;
+
+
 
     // Audit fields
     private String createdBy;

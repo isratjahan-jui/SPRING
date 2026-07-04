@@ -15,116 +15,106 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/commissions")
 @RequiredArgsConstructor
-
 public class CommissionController {
 
     private final CommissionService commissionService;
 
     // ── Create ───────────────────────────────────────────────────
-    // POST /api/commissions
     @PostMapping
-    public ResponseEntity<CommissionResponseDTO> create(
-            @RequestBody CommissionRequestDTO dto
-    ) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(commissionService.createFromBooking(dto));
+    public ResponseEntity<CommissionResponseDTO> create(@RequestBody CommissionRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(commissionService.createFromBooking(dto));
+    }
+
+    // ── Update ───────────────────────────────────────────────────
+    @PutMapping("/{id}")
+    public ResponseEntity<CommissionResponseDTO> update(@PathVariable Long id, @RequestBody CommissionRequestDTO dto) {
+        return ResponseEntity.ok(commissionService.updateCommission(id, dto));
+    }
+
+    // ── Delete ───────────────────────────────────────────────────
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        commissionService.deleteCommission(id);
+        return ResponseEntity.noContent().build();
     }
 
     // ── Get All ──────────────────────────────────────────────────
-    // GET /api/commissions
     @GetMapping
     public ResponseEntity<List<CommissionResponseDTO>> getAll() {
         return ResponseEntity.ok(commissionService.getAll());
     }
 
     // ── Get by ID ────────────────────────────────────────────────
-    // GET /api/commissions/1
     @GetMapping("/{id}")
-    public ResponseEntity<CommissionResponseDTO> getById(
-            @PathVariable Long id
-    ) {
+    public ResponseEntity<CommissionResponseDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(commissionService.getById(id));
     }
 
     // ── Get by Booking ID ────────────────────────────────────────
-    // GET /api/commissions/booking/1
     @GetMapping("/booking/{bookingId}")
-    public ResponseEntity<CommissionResponseDTO> getByBookingId(
-            @PathVariable Long bookingId
-    ) {
-        return ResponseEntity.ok(
-                commissionService.getByBookingId(bookingId)
-        );
+    public ResponseEntity<CommissionResponseDTO> getByBookingId(@PathVariable Long bookingId) {
+        return ResponseEntity.ok(commissionService.getByBookingId(bookingId));
+    }
+
+    // ── Exists check by Booking ID ───────────────────────────────
+    @GetMapping("/booking/{bookingId}/exists")
+    public ResponseEntity<Boolean> existsByBookingId(@PathVariable Long bookingId) {
+        return ResponseEntity.ok(commissionService.existsByBookingId(bookingId));
+    }
+
+    // ── Get by Payment ID ────────────────────────────────────────
+    @GetMapping("/payment/{paymentId}")
+    public ResponseEntity<CommissionResponseDTO> getByPaymentId(@PathVariable Long paymentId) {
+        return ResponseEntity.ok(commissionService.getByPaymentId(paymentId));
+    }
+
+    // ── Get by ExtraService ID ───────────────────────────────────
+    @GetMapping("/extra/{extraServiceId}")
+    public ResponseEntity<CommissionResponseDTO> getByExtraServiceId(@PathVariable Long extraServiceId) {
+        return ResponseEntity.ok(commissionService.getByExtraServiceId(extraServiceId));
     }
 
     // ── Get by Owner ID ──────────────────────────────────────────
-    // GET /api/commissions/owner/1
     @GetMapping("/owner/{ownerId}")
-    public ResponseEntity<List<CommissionResponseDTO>> getByOwner(
-            @PathVariable Long ownerId
-    ) {
-        return ResponseEntity.ok(
-                commissionService.getByOwnerId(ownerId)
-        );
+    public ResponseEntity<List<CommissionResponseDTO>> getByOwner(@PathVariable Long ownerId) {
+        return ResponseEntity.ok(commissionService.getByOwnerId(ownerId));
     }
 
     // ── Get by Hotel ID ──────────────────────────────────────────
-    // GET /api/commissions/hotel/1
     @GetMapping("/hotel/{hotelId}")
-    public ResponseEntity<List<CommissionResponseDTO>> getByHotel(
-            @PathVariable Long hotelId
-    ) {
-        return ResponseEntity.ok(
-                commissionService.getByHotelId(hotelId)
-        );
+    public ResponseEntity<List<CommissionResponseDTO>> getByHotel(@PathVariable Long hotelId) {
+        return ResponseEntity.ok(commissionService.getByHotelId(hotelId));
+    }
+
+    // ── Get by Commission Rate ───────────────────────────────────
+    @GetMapping("/rate/{rate}")
+    public ResponseEntity<List<CommissionResponseDTO>> getByRate(@PathVariable Double rate) {
+        return ResponseEntity.ok(commissionService.getByCommissionRate(rate));
     }
 
     // ── Admin Total Earnings ─────────────────────────────────────
-    // GET /api/commissions/admin/total
     @GetMapping("/admin/total")
     public ResponseEntity<Double> getAdminTotal() {
-        return ResponseEntity.ok(
-                commissionService.getTotalAdminEarnings()
-        );
+        return ResponseEntity.ok(commissionService.getTotalAdminEarnings());
     }
 
     // ── Owner Total Earnings ─────────────────────────────────────
-    // GET /api/commissions/owner/1/total
     @GetMapping("/owner/{ownerId}/total")
-    public ResponseEntity<Double> getOwnerTotal(
-            @PathVariable Long ownerId
-    ) {
-        return ResponseEntity.ok(
-                commissionService.getTotalOwnerEarnings(ownerId)
-        );
+    public ResponseEntity<Double> getOwnerTotal(@PathVariable Long ownerId) {
+        return ResponseEntity.ok(commissionService.getTotalOwnerEarnings(ownerId));
     }
 
     // ── Date Range ───────────────────────────────────────────────
-    // GET /api/commissions/range?start=...&end=...
     @GetMapping("/range")
     public ResponseEntity<List<CommissionResponseDTO>> getByRange(
-            @RequestParam
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime start,
-
-            @RequestParam
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime end
-    ) {
-        return ResponseEntity.ok(
-                commissionService.getByDateRange(start, end)
-        );
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+        return ResponseEntity.ok(commissionService.getByDateRange(start, end));
     }
 
     // ── Monthly Report ───────────────────────────────────────────
-    // GET /api/commissions/report/monthly?year=2025
     @GetMapping("/report/monthly")
-    public ResponseEntity<List<Object[]>> getMonthlyReport(
-            @RequestParam int year
-    ) {
-        return ResponseEntity.ok(
-                commissionService.getMonthlyReport(year)
-        );
+    public ResponseEntity<List<Object[]>> getMonthlyReport(@RequestParam int year) {
+        return ResponseEntity.ok(commissionService.getMonthlyReport(year));
     }
 }
