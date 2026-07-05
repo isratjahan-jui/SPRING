@@ -1,0 +1,50 @@
+package com.MHM.MultiHotelManagement.controller;
+
+import com.MHM.MultiHotelManagement.dto.request.HotelRequestDTO;
+import com.MHM.MultiHotelManagement.dto.response.HotelResponseDTO;
+import com.MHM.MultiHotelManagement.service.HotelService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/hotels")
+@RequiredArgsConstructor
+public class HotelController {
+
+    private final HotelService hotelService;
+
+    @PostMapping
+    public ResponseEntity<HotelResponseDTO> create(@RequestBody HotelRequestDTO dto) {
+        return ResponseEntity.ok(hotelService.createHotel(dto));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<HotelResponseDTO> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(hotelService.getHotelById(id));
+    }
+
+    @GetMapping("/owner/{ownerId}")
+    public ResponseEntity<List<HotelResponseDTO>> getByOwner(@PathVariable Long ownerId) {
+        return ResponseEntity.ok(hotelService.getHotelsByOwner(ownerId));
+    }
+
+    @GetMapping("/city/{city}")
+    public ResponseEntity<List<HotelResponseDTO>> getByCity(@PathVariable String city) {
+        return ResponseEntity.ok(hotelService.getHotelsByCity(city));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<HotelResponseDTO> update(@PathVariable Long id,
+                                                   @RequestBody HotelRequestDTO dto) {
+        return ResponseEntity.ok(hotelService.updateHotel(id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> delete(@PathVariable Long id) {
+        hotelService.deleteHotel(id);
+        return ResponseEntity.ok("Hotel deleted successfully");
+    }
+}
