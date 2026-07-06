@@ -4,6 +4,7 @@ import com.MHM.MultiHotelManagement.dto.request.WishlistRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.WishlistResponseDTO;
 import com.MHM.MultiHotelManagement.service.WishlistService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class WishlistController {
     // ── Add to Wishlist ───────────────────────────────
     @PostMapping
     public ResponseEntity<WishlistResponseDTO> add(@RequestBody WishlistRequestDTO dto) {
-        return ResponseEntity.ok(wishlistService.addToWishlist(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(wishlistService.addToWishlist(dto));
     }
 
     // ── Remove from Wishlist ──────────────────────────

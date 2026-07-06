@@ -1,5 +1,6 @@
 package com.MHM.MultiHotelManagement.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,13 +31,13 @@ public class HotelOwner {
     private String address;
     private String gender;
 
-//    @Temporal(TemporalType.DATE)
     private Date dateOfBirth;
 
     private String image;
 
     // Owner ↔ Hotel (One-to-Many)
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Hotel> hotels = new ArrayList<>();
 
     // Auth account — source of truth for login credentials

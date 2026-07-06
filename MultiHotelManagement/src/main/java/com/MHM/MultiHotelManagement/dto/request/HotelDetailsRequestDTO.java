@@ -9,6 +9,7 @@ public class HotelDetailsRequestDTO {
     private String ownerSpeach;
     private String description;
     private String hotelPolicy;
+    private Double pricePerNight;
     private String checkInTime;        // "14:00"
     private String checkOutTime;      // "12:00"
 
@@ -20,7 +21,4 @@ public class HotelDetailsRequestDTO {
     private String childPolicy;
     private String languages;
     private String nearbyAttractions;
-
-
-
 }

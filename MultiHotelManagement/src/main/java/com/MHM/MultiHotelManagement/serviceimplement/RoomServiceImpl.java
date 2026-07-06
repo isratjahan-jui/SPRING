@@ -232,7 +232,7 @@ public class RoomServiceImpl implements RoomService {
 
             return fileName;
         } catch (Exception e) {
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Image upload failed: " + e.getMessage()
             );
         }

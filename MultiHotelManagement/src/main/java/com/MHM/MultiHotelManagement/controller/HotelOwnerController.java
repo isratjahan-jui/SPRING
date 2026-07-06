@@ -4,6 +4,7 @@ import com.MHM.MultiHotelManagement.dto.request.HotelOwnerRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.HotelOwnerResponseDTO;
 import com.MHM.MultiHotelManagement.service.HotelOwnerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,7 @@ public class HotelOwnerController {
 
     @PostMapping
     public ResponseEntity<HotelOwnerResponseDTO> create(@RequestBody HotelOwnerRequestDTO dto) {
-        return ResponseEntity.ok(ownerService.createOwner(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ownerService.createOwner(dto));
     }
 
     @GetMapping("/{id}")

@@ -13,6 +13,7 @@ public class HotelDetailsMapper {
         dto.setOwnerSpeach(details.getOwnerSpeach());
         dto.setDescription(details.getDescription());
         dto.setHotelPolicy(details.getHotelPolicy());
+        dto.setPricePerNight(details.getPricePerNight());
         dto.setCheckInTime(details.getCheckInTime());
         dto.setCheckOutTime(details.getCheckOutTime());
         dto.setContactEmail(details.getContactEmail());
@@ -37,6 +38,7 @@ public class HotelDetailsMapper {
         details.setOwnerSpeach(dto.getOwnerSpeach());
         details.setDescription(dto.getDescription());
         details.setHotelPolicy(dto.getHotelPolicy());
+        details.setPricePerNight(dto.getPricePerNight());
         details.setCheckInTime(dto.getCheckInTime());
         details.setCheckOutTime(dto.getCheckOutTime());
         details.setContactEmail(dto.getContactEmail());

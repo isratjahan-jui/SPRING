@@ -3,6 +3,7 @@ package com.MHM.MultiHotelManagement.controller;
 import com.MHM.MultiHotelManagement.dto.request.ReviewRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.ReviewResponseDTO;
 import com.MHM.MultiHotelManagement.service.ReviewService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ public class ReviewController {
 
     @PostMapping
     public ResponseEntity<ReviewResponseDTO> create(@RequestBody ReviewRequestDTO dto) {
-        return ResponseEntity.ok(reviewService.createReview(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(reviewService.createReview(dto));
     }
 
     @PutMapping("/{id}")

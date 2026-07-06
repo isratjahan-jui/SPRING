@@ -3,6 +3,7 @@ package com.MHM.MultiHotelManagement.controller;
 import com.MHM.MultiHotelManagement.dto.AdminDTO;
 import com.MHM.MultiHotelManagement.dto.request.AdminRequestDTO;
 import com.MHM.MultiHotelManagement.service.AdminService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,7 +46,7 @@ public class AdminController {
     // ✅ Save new admin
     @PostMapping
     public ResponseEntity<AdminDTO> saveAdmin(@RequestBody AdminRequestDTO dto) {
-        return ResponseEntity.ok(adminService.saveAdmin(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(adminService.saveAdmin(dto));
     }
 
     // ✅ Delete admin by ID

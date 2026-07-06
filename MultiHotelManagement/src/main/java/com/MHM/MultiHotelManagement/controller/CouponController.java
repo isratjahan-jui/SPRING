@@ -4,6 +4,7 @@ import com.MHM.MultiHotelManagement.dto.request.CouponRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.CouponResponseDTO;
 import com.MHM.MultiHotelManagement.service.CouponService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ public class CouponController {
 
     @PostMapping
     public ResponseEntity<CouponResponseDTO> create(@RequestBody CouponRequestDTO dto) {
-        return ResponseEntity.ok(couponService.createCoupon(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(couponService.createCoupon(dto));
     }
 
     @PutMapping("/{id}/deactivate")

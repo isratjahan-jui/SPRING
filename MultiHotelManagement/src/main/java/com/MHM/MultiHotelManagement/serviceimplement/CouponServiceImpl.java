@@ -5,7 +5,7 @@ import com.MHM.MultiHotelManagement.dto.request.CouponRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.CouponResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Coupon;
 import com.MHM.MultiHotelManagement.entity.Hotel;
-
+import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.repository.CouponRepository;
 import com.MHM.MultiHotelManagement.repository.HotelRepository;
 import com.MHM.MultiHotelManagement.service.CouponService;
@@ -27,7 +27,7 @@ public class CouponServiceImpl implements CouponService {
     @Transactional
     public CouponResponseDTO createCoupon(CouponRequestDTO dto) {
         Hotel hotel = hotelRepository.findById(dto.getHotelId())
-                .orElseThrow(() -> new RuntimeException("Hotel not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
 
         Coupon coupon = new Coupon();
         coupon.setCode(dto.getCode());
@@ -46,7 +46,7 @@ public class CouponServiceImpl implements CouponService {
     @Transactional
     public void deactivateCoupon(Long id) {
         Coupon coupon = couponRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Coupon not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Coupon not found"));
         coupon.setActive(false);
         couponRepository.save(coupon);
     }
@@ -55,7 +55,7 @@ public class CouponServiceImpl implements CouponService {
     @Transactional(readOnly = true)
     public CouponResponseDTO getCouponByCode(String code) {
         Coupon coupon = couponRepository.findByCodeAndActiveTrue(code);
-        if (coupon == null) throw new RuntimeException("Coupon not found or inactive");
+        if (coupon == null) throw new ResourceNotFoundException("Coupon not found or inactive");
         return CouponMapper.toDTO(coupon);
     }
 

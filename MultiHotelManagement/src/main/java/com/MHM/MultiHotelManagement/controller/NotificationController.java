@@ -4,6 +4,7 @@ import com.MHM.MultiHotelManagement.dto.request.NotificationRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.NotificationResponseDTO;
 import com.MHM.MultiHotelManagement.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ public class NotificationController {
 
     @PostMapping
     public ResponseEntity<NotificationResponseDTO> create(@RequestBody NotificationRequestDTO dto) {
-        return ResponseEntity.ok(notificationService.createNotification(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(notificationService.createNotification(dto));
     }
 
     @PutMapping("/{id}/read")

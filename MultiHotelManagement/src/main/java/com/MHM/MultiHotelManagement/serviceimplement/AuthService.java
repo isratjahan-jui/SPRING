@@ -19,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -59,6 +60,7 @@ public class AuthService {
      * @return LoginResponseDTO containing token and user details
      */
 
+    @Transactional(readOnly = true)
     public LoginResponseDTO login(LoginRequestDTO dto){
         // =====================================================
         // STEP 1: Authenticate user credentials
@@ -151,7 +153,7 @@ public class AuthService {
 
         if (user.getRole() == Role.HOTEL_OWNER) {
 
-            hotelOwnerRepository.findByUser_Id(user.getId())
+            hotelOwnerRepository.findByUser_IdWithUser(user.getId())
                     .ifPresent(owner -> {
 
                         // Owner er sathe jodi hotel thake
@@ -208,6 +210,7 @@ public class AuthService {
     }
 
     // ── Confirm verification link ─────────────────────────────────
+    @Transactional
     public void verifyEmail(String token) {
 
         if (!jwtUtil.isValidForPurpose(token, "EMAIL_VERIFICATION")) {
@@ -244,6 +247,7 @@ public class AuthService {
     }
 
     // ── Reset password using token ────────────────────────────────
+    @Transactional
     public void resetPassword(ResetPasswordRequestDTO dto) {
 
         if (!jwtUtil.isValidForPurpose(dto.getToken(), "PASSWORD_RESET")) {

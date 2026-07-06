@@ -4,28 +4,35 @@ import com.MHM.MultiHotelManagement.entity.Notification;
 import com.MHM.MultiHotelManagement.enums.NotificationChannel;
 import com.MHM.MultiHotelManagement.enums.NotificationType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    // User ভিত্তিক সব notification
-    List<Notification> findByUser_Id(Long userId);
 
-    // User ভিত্তিক unread/read notification
-    List<Notification> findByUser_IdAndReadStatus(Long userId, Boolean readStatus);
+    @Query("""
+        SELECT n FROM Notification n
+        LEFT JOIN FETCH n.user u
+        WHERE u.id = :userId
+    """)
+    List<Notification> findByUser_Id(@Param("userId") Long userId);
 
-    // সব unread notification
+    @Query("""
+        SELECT n FROM Notification n
+        LEFT JOIN FETCH n.user u
+        WHERE u.id = :userId AND n.readStatus = :readStatus
+    """)
+    List<Notification> findByUser_IdAndReadStatus(
+            @Param("userId") Long userId,
+            @Param("readStatus") Boolean readStatus
+    );
+
     List<Notification> findByReadStatusFalse();
 
-    // Type ভিত্তিক notification (Enum ব্যবহার করা হলো)
     List<Notification> findByType(NotificationType type);
 
-    // Channel ভিত্তিক notification (Enum ব্যবহার করা হলো)
     List<Notification> findByChannel(NotificationChannel channel);
-
-
-
 }

@@ -3,6 +3,7 @@ import com.MHM.MultiHotelManagement.dto.request.CustomerSupportRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.CustomerSupportResponseDTO;
 import com.MHM.MultiHotelManagement.service.CustomerSupportService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ public class CustomerSupportController {
 
     @PostMapping
     public ResponseEntity<CustomerSupportResponseDTO> create(@RequestBody CustomerSupportRequestDTO dto) {
-        return ResponseEntity.ok(supportService.createTicket(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(supportService.createTicket(dto));
     }
 
     @PutMapping("/{id}")

@@ -5,6 +5,7 @@ import com.MHM.MultiHotelManagement.dto.request.LocationRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.LocationResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Location;
 import com.MHM.MultiHotelManagement.exception.AlreadyExistsException;
+import com.MHM.MultiHotelManagement.exception.BadRequestException;
 import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.repository.LocationRepository;
 import com.MHM.MultiHotelManagement.service.LocationService;
@@ -194,7 +195,7 @@ public class LocationServiceImpl implements LocationService {
 
             return fileName;
         } catch (Exception e) {
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Image upload failed: " + e.getMessage()
             );
         }

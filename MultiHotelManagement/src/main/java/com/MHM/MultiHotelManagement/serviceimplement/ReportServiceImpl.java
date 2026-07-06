@@ -6,7 +6,7 @@ import com.MHM.MultiHotelManagement.dto.response.ReportResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Hotel;
 import com.MHM.MultiHotelManagement.entity.Report;
 import com.MHM.MultiHotelManagement.enums.ReportType;
-
+import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.repository.HotelRepository;
 import com.MHM.MultiHotelManagement.repository.ReportRepository;
 import com.MHM.MultiHotelManagement.service.ReportService;
@@ -28,7 +28,7 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     public ReportResponseDTO generateReport(ReportRequestDTO dto) {
         Hotel hotel = hotelRepository.findById(dto.getHotelId())
-                .orElseThrow(() -> new RuntimeException("Hotel not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
 
         Report report = new Report();
         report.setTotalBookings(dto.getTotalBookings());

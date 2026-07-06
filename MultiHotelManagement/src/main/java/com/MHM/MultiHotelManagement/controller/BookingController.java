@@ -3,6 +3,7 @@ package com.MHM.MultiHotelManagement.controller;
 import com.MHM.MultiHotelManagement.dto.request.BookingRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.BookingResponseDTO;
 import com.MHM.MultiHotelManagement.service.BookingService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<BookingResponseDTO> create(@RequestBody BookingRequestDTO dto) {
-        return ResponseEntity.ok(bookingService.createBooking(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.createBooking(dto));
     }
 
     @PutMapping("/{id}")
@@ -61,7 +62,7 @@ public class BookingController {
     @PostMapping("/{id}/food-items")
     public ResponseEntity<BookingResponseDTO> addFoodItems(@PathVariable Long id,
                                                            @RequestBody List<Long> foodItemIds) {
-        return ResponseEntity.ok(bookingService.addFoodItemsToBooking(id, foodItemIds));
+        return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.addFoodItemsToBooking(id, foodItemIds));
     }
 
     // বুকিংয়ের খাবার cancel করা

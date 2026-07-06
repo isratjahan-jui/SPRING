@@ -1,10 +1,7 @@
 package com.MHM.MultiHotelManagement.util;
 
-
-
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,7 +13,6 @@ import org.springframework.stereotype.Service;
 public class EmailService {
 
     private final JavaMailSender javaMailSender;
-
 
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -71,10 +67,10 @@ public class EmailService {
                                             style="background:linear-gradient(135deg,#2563eb,#1d4ed8);
                                                    padding:40px 20px;">
                                             <h1 style="color:#ffffff; margin:0;">
-                                                CourierBD
+                                                MultiHotel
                                             </h1>
                                             <p style="color:#dbeafe; margin-top:10px;">
-                                                Fast & Reliable Courier Service
+                                                Book Your Perfect Stay
                                             </p>
                                         </td>
                                     </tr>
@@ -88,9 +84,9 @@ public class EmailService {
                                             </h2>
                 
                                             <p style="font-size:16px; line-height:1.7;">
-                                                Thank you for registering with CourierBD.
+                                                Thank you for registering with MultiHotel.
                                                 Please verify your email address to activate your account
-                                                and start using our courier services.
+                                                and start booking amazing hotels.
                                             </p>
                 
                                             <div style="text-align:center; margin:35px 0;">
@@ -126,7 +122,7 @@ public class EmailService {
                                                    border-top:1px solid #e2e8f0;">
                 
                                             <p style="margin:0; color:#64748b; font-size:13px;">
-                                                © 2026 CourierBD. All rights reserved.
+                                                © 2026 MultiHotel. All rights reserved.
                                             </p>
                 
                                             <p style="margin-top:8px; color:#94a3b8; font-size:12px;">
@@ -146,7 +142,7 @@ public class EmailService {
                 </html>
                 """.formatted(name, link);
 
-        sendSimpleMail(to, "Verify your CourierBD account", body);
+        sendSimpleMail(to, "Verify your MultiHotel account", body);
     }
 
 
@@ -173,7 +169,7 @@ public class EmailService {
                 </div>
                 """.formatted(name, link);
 
-        sendSimpleMail(to, "Reset your CourierBD password", body);
+        sendSimpleMail(to, "Reset your MultiHotel password", body);
     }
 
 

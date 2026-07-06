@@ -1,6 +1,6 @@
 package com.MHM.MultiHotelManagement.entity;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,7 +21,7 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String roomType;       // Single, Double, Suite ইত্যাদি
+    private String roomType;
     private String image;
     private int totalRooms;
     private int adults;
@@ -30,20 +30,18 @@ public class Room {
     private int availableRooms;
     private int bookedRooms;
 
-    private String amenities;      // WiFi, AC, TV ইত্যাদি
-    private String description;    // রুমের বিস্তারিত বর্ণনা
+    private String amenities;
+    private String description;
 
     private Boolean isAvailable;
 
-    // Room ↔ Hotel (Many-to-One)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id")
-    @JsonBackReference(value = "hotel-rooms")
+    @JsonIgnore
     private Hotel hotel;
 
-    // Room ↔ Booking (One-to-Many)
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
-    @JsonManagedReference(value = "room-bookings")
+    @JsonIgnore
     private List<Booking> bookings = new ArrayList<>();
 
     private LocalDateTime createdAt;

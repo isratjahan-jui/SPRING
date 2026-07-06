@@ -13,11 +13,7 @@ import java.util.Optional;
 @Repository
 public interface HotelRepository extends JpaRepository<Hotel, Long> {
 
-
-
     List<Hotel> findByStatus(HotelStatus status);
-
-    List<Hotel> findByOwner_Id(Long ownerId);
 
     Optional<Hotel> findByHotelName(String hotelname);
 
@@ -43,19 +39,41 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
 
     @Query("""
         SELECT h FROM Hotel h
-        WHERE h.status = 'APPROVED'
-        AND h.location.city = :city
+        LEFT JOIN FETCH h.location l
+        LEFT JOIN FETCH h.hotelDetails hd
+        LEFT JOIN FETCH h.owner o
+        LEFT JOIN FETCH o.user
+        WHERE o.id = :ownerId
     """)
-    List<Hotel> findByCity(@Param("city") String city);
+    List<Hotel> findByOwner_IdWithDetails(@Param("ownerId") Long ownerId);
 
-    @Query("SELECT h FROM Hotel h WHERE h.location.locationName = :locationName")
+    @Query("""
+        SELECT h FROM Hotel h
+        LEFT JOIN FETCH h.location l
+        LEFT JOIN FETCH h.hotelDetails hd
+        LEFT JOIN FETCH h.owner o
+        LEFT JOIN FETCH o.user
+        WHERE h.location.city = :city
+    """)
+    List<Hotel> findByCityWithDetails(@Param("city") String city);
+
+    @Query("""
+        SELECT h FROM Hotel h
+        LEFT JOIN FETCH h.location l
+        LEFT JOIN FETCH h.hotelDetails hd
+        LEFT JOIN FETCH h.owner o
+        LEFT JOIN FETCH o.user
+        WHERE h.location.locationName = :locationName
+    """)
     List<Hotel> findHotelByLocationName(@Param("locationName") String locationName);
 
-    @Query("SELECT h FROM Hotel h WHERE h.location.id = :locationId")
+    @Query("""
+        SELECT h FROM Hotel h
+        LEFT JOIN FETCH h.location l
+        LEFT JOIN FETCH h.hotelDetails hd
+        LEFT JOIN FETCH h.owner o
+        LEFT JOIN FETCH o.user
+        WHERE h.location.id = :locationId
+    """)
     List<Hotel> findHotelsByLocationId(@Param("locationId") Long locationId);
-
-
-
-
-
 }

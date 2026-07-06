@@ -68,7 +68,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional(readOnly = true)
     public ReviewResponseDTO getReviewById(Long id) {
-        Review review = reviewRepository.findById(id)
+        Review review = reviewRepository.findByIdWithDetails(id)
                 .orElseThrow(() -> new EntityNotFoundException("Review not found"));
         return ReviewMapperDTO.toResponseDTO(review);
     }

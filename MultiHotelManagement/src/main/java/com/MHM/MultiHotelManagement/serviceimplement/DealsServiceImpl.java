@@ -6,7 +6,7 @@ import com.MHM.MultiHotelManagement.dto.response.DealsResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Deals;
 import com.MHM.MultiHotelManagement.entity.Hotel;
 import com.MHM.MultiHotelManagement.entity.Room;
-
+import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.repository.DealsRepository;
 import com.MHM.MultiHotelManagement.repository.HotelRepository;
 import com.MHM.MultiHotelManagement.repository.RoomRepository;
@@ -30,12 +30,12 @@ public class DealsServiceImpl implements DealsService {
     @Transactional
     public DealsResponseDTO createDeal(DealsRequestDTO dto) {
         Hotel hotel = hotelRepository.findById(dto.getHotelId())
-                .orElseThrow(() -> new RuntimeException("Hotel not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
 
         Room room = null;
         if (dto.getRoomId() != null) {
             room = roomRepository.findById(dto.getRoomId())
-                    .orElseThrow(() -> new RuntimeException("Room not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
         }
 
         Deals deals = new Deals();

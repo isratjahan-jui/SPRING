@@ -3,6 +3,7 @@ package com.MHM.MultiHotelManagement.controller;
 import com.MHM.MultiHotelManagement.dto.request.PaymentRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.PaymentResponseDTO;
 import com.MHM.MultiHotelManagement.service.PaymentService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ public class PaymentController {
 
     @PostMapping
     public ResponseEntity<PaymentResponseDTO> createPayment(@RequestBody PaymentRequestDTO dto) {
-        return ResponseEntity.ok(paymentService.createPayment(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(paymentService.createPayment(dto));
     }
 
     @PutMapping("/{id}")

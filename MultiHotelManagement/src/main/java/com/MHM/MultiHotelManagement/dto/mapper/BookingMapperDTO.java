@@ -3,7 +3,6 @@ package com.MHM.MultiHotelManagement.dto.mapper;
 import com.MHM.MultiHotelManagement.dto.request.BookingRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.BookingResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Booking;
-import com.MHM.MultiHotelManagement.entity.FoodItem;
 
 public class BookingMapperDTO {
 
@@ -42,15 +41,6 @@ public class BookingMapperDTO {
 
         if (booking.getStatus() != null) {
             response.setStatus(booking.getStatus().name());
-        }
-
-        // FoodItem names
-        if (booking.getFoodItems() != null && !booking.getFoodItems().isEmpty()) {
-            response.setFoodItems(
-                    booking.getFoodItems().stream()
-                            .map(FoodItem::getItemName)
-                            .toList()
-            );
         }
 
         return response;

@@ -5,6 +5,7 @@ import com.MHM.MultiHotelManagement.dto.request.DealsRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.DealsResponseDTO;
 import com.MHM.MultiHotelManagement.service.DealsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class DealsController {
 
     @PostMapping
     public ResponseEntity<DealsResponseDTO> create(@RequestBody DealsRequestDTO dto) {
-        return ResponseEntity.ok(dealsService.createDeal(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(dealsService.createDeal(dto));
     }
 
     @DeleteMapping("/{id}")

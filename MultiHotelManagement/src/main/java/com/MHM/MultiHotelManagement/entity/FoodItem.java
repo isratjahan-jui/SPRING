@@ -1,5 +1,6 @@
 package com.MHM.MultiHotelManagement.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,6 +33,7 @@ public class FoodItem {
 
     // এক Booking এ একাধিক FoodItem থাকতে পারে
     @ManyToMany(mappedBy = "foodItems")
+    @JsonIgnore
     private List<Booking> bookings = new ArrayList<>();
 
     // Cancel policy fields

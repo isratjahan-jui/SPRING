@@ -26,7 +26,7 @@ public interface LocationRepository  extends JpaRepository<Location, Long> {
 
     // ID দিয়ে hotels সহ খোঁজো
     @Query("""
-        SELECT l FROM Location l
+        SELECT DISTINCT l FROM Location l
         LEFT JOIN FETCH l.hotels h
         WHERE l.id = :id
     """)

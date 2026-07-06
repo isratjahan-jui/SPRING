@@ -1,0 +1,23 @@
+<section class="hero">
+  <h1>Find Your Perfect Stay</h1>
+  <p>Search hotels easily with a clean interface.</p>
+
+  <div class="search-box">
+    <div class="sf">
+      <label>Destination</label>
+      <input type="text" [(ngModel)]="searchDest" placeholder="City or hotel..." />
+    </div>
+
+    <div class="sf">
+      <label>Check-in</label>
+      <input type="date" [(ngModel)]="searchCheckin" />
+    </div>
+
+    <div class="sf">
+      <label>Check-out</label>
+      <input type="date" [(ngModel)]="searchCheckout" />
+    </div>
+
+    <button class="sbtn" (click)="doSearch()">Search</button>
+  </div>
+</section>

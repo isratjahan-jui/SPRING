@@ -5,7 +5,7 @@ import com.MHM.MultiHotelManagement.dto.request.NotificationRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.NotificationResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Notification;
 import com.MHM.MultiHotelManagement.entity.User;
-
+import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.repository.NotificationRepository;
 import com.MHM.MultiHotelManagement.repository.UserRepository;
 import com.MHM.MultiHotelManagement.service.NotificationService;
@@ -27,7 +27,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public NotificationResponseDTO createNotification(NotificationRequestDTO dto) {
         User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Notification notification = new Notification();
         notification.setMessage(dto.getMessage());
@@ -44,7 +44,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void markAsRead(Long id) {
         Notification notification = notificationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Notification not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Notification not found"));
         notification.setReadStatus(true);
         notificationRepository.save(notification);
     }

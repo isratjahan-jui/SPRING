@@ -1,6 +1,5 @@
 package com.MHM.MultiHotelManagement.entity;
 
-import com.MHM.MultiHotelManagement.enums.BookingStatus;
 import com.MHM.MultiHotelManagement.enums.ServiceStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

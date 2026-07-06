@@ -45,7 +45,7 @@ public class HotelDetailsServiceImpl implements HotelDetailsService {
     @Override
     @Transactional(readOnly = true)
     public HotelDetailsResponseDTO getHotelDetailsByHotelId(Long hotelId) {
-        HotelDetails details = hotelDetailsRepo.findByHotel_Id(hotelId)
+        HotelDetails details = hotelDetailsRepo.findByHotelIdWithDetails(hotelId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "HotelDetails not found for hotel id: " + hotelId
                 ));
@@ -53,22 +53,11 @@ public class HotelDetailsServiceImpl implements HotelDetailsService {
         return HotelDetailsMapper.toDTO(details);
     }
 
-    //    public HotelDetailsResponseDTO getHotelDetailsByHotelId(Long hotelId) {
-//        HotelDetails details = hotelDetailsRepo.findByHotelIdWithDetails(hotelId)
-//                .orElseThrow(() -> new ResourceNotFoundException("HotelDetails not found for hotel id: " + hotelId));
-//        return HotelDetailsMapper.toDTO(details);
-//
-//
-//
-//    }
-
-
-
     // ── Get by ID ────────────────────────────────────────────
     @Override
     @Transactional(readOnly = true)
     public HotelDetailsResponseDTO getHotelDetailsById(Long id) {
-        HotelDetails details = hotelDetailsRepo.findById(id)
+        HotelDetails details = hotelDetailsRepo.findByIdWithDetails(id)
                 .orElseThrow(() -> new ResourceNotFoundException("HotelDetails not found with id: " + id));
         return HotelDetailsMapper.toDTO(details);
     }
@@ -93,6 +82,7 @@ public class HotelDetailsServiceImpl implements HotelDetailsService {
         if (dto.getChildPolicy() != null) details.setChildPolicy(dto.getChildPolicy());
         if (dto.getLanguages() != null) details.setLanguages(dto.getLanguages());
         if (dto.getNearbyAttractions() != null) details.setNearbyAttractions(dto.getNearbyAttractions());
+        if (dto.getPricePerNight() != null) details.setPricePerNight(dto.getPricePerNight());
 
         HotelDetails updated = hotelDetailsRepo.save(details);
         return HotelDetailsMapper.toDTO(updated);

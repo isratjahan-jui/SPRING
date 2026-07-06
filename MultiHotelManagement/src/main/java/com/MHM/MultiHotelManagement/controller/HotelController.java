@@ -4,6 +4,7 @@ import com.MHM.MultiHotelManagement.dto.request.HotelRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.HotelResponseDTO;
 import com.MHM.MultiHotelManagement.service.HotelService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,12 @@ public class HotelController {
 
     @PostMapping
     public ResponseEntity<HotelResponseDTO> create(@RequestBody HotelRequestDTO dto) {
-        return ResponseEntity.ok(hotelService.createHotel(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(hotelService.createHotel(dto));
+    }
+
+    @GetMapping("/approved")
+    public ResponseEntity<List<HotelResponseDTO>> getApprovedHotels() {
+        return ResponseEntity.ok(hotelService.getAllApprovedHotels());
     }
 
     @GetMapping("/{id}")

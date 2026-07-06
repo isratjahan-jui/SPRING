@@ -60,6 +60,14 @@ public class BookingServiceImple implements BookingService {
         booking.setRoom(room);
         booking.setStatus(BookingStatus.PENDING);
 
+        // Calculate totalAmount and dueAmount
+        double roomTotal = room.getPricePerNight() * dto.getNumberOfRooms();
+        double discount = roomTotal * dto.getDiscountRate() / 100.0;
+        double totalAmount = roomTotal - discount;
+        booking.setTotalPrice(roomTotal);
+        booking.setTotalAmount(totalAmount);
+        booking.setDueAmount(totalAmount - dto.getAdvanceAmount());
+
         // FoodItem integration
         if (dto.getFoodItemIds() != null && !dto.getFoodItemIds().isEmpty()) {
             List<FoodItem> foodItems = foodItemRepository.findAllById(dto.getFoodItemIds());
@@ -96,7 +104,7 @@ public class BookingServiceImple implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public BookingResponseDTO getBookingById(Long id) {
-        Booking booking = bookingRepository.findById(id)
+        Booking booking = bookingRepository.findByIdWithDetails(id)
                 .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
         return BookingMapperDTO.toResponseDTO(booking);
     }

@@ -79,6 +79,7 @@ public class Booking {
             joinColumns = @JoinColumn(name = "booking_id"),
             inverseJoinColumns = @JoinColumn(name = "food_item_id")
     )
+    @JsonIgnore
     private List<FoodItem> foodItems = new ArrayList<>();
 
 

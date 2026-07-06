@@ -7,7 +7,7 @@ import com.MHM.MultiHotelManagement.dto.response.CustomerSupportResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Customer;
 import com.MHM.MultiHotelManagement.entity.CustomerSupport;
 import com.MHM.MultiHotelManagement.entity.User;
-
+import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.repository.CustomerRepository;
 import com.MHM.MultiHotelManagement.repository.CustomerSupportRepository;
 import com.MHM.MultiHotelManagement.repository.UserRepository;
@@ -31,12 +31,12 @@ public class CustomerSupportServiceImpl implements CustomerSupportService {
     @Transactional
     public CustomerSupportResponseDTO createTicket(CustomerSupportRequestDTO dto) {
         Customer customer = customerRepository.findById(dto.getCustomerId())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
         User agent = null;
         if (dto.getAgentId() != null) {
             agent = userRepository.findById(dto.getAgentId())
-                    .orElseThrow(() -> new RuntimeException("Agent not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Agent not found"));
         }
 
         CustomerSupport ticket = new CustomerSupport();
@@ -55,7 +55,7 @@ public class CustomerSupportServiceImpl implements CustomerSupportService {
     @Transactional
     public CustomerSupportResponseDTO updateTicket(Long id, CustomerSupportRequestDTO dto) {
         CustomerSupport ticket = supportRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
 
         ticket.setSubject(dto.getSubject());
         ticket.setDescription(dto.getDescription());
@@ -64,7 +64,7 @@ public class CustomerSupportServiceImpl implements CustomerSupportService {
 
         if (dto.getAgentId() != null) {
             User agent = userRepository.findById(dto.getAgentId())
-                    .orElseThrow(() -> new RuntimeException("Agent not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Agent not found"));
             ticket.setAgent(agent);
         }
 
@@ -76,7 +76,7 @@ public class CustomerSupportServiceImpl implements CustomerSupportService {
     @Transactional
     public void closeTicket(Long id) {
         CustomerSupport ticket = supportRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
         ticket.setStatus(com.MHM.MultiHotelManagement.enums.CustomerSupportTicketStatus.CLOSED);
         supportRepository.save(ticket);
     }

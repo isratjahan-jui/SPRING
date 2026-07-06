@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ReviewRepository
@@ -26,5 +27,16 @@ public interface ReviewRepository
     """)
     List<Review> findByHotelIdWithDetails(
             @Param("hotelId") Long hotelId
+    );
+
+    @Query("""
+        SELECT r FROM Review r
+        LEFT JOIN FETCH r.customer c
+        LEFT JOIN FETCH c.user
+        LEFT JOIN FETCH r.hotel
+        WHERE r.id = :id
+    """)
+    Optional<Review> findByIdWithDetails(
+            @Param("id") Long id
     );
 }

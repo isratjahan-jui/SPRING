@@ -3,6 +3,7 @@ package com.MHM.MultiHotelManagement.controller;
 import com.MHM.MultiHotelManagement.dto.request.ExtraServiceRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.ExtraServiceResponseDTO;
 import com.MHM.MultiHotelManagement.service.ExtraServiceService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ public class ExtraServiceController {
 
     @PostMapping
     public ResponseEntity<ExtraServiceResponseDTO> createExtraService(@RequestBody ExtraServiceRequestDTO dto) {
-        return ResponseEntity.ok(extraServiceService.createExtraService(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(extraServiceService.createExtraService(dto));
     }
 
     @PutMapping("/{id}")

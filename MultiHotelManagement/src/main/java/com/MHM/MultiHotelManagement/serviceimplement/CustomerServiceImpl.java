@@ -7,6 +7,7 @@ import com.MHM.MultiHotelManagement.entity.Customer;
 import com.MHM.MultiHotelManagement.entity.User;
 import com.MHM.MultiHotelManagement.enums.Role;
 import com.MHM.MultiHotelManagement.exception.AlreadyExistsException;
+import com.MHM.MultiHotelManagement.exception.BadRequestException;
 import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.repository.CustomerRepository;
 import com.MHM.MultiHotelManagement.repository.UserRepository;
@@ -80,7 +81,7 @@ public class CustomerServiceImpl implements CustomerService {
                         LocalDate.parse(dto.getDateOfBirth())
                 );
             } catch (DateTimeParseException e) {
-                throw new RuntimeException(
+                throw new BadRequestException(
                         "Invalid date format. Use yyyy-MM-dd"
                 );
             }
@@ -173,7 +174,7 @@ public class CustomerServiceImpl implements CustomerService {
                         LocalDate.parse(dto.getDateOfBirth())
                 );
             } catch (DateTimeParseException e) {
-                throw new RuntimeException(
+                throw new BadRequestException(
                         "Invalid date format. Use yyyy-MM-dd"
                 );
             }
@@ -232,7 +233,7 @@ public class CustomerServiceImpl implements CustomerService {
 
             return fileName;
         } catch (Exception e) {
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Image upload failed: " + e.getMessage()
             );
         }

@@ -5,6 +5,7 @@ import com.MHM.MultiHotelManagement.dto.request.InvoiceRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.InvoiceResponseDTO;
 import com.MHM.MultiHotelManagement.entity.*;
 import com.MHM.MultiHotelManagement.enums.InvoiceStatus;
+import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.repository.*;
 import com.MHM.MultiHotelManagement.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
@@ -31,11 +32,11 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Transactional
     public InvoiceResponseDTO create(InvoiceRequestDTO dto) {
         Booking booking = bookingRepository.findById(dto.getBookingId())
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
         Payment payment = paymentRepository.findById(dto.getPaymentId())
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
         Customer customer = customerRepository.findById(dto.getCustomerId())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
         Commission commission = null;
         if (dto.getCommissionId() != null) {
@@ -63,7 +64,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Transactional(readOnly = true)
     public InvoiceResponseDTO getById(Long id) {
         return mapper.toDTO(invoiceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Invoice not found")));
+                .orElseThrow(() -> new ResourceNotFoundException("Invoice not found")));
     }
 
     @Override

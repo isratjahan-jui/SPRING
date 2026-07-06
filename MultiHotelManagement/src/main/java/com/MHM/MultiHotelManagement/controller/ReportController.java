@@ -4,6 +4,7 @@ import com.MHM.MultiHotelManagement.dto.request.ReportRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.ReportResponseDTO;
 import com.MHM.MultiHotelManagement.service.ReportService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ public class ReportController {
 
     @PostMapping
     public ResponseEntity<ReportResponseDTO> generate(@RequestBody ReportRequestDTO dto) {
-        return ResponseEntity.ok(reportService.generateReport(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(reportService.generateReport(dto));
     }
 
     @GetMapping("/hotel/{hotelId}")

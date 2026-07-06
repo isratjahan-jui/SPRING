@@ -10,6 +10,7 @@ import com.MHM.MultiHotelManagement.service.AdminService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class AdminServiceImple implements AdminService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AdminDTO getProfile(String email) {
         Admin admin = adminRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Admin not found with email: " + email));
@@ -31,6 +33,7 @@ public class AdminServiceImple implements AdminService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AdminDTO getAdminById(Long id) {
         Admin admin = adminRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Admin not found with id: " + id));
@@ -38,6 +41,7 @@ public class AdminServiceImple implements AdminService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AdminDTO findAdminByUserId(Long userId) {
         Admin admin = adminRepository.findAdminByUser_Id(userId);
         if (admin == null) {
@@ -47,12 +51,14 @@ public class AdminServiceImple implements AdminService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<AdminDTO> getAllAdmins() {
         List<Admin> admins = adminRepository.findAll();
         return admins.stream().map(this::mapToDTO).toList();
     }
 
     @Override
+    @Transactional
     public AdminDTO saveAdmin(AdminRequestDTO dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + dto.getUserId()));
@@ -72,6 +78,7 @@ public class AdminServiceImple implements AdminService {
     }
 
     @Override
+    @Transactional
     public void deleteAdmin(Long id) {
         if (!adminRepository.existsById(id)) {
             throw new EntityNotFoundException("Admin not found with id: " + id);

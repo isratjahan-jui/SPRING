@@ -13,6 +13,7 @@ public class HotelDetailsResponseDTO {
     private String ownerSpeach;
     private String description;
     private String hotelPolicy;
+    private Double pricePerNight;
 
     private String contactEmail;
     private String contactPhone;
@@ -26,7 +27,4 @@ public class HotelDetailsResponseDTO {
     private String childPolicy;
     private String languages;
     private String nearbyAttractions;
-
-
-
 }

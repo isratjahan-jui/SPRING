@@ -47,22 +47,29 @@ public class HotelServiceImpl implements HotelService {
     @Override
     @Transactional(readOnly = true)
     public HotelResponseDTO getHotelById(Long id) {
-        Hotel hotel = hotelRepo.findById(id)
+        Hotel hotel = hotelRepo.findByIdWithDetails(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with id: " + id));
         return HotelMapper.toDTO(hotel);
     }
 
     @Override
     @Transactional(readOnly = true)
+    public List<HotelResponseDTO> getAllApprovedHotels() {
+        return hotelRepo.findAllApprovedWithDetails()
+                .stream().map(HotelMapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<HotelResponseDTO> getHotelsByOwner(Long ownerId) {
-        return hotelRepo.findByOwner_Id(ownerId)
+        return hotelRepo.findByOwner_IdWithDetails(ownerId)
                 .stream().map(HotelMapper::toDTO).collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<HotelResponseDTO> getHotelsByCity(String city) {
-        return hotelRepo.findByCity(city)
+        return hotelRepo.findByCityWithDetails(city)
                 .stream().map(HotelMapper::toDTO).collect(Collectors.toList());
     }
 

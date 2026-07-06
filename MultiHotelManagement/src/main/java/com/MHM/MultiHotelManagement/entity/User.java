@@ -1,6 +1,7 @@
 package com.MHM.MultiHotelManagement.entity;
 
 import com.MHM.MultiHotelManagement.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,12 +47,14 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE},
             orphanRemoval = true)
+    @JsonIgnore
     private HotelOwner hotelOwner;
 
     // User ↔ Customer (One-to-One)
     @OneToOne(mappedBy = "user",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE},
             orphanRemoval = true)
+    @JsonIgnore
     private Customer customer;
 
     // Spring Security methods

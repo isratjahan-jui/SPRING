@@ -8,6 +8,7 @@ import java.util.List;
 public interface HotelService {
     HotelResponseDTO createHotel(HotelRequestDTO dto);
     HotelResponseDTO getHotelById(Long id);
+    List<HotelResponseDTO> getAllApprovedHotels();
     List<HotelResponseDTO> getHotelsByOwner(Long ownerId);
     List<HotelResponseDTO> getHotelsByCity(String city);
     HotelResponseDTO updateHotel(Long id, HotelRequestDTO dto);

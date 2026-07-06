@@ -272,7 +272,7 @@ public class GalleryServiceImpl implements GalleryService {
             return "gallery/" + folder + "/" + fileName;
 
         } catch (Exception e) {
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Image upload failed: " + e.getMessage()
             );
         }

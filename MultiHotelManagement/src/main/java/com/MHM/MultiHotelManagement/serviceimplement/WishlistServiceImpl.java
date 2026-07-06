@@ -61,7 +61,7 @@ public class WishlistServiceImpl implements WishlistService {
     @Override
     @Transactional(readOnly = true)
     public List<WishlistResponseDTO> getAll() {
-        return wishlistRepo.findAll()
+        return wishlistRepo.findAllWithDetails()
                 .stream()
                 .map(WishlistMapper::toDTO)
                 .collect(Collectors.toList());
@@ -70,7 +70,7 @@ public class WishlistServiceImpl implements WishlistService {
     @Override
     @Transactional(readOnly = true)
     public List<WishlistResponseDTO> getByUserId(Long userId) {
-        return wishlistRepo.findByUser_Id(userId)
+        return wishlistRepo.findByUser_IdWithDetails(userId)
                 .stream()
                 .map(WishlistMapper::toDTO)
                 .collect(Collectors.toList());
@@ -79,7 +79,7 @@ public class WishlistServiceImpl implements WishlistService {
     @Override
     @Transactional(readOnly = true)
     public List<WishlistResponseDTO> getByCustomerId(Long customerId) {
-        return wishlistRepo.findByCustomer_Id(customerId)
+        return wishlistRepo.findByCustomer_IdWithDetails(customerId)
                 .stream()
                 .map(WishlistMapper::toDTO)
                 .collect(Collectors.toList());
@@ -88,7 +88,7 @@ public class WishlistServiceImpl implements WishlistService {
     @Override
     @Transactional(readOnly = true)
     public List<WishlistResponseDTO> getByHotelId(Long hotelId) {
-        return wishlistRepo.findByHotel_Id(hotelId)
+        return wishlistRepo.findByHotel_IdWithDetails(hotelId)
                 .stream()
                 .map(WishlistMapper::toDTO)
                 .collect(Collectors.toList());

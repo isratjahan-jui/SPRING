@@ -3,6 +3,7 @@ package com.MHM.MultiHotelManagement.controller;
 import com.MHM.MultiHotelManagement.dto.request.FoodItemRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.FoodItemResponseDTO;
 import com.MHM.MultiHotelManagement.service.FoodItemService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ public class FoodItemController {
 
     @PostMapping
     public ResponseEntity<FoodItemResponseDTO> createFoodItem(@RequestBody FoodItemRequestDTO dto) {
-        return ResponseEntity.ok(foodItemService.createFoodItem(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(foodItemService.createFoodItem(dto));
     }
 
     @PutMapping("/{id}")

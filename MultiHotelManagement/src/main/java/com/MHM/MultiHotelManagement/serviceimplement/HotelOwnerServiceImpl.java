@@ -34,7 +34,7 @@ public class HotelOwnerServiceImpl implements HotelOwnerService {
     @Override
     @Transactional(readOnly = true)
     public HotelOwnerResponseDTO getOwnerById(Long id) {
-        HotelOwner owner = ownerRepo.findById(id)
+        HotelOwner owner = ownerRepo.findByIdWithUser(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Owner not found with id: " + id));
         return HotelOwnerMapper.toDTO(owner);
     }
@@ -42,7 +42,7 @@ public class HotelOwnerServiceImpl implements HotelOwnerService {
     @Override
     @Transactional(readOnly = true)
     public HotelOwnerResponseDTO getOwnerByUserId(Long userId) {
-        HotelOwner owner = ownerRepo.findByUser_Id(userId)
+        HotelOwner owner = ownerRepo.findByUser_IdWithUser(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Owner not found for user id: " + userId));
         return HotelOwnerMapper.toDTO(owner);
     }
