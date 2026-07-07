@@ -3,10 +3,14 @@ package com.MHM.MultiHotelManagement.serviceimplement;
 
 import com.MHM.MultiHotelManagement.dto.request.ForgotPasswordRequestDTO;
 import com.MHM.MultiHotelManagement.dto.request.LoginRequestDTO;
+import com.MHM.MultiHotelManagement.dto.request.RegisterRequestDTO;
 import com.MHM.MultiHotelManagement.dto.request.ResetPasswordRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.LoginResponseDTO;
+import com.MHM.MultiHotelManagement.entity.Customer;
+import com.MHM.MultiHotelManagement.entity.HotelOwner;
 import com.MHM.MultiHotelManagement.entity.User;
 import com.MHM.MultiHotelManagement.enums.Role;
+import com.MHM.MultiHotelManagement.repository.CustomerRepository;
 import com.MHM.MultiHotelManagement.repository.HotelOwnerRepository;
 import com.MHM.MultiHotelManagement.repository.UserRepository;
 import com.MHM.MultiHotelManagement.security.JwtUtil;
@@ -41,9 +45,8 @@ public class AuthService {
      */
     private final HotelOwnerRepository hotelOwnerRepository;
 
-    /**
-     * Utility class for generating and validating JWT tokens.
-     */
+    private final CustomerRepository customerRepository;
+
     private final JwtUtil jwtUtil;
 
     private final EmailService emailService;
@@ -190,6 +193,59 @@ public class AuthService {
 
     }
 
+    // ── Register new user ─────────────────────────────────────────
+    @Transactional
+    public void register(RegisterRequestDTO dto) {
+
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already registered: " + dto.getEmail());
+        }
+
+        Role role;
+        try {
+            role = Role.valueOf(dto.getRole().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid role: " + dto.getRole());
+        }
+
+        if (role == Role.ADMIN) {
+            throw new RuntimeException("Admin registration is not allowed");
+        }
+
+        User user = new User();
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setPassword(encoder.encode(dto.getPassword()));
+        user.setPhone(dto.getPhone());
+        user.setRole(role);
+        user.setActive(true);
+        user = userRepository.save(user);
+
+        if (role == Role.CUSTOMER) {
+            Customer customer = new Customer();
+            customer.setCustomerName(dto.getName());
+            customer.setEmail(dto.getEmail());
+            customer.setPhone(dto.getPhone());
+            customer.setUser(user);
+            customerRepository.save(customer);
+        } else if (role == Role.HOTEL_OWNER) {
+            HotelOwner owner = new HotelOwner();
+            owner.setName(dto.getName());
+            owner.setEmail(dto.getEmail());
+            owner.setPhone(dto.getPhone());
+            owner.setUser(user);
+            hotelOwnerRepository.save(owner);
+        }
+
+        String token = jwtUtil.generateVerificationToken(user.getEmail());
+
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), user.getName(), token);
+        } catch (MessagingException e) {
+            System.out.println("Warning: Failed to send verification email: " + e.getMessage());
+        }
+    }
+
     // ── Send / resend verification email ─────────────────────────
     public void sendVerificationEmail(String email) {
 
@@ -205,7 +261,7 @@ public class AuthService {
         try {
             emailService.sendVerificationEmail(user.getEmail(), user.getName(), token);
         } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send verification email: " + e.getMessage());
+            System.out.println("Warning: Failed to send verification email: " + e.getMessage());
         }
     }
 

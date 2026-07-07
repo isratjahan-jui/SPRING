@@ -1,0 +1,41 @@
+<div class="container-fluid p-0">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+    <a class="navbar-brand" routerLink="/">MultiHotel</a>
+    <div class="ms-auto">
+      <a routerLink="/login" class="btn btn-outline-light btn-sm me-2">Login</a>
+      <a routerLink="/register" class="btn btn-primary btn-sm">Register</a>
+    </div>
+  </nav>
+
+  <header class="bg-primary text-white text-center py-5">
+    <h1>Welcome to MultiHotel</h1>
+    <p class="lead">Find and book the best hotels at the best prices</p>
+    <div class="container mt-3" style="max-width: 500px">
+      <div class="input-group">
+        <input type="text" class="form-control" placeholder="Search by city..." [(ngModel)]="searchCity" />
+        <button class="btn btn-light" (click)="search()">Search</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container my-5">
+    <h2 class="mb-4">Featured Hotels</h2>
+    <div class="row">
+      @for (hotel of hotels; track hotel.id) {
+        <div class="col-md-4 mb-4">
+          <div class="card h-100 shadow-sm">
+            <img [src]="'http://localhost:8085/' + hotel.image" class="card-img-top" style="height: 200px; object-fit: cover" alt="" />
+            <div class="card-body">
+              <h5 class="card-title">{{ hotel.hotelName }}</h5>
+              <p class="card-text text-muted">{{ hotel.address }}</p>
+              <p class="fw-bold text-primary">\${{ hotel.pricePerNight }} / night</p>
+              <a [routerLink]="['/hotels', hotel.id]" class="btn btn-outline-primary w-100">View Details</a>
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <p class="text-muted">No hotels available.</p>
+      }
+    </div>
+  </div>
+</div>

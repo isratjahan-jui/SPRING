@@ -1,0 +1,17 @@
+<div class="d-flex">
+  <nav class="bg-dark text-white vh-100 p-3" style="width: 250px">
+    <h5 class="mb-4">Admin Panel</h5>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a routerLink="/admin" class="nav-link text-white" routerLinkActive="fw-bold" [routerLinkActiveOptions]="{exact:true}">Dashboard</a></li>
+      <li class="nav-item"><a routerLink="/admin/hotels" class="nav-link text-white" routerLinkActive="fw-bold">Hotels</a></li>
+      <li class="nav-item"><a routerLink="/admin/owners" class="nav-link text-white" routerLinkActive="fw-bold">Owners</a></li>
+      <li class="nav-item"><a routerLink="/admin/customers" class="nav-link text-white" routerLinkActive="fw-bold">Customers</a></li>
+      <li class="nav-item"><a routerLink="/admin/commissions" class="nav-link text-white" routerLinkActive="fw-bold">Commissions</a></li>
+    </ul>
+    <hr class="text-white" />
+    <button class="btn btn-outline-light btn-sm w-100" (click)="auth.logout()">Logout</button>
+  </nav>
+  <main class="p-4 w-100">
+    <router-outlet />
+  </main>
+</div>

@@ -2,6 +2,7 @@ package com.MHM.MultiHotelManagement.controller;
 
 import com.MHM.MultiHotelManagement.dto.request.ForgotPasswordRequestDTO;
 import com.MHM.MultiHotelManagement.dto.request.LoginRequestDTO;
+import com.MHM.MultiHotelManagement.dto.request.RegisterRequestDTO;
 import com.MHM.MultiHotelManagement.dto.request.ResetPasswordRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.LoginResponseDTO;
 import com.MHM.MultiHotelManagement.serviceimplement.AuthService;
@@ -26,10 +27,9 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> sendVerificationEmail(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        authService.sendVerificationEmail(email);
-        return ResponseEntity.ok(Map.of("message", "Verification email sent successfully"));
+    public ResponseEntity<Map<String, String>> register(@RequestBody RegisterRequestDTO dto) {
+        authService.register(dto);
+        return ResponseEntity.ok(Map.of("message", "Registration successful. Please check your email to verify your account."));
     }
 
     @GetMapping("/verify")

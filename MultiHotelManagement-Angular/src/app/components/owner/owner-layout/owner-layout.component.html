@@ -1,0 +1,19 @@
+<div class="d-flex">
+  <nav class="bg-dark text-white vh-100 p-3" style="width: 250px">
+    <h5 class="mb-4">Owner Panel</h5>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a routerLink="/owner" class="nav-link text-white" routerLinkActive="fw-bold" [routerLinkActiveOptions]="{exact:true}">Dashboard</a></li>
+      <li class="nav-item"><a routerLink="/owner/my-hotels" class="nav-link text-white" routerLinkActive="fw-bold">My Hotels</a></li>
+      <li class="nav-item"><a routerLink="/owner/rooms" class="nav-link text-white" routerLinkActive="fw-bold">Rooms</a></li>
+      <li class="nav-item"><a routerLink="/owner/bookings" class="nav-link text-white" routerLinkActive="fw-bold">Bookings</a></li>
+      <li class="nav-item"><a routerLink="/owner/facilities" class="nav-link text-white" routerLinkActive="fw-bold">Facilities</a></li>
+      <li class="nav-item"><a routerLink="/owner/food-items" class="nav-link text-white" routerLinkActive="fw-bold">Food Items</a></li>
+      <li class="nav-item"><a routerLink="/owner/gallery" class="nav-link text-white" routerLinkActive="fw-bold">Gallery</a></li>
+    </ul>
+    <hr class="text-white" />
+    <button class="btn btn-outline-light btn-sm w-100" (click)="auth.logout()">Logout</button>
+  </nav>
+  <main class="p-4 w-100">
+    <router-outlet />
+  </main>
+</div>

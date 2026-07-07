@@ -1,0 +1,26 @@
+<h2>My Profile</h2>
+@if (profile) {
+  <div class="card" style="max-width:500px">
+    <div class="card-body">
+      <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input class="form-control" [(ngModel)]="profile.customerName" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input class="form-control" [(ngModel)]="profile.email" readonly />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Phone</label>
+        <input class="form-control" [(ngModel)]="profile.phone" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Address</label>
+        <input class="form-control" [(ngModel)]="profile.address" />
+      </div>
+      <button class="btn btn-primary" (click)="save()">Save Changes</button>
+    </div>
+  </div>
+} @else {
+  <div class="spinner-border"></div>
+}

@@ -1,0 +1,15 @@
+<h2>Owner Dashboard</h2>
+<p class="text-muted">Welcome, {{ auth.userName() }}!</p>
+<div class="row mt-4">
+  <div class="col-md-4 mb-3">
+    <div class="card text-bg-primary">
+      <div class="card-body"><h5>My Hotels</h5><h3>{{ hotels.length }}</h3></div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card text-bg-success">
+      <div class="card-body"><h5>Active Hotels</h5><h3>{{ activeCount }}</h3></div>
+    </div>
+  </div>
+</div>
+<a routerLink="/owner/my-hotels" class="btn btn-primary">Manage Hotels</a>

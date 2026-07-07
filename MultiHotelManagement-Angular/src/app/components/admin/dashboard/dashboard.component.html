@@ -1,0 +1,14 @@
+<h2>Admin Dashboard</h2>
+<p class="text-muted">Welcome, {{ auth.userName() }}!</p>
+<div class="row mt-4">
+  <div class="col-md-3 mb-3">
+    <div class="card text-bg-primary">
+      <div class="card-body"><h5>Total Hotels</h5><h3>{{ hotelCount }}</h3></div>
+    </div>
+  </div>
+  <div class="col-md-3 mb-3">
+    <div class="card text-bg-success">
+      <div class="card-body"><h5>Total Earnings</h5><h3>\${{ totalEarnings }}</h3></div>
+    </div>
+  </div>
+</div>
