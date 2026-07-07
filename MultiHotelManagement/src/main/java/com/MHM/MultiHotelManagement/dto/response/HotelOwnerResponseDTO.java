@@ -15,6 +15,7 @@ public class HotelOwnerResponseDTO {
     private Date dateOfBirth;
     private String image;
     private Long userId;
+    private String role;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

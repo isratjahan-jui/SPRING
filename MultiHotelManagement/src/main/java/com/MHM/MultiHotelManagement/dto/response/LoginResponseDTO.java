@@ -18,6 +18,6 @@ public class LoginResponseDTO {
     private Long    hotelId;
     private String  hotelName;
 
-    private Long    OwnerId;
-    private String OwnerName;
+    private Long    ownerId;
+    private String ownerName;
 }

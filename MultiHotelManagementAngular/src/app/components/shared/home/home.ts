@@ -1,21 +1,30 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+
+import { Hotel } from '../../../models/hotel.model';
+import { HotelService } from '../../../services/hotel.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-home',
-  imports: [FormsModule],
+  standalone: true,
+  imports: [RouterLink,CommonModule, FormsModule],
   templateUrl: './home.html',
-  styleUrl: './home.css',
+  styleUrls: ['./home.css'],
 })
-export class Home {
+export class HomeComponent implements OnInit {
+  private hotelService = inject(HotelService);
+  hotels: Hotel[] = [];
+  searchCity = '';
 
-   searchDest: string = '';
-  searchCheckin: string = '';
-  searchCheckout: string = '';
+  ngOnInit() {
+    this.hotelService.getAllApproved().subscribe((data) => (this.hotels = data));
+  }
 
-  doSearch() {
-    console.log('Searching:', this.searchDest, this.searchCheckin, this.searchCheckout);
-    
+  search() {
+    if (this.searchCity) {
+      this.hotelService.getByCity(this.searchCity).subscribe((data) => (this.hotels = data));
+    }
   }
 }
-

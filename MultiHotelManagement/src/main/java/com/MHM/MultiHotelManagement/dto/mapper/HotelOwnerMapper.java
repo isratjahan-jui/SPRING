@@ -7,6 +7,7 @@ public class HotelOwnerMapper {
 
     public static HotelOwnerResponseDTO toDTO(HotelOwner owner) {
         HotelOwnerResponseDTO dto = new HotelOwnerResponseDTO();
+
         dto.setId(owner.getId());
         dto.setName(owner.getName());
         dto.setEmail(owner.getEmail());
@@ -15,9 +16,13 @@ public class HotelOwnerMapper {
         dto.setGender(owner.getGender());
         dto.setDateOfBirth(owner.getDateOfBirth());
         dto.setImage(owner.getImage());
-        dto.setUserId(owner.getUser().getId());
+
         dto.setCreatedAt(owner.getCreatedAt());
         dto.setUpdatedAt(owner.getUpdatedAt());
+        dto.setUserId(owner.getUser().getId());
+        dto.setRole(owner.getUser().getRole().toString());
+
+
         return dto;
     }
 
