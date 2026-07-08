@@ -1,0 +1,18 @@
+<div class="container mt-4">
+  <h2>Approved Hotels</h2>
+  <button routerLink="/hotels/add" class="btn btn-success mb-3">Add Hotel</button>
+  <div class="row">
+    <div class="col-md-4" *ngFor="let hotel of hotels">
+      <div class="card mb-3">
+        <img [src]="hotel.image" class="card-img-top" alt="{{hotel.hotelName}}">
+        <div class="card-body">
+          <h5 class="card-title">{{hotel.hotelName}}</h5>
+          <p>{{hotel.address}}</p>
+          <p>৳{{hotel.pricePerNight}} / night</p>
+          <button routerLink="/hotels/edit/{{hotel.id}}" class="btn btn-primary btn-sm">Edit</button>
+          <button (click)="deleteHotel(hotel.id)" class="btn btn-danger btn-sm">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

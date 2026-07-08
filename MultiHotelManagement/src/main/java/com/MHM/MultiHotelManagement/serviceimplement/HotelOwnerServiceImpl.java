@@ -22,7 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-
+import java.util.UUID;
 
 
 @Service
@@ -35,11 +35,6 @@ public class HotelOwnerServiceImpl implements HotelOwnerService {
 
 
     @Override
-    @Transactional
-    public HotelOwnerResponseDTO createOwner(HotelOwnerRequestDTO dto) {
-        return createOwner(dto, null);
-    }
-
     @Transactional
     public HotelOwnerResponseDTO createOwner(HotelOwnerRequestDTO dto, MultipartFile image) {
 
@@ -83,7 +78,7 @@ public class HotelOwnerServiceImpl implements HotelOwnerService {
 
     @Override
     @Transactional
-    public HotelOwnerResponseDTO updateOwner(Long id, HotelOwnerRequestDTO dto) {
+    public HotelOwnerResponseDTO updateOwner(Long id, HotelOwnerRequestDTO dto, MultipartFile image) {
         HotelOwner owner = ownerRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Owner not found with id: " + id));
 
@@ -92,7 +87,12 @@ public class HotelOwnerServiceImpl implements HotelOwnerService {
         owner.setAddress(dto.getAddress());
         owner.setGender(dto.getGender());
         owner.setDateOfBirth(dto.getDateOfBirth());
-        owner.setImage(dto.getImage());
+
+        if (image != null && !image.isEmpty()) {
+            owner.setImage(uploadImage(image, dto.getName()));
+        } else if (dto.getImage() != null) {
+            owner.setImage(dto.getImage());
+        }
 
         return HotelOwnerMapper.toDTO(ownerRepo.save(owner));
     }
@@ -117,26 +117,36 @@ public class HotelOwnerServiceImpl implements HotelOwnerService {
     }
 
 
-    private String uploadImage(MultipartFile image, String ownerName) {
+    // ── Image Upload Helper ──────────────────────────────────────
+    private String uploadImage(MultipartFile file, String ownerName) {
         try {
-            // ফাইলের নাম unique করার জন্য ownerName + timestamp ব্যবহার করা হচ্ছে
-            String fileName = ownerName + "_" + System.currentTimeMillis() + "_" + image.getOriginalFilename();
-
-            // লোকাল ফোল্ডারে সেভ করার জন্য path
-            Path uploadPath = Paths.get("uploads/owners");
-
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
+            // Upload folder path
+            Path path = Paths.get("uploads", "owners");
+            if (!Files.exists(path)) {
+                Files.createDirectories(path);
             }
 
-            Path filePath = uploadPath.resolve(fileName);
-            Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            // File extension বের করা
+            String ext = "";
+            String original = file.getOriginalFilename();
+            if (original != null && original.contains(".")) {
+                ext = original.substring(original.lastIndexOf("."));
+            }
 
-            // DB তে শুধু ফাইলের নাম বা path সেভ করা হবে
+            // Unique file name তৈরি করা (ownerName + UUID + extension)
+            String fileName = ownerName.trim()
+                    .replaceAll("\\s+", "_")
+                    + "_" + UUID.randomUUID() + ext;
+
+            // Copy file to target folder
+            Files.copy(file.getInputStream(), path.resolve(fileName));
+
+            // DB তে শুধু fileName save হবে
             return fileName;
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Image upload failed: " + e.getMessage());
         }
     }
+
 
 }

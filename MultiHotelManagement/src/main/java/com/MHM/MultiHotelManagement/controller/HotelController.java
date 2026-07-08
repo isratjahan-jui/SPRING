@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -18,8 +19,10 @@ public class HotelController {
     private final HotelService hotelService;
 
     @PostMapping
-    public ResponseEntity<HotelResponseDTO> create(@RequestBody HotelRequestDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(hotelService.createHotel(dto));
+    public ResponseEntity<HotelResponseDTO> create(
+            @RequestPart("data") HotelRequestDTO dto,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(hotelService.createHotel(dto, image));
     }
 
     @GetMapping("/approved")
@@ -42,10 +45,12 @@ public class HotelController {
         return ResponseEntity.ok(hotelService.getHotelsByCity(city));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<HotelResponseDTO> update(@PathVariable Long id,
-                                                   @RequestBody HotelRequestDTO dto) {
-        return ResponseEntity.ok(hotelService.updateHotel(id, dto));
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<HotelResponseDTO> update(
+            @PathVariable Long id,
+            @RequestPart("data") HotelRequestDTO dto,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        return ResponseEntity.ok(hotelService.updateHotel(id, dto, image));
     }
 
     @DeleteMapping("/{id}")

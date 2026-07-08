@@ -13,15 +13,19 @@ export interface Hotel {
   ownerId: number;
   locationName?: string;
   city?: string;
+  ownerName?: string;
 }
 
 export interface HotelRequest {
   hotelName: string;
   address: string;
   description: string;
-  pricePerNight: number;
+  pricePerNight?: number;
   rating: string;
-  foodAvailable: boolean;
-  foodServiceHours: string;
+  // image: string;
+  status: string;
+  foodAvailable?: boolean;
+  foodServiceHours?: string;
   locationId: number;
+  ownerId: number;
 }

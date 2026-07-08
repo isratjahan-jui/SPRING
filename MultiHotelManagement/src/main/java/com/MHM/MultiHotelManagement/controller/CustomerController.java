@@ -14,14 +14,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/customers")
 @RequiredArgsConstructor
-
+@CrossOrigin("*")
 public class CustomerController {
 
     private final CustomerService customerService;
 
     // ── Create (Register Customer) ──────────────────────────────
     // POST /api/customers
-    @PostMapping(consumes = {"multipart/form-data"})
+    @PostMapping
     public ResponseEntity<CustomerResponseDTO> create(
             @RequestPart("data") CustomerRequestDTO dto,
             @RequestPart(value = "image", required = false)

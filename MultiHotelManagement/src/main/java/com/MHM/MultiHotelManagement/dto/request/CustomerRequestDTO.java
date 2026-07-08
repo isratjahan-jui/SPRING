@@ -16,4 +16,6 @@ public class CustomerRequestDTO {
     private String address;
     private String gender;       // MALE / FEMALE / OTHER
     private String dateOfBirth;  // "1995-08-21" format
+    private String image;
+
 }

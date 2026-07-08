@@ -20,4 +20,6 @@ public class CustomerResponseDTO {
     private String gender;
     private String dateOfBirth;
     private String image;
+
+
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HotelOwner } from '../../../models/hotel-owner.model';
 import { HotelOwenerService } from '../../../services/hotel-owener-service';
@@ -11,8 +11,6 @@ import { HotelOwenerService } from '../../../services/hotel-owener-service';
   styleUrl: './add-hotel-owner-component.css',
 })
 export class AddHotelOwnerComponent {
-
-
   owner: HotelOwner = {
     name: '',
     email: '',
@@ -21,35 +19,45 @@ export class AddHotelOwnerComponent {
     gender: '',
     dateOfBirth: '',
     image: '',
-    password: ''
+    password: '',
   };
 
   confirmPassword: string = '';
+  selectedImage?: File;
+  preview: string | ArrayBuffer | null = null;
 
-  constructor(private ownerService: HotelOwenerService) { }
+  constructor(private ownerService: HotelOwenerService) {}
+
+  onFileSelected(event: any): void {
+    if (event.target.files && event.target.files.length > 0) {
+      this.selectedImage = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.preview = reader.result;
+      };
+      reader.readAsDataURL(this.selectedImage!);
+    }
+  }
 
   saveOwner() {
-
     if (this.owner.password !== this.confirmPassword) {
       alert('Password and Confirm Password do not match.');
       return;
     }
 
-    this.ownerService.createOwner(this.owner).subscribe({
+    this.ownerService.createOwner(this.owner, this.selectedImage).subscribe({
       next: () => {
         alert('Hotel Owner Created Successfully');
         this.resetForm();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error(err);
-        alert('Failed to Create Hotel Owner');
-      }
+        alert(err.error?.message || 'Failed to Create Hotel Owner');
+      },
     });
-
   }
 
   resetForm() {
-
     this.owner = {
       name: '',
       email: '',
@@ -58,13 +66,10 @@ export class AddHotelOwnerComponent {
       gender: '',
       dateOfBirth: '',
       image: '',
-      password: ''
+      password: '',
     };
-
     this.confirmPassword = '';
+    this.selectedImage = undefined;
+    this.preview = null;
   }
-
-
-
-
 }

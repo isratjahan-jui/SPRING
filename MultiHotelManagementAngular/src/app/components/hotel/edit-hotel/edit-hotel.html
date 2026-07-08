@@ -1,0 +1,14 @@
+<div class="container mt-4">
+  <h2>Edit Hotel</h2>
+  <form (ngSubmit)="updateHotel()">
+    <input [(ngModel)]="hotel.hotelName" name="hotelName" placeholder="Hotel Name" class="form-control mb-2" required>
+    <input [(ngModel)]="hotel.address" name="address" placeholder="Address" class="form-control mb-2" required>
+    <textarea [(ngModel)]="hotel.description" name="description" placeholder="Description" class="form-control mb-2"></textarea>
+    <input [(ngModel)]="hotel.pricePerNight" name="pricePerNight" type="number" placeholder="Price per night" class="form-control mb-2">
+    <input [(ngModel)]="hotel.rating" name="rating" placeholder="Rating" class="form-control mb-2">
+    <label><input type="checkbox" [(ngModel)]="hotel.foodAvailable" name="foodAvailable"> Food Available</label>
+    <input [(ngModel)]="hotel.foodServiceHours" name="foodServiceHours" placeholder="Food Service Hours" class="form-control mb-2">
+    <input [(ngModel)]="hotel.locationId" name="locationId" type="number" placeholder="Location ID" class="form-control mb-2">
+    <button type="submit" class="btn btn-primary">Update</button>
+  </form>
+</div>

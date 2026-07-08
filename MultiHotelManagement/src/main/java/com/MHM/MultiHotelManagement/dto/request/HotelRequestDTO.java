@@ -9,10 +9,7 @@ public class HotelRequestDTO {
     private String description;
     private String rating;
     private String image;
-    private String status;   // Enum string value
+    private String status;
     private Long locationId;
     private Long ownerId;
-
-
-
 }

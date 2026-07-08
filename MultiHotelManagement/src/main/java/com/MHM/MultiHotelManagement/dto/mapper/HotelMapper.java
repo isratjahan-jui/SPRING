@@ -3,7 +3,6 @@ package com.MHM.MultiHotelManagement.dto.mapper;
 import com.MHM.MultiHotelManagement.dto.request.HotelRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.HotelResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Hotel;
-import com.MHM.MultiHotelManagement.enums.HotelStatus;
 
 public class HotelMapper {
 
@@ -15,14 +14,11 @@ public class HotelMapper {
         dto.setDescription(hotel.getDescription());
         dto.setRating(hotel.getRating());
         dto.setImage(hotel.getImage());
-        dto.setStatus(hotel.getStatus().name());
+        dto.setStatus(hotel.getStatus() != null ? hotel.getStatus().name() : null);
         dto.setLocationId(hotel.getLocation() != null ? hotel.getLocation().getId() : null);
         dto.setOwnerId(hotel.getOwner() != null ? hotel.getOwner().getId() : null);
-
-        // নতুন ফিল্ড সেট করা
         dto.setLocationName(hotel.getLocation() != null ? hotel.getLocation().getLocationName() : null);
         dto.setOwnerName(hotel.getOwner() != null ? hotel.getOwner().getName() : null);
-
         return dto;
     }
 
@@ -33,7 +29,9 @@ public class HotelMapper {
         hotel.setDescription(dto.getDescription());
         hotel.setRating(dto.getRating());
         hotel.setImage(dto.getImage());
-        hotel.setStatus(HotelStatus.valueOf(dto.getStatus()));
+        if (dto.getStatus() != null) {
+            hotel.setStatus(com.MHM.MultiHotelManagement.enums.HotelStatus.valueOf(dto.getStatus()));
+        }
         return hotel;
     }
 }

@@ -3,12 +3,11 @@ package com.MHM.MultiHotelManagement.controller;
 import com.MHM.MultiHotelManagement.dto.request.HotelOwnerRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.HotelOwnerResponseDTO;
 import com.MHM.MultiHotelManagement.service.HotelOwnerService;
-import com.MHM.MultiHotelManagement.service.HotelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -19,10 +18,11 @@ public class HotelOwnerController {
 
     private final HotelOwnerService ownerService;
 
-
     @PostMapping
-    public ResponseEntity<HotelOwnerResponseDTO> create(@RequestBody HotelOwnerRequestDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ownerService.createOwner(dto));
+    public ResponseEntity<HotelOwnerResponseDTO> create(
+            @RequestPart("data") HotelOwnerRequestDTO dto,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ownerService.createOwner(dto, image));
     }
 
     @GetMapping("/{id}")
@@ -35,10 +35,12 @@ public class HotelOwnerController {
         return ResponseEntity.ok(ownerService.getOwnerByUserId(userId));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<HotelOwnerResponseDTO> update(@PathVariable Long id,
-                                                        @RequestBody HotelOwnerRequestDTO dto) {
-        return ResponseEntity.ok(ownerService.updateOwner(id, dto));
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<HotelOwnerResponseDTO> update(
+            @PathVariable Long id,
+            @RequestPart("data") HotelOwnerRequestDTO dto,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        return ResponseEntity.ok(ownerService.updateOwner(id, dto, image));
     }
 
     @DeleteMapping("/{id}")
@@ -46,7 +48,6 @@ public class HotelOwnerController {
         ownerService.deleteOwner(id);
         return ResponseEntity.ok("HotelOwner deleted successfully");
     }
-
 
     @GetMapping
     public ResponseEntity<List<HotelOwnerResponseDTO>> getAllOwners() {
