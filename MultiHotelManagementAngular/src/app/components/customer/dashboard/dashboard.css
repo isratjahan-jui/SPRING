@@ -1,0 +1,61 @@
+.dashboard-container {
+  padding: 24px;
+}
+.dashboard-header h1 {
+  margin: 0 0 4px;
+  font-size: 24px;
+}
+.dashboard-header p {
+  color: #6c757d;
+  margin: 0 0 24px;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.stat-card {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.stat-icon {
+  font-size: 32px;
+}
+.stat-info h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #6c757d;
+}
+.stat-value {
+  margin: 4px 0 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+.quick-actions h2 {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+.action-btn {
+  display: block;
+  text-align: center;
+  padding: 12px;
+  background: #ffc107;
+  color: #000;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+}
+.action-btn:hover {
+  background: #ffca2c;
+}

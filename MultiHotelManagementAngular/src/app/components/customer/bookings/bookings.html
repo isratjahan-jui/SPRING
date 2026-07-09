@@ -1,0 +1,39 @@
+<div class="container mt-4">
+  <h2>My Bookings</h2>
+  @if (loading) {
+    <p class="text-muted">Loading...</p>
+  } @else if (bookings.length === 0) {
+    <p class="text-muted">
+      No bookings yet. <a routerLink="/hotels">Browse hotels</a> to book your stay.
+    </p>
+  } @else {
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Hotel</th>
+          <th>Room</th>
+          <th>Check-in</th>
+          <th>Check-out</th>
+          <th>Guests</th>
+          <th>Amount</th>
+          <th>Due</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (b of bookings; track b.id) {
+          <tr>
+            <td>{{ b.hotelName }}</td>
+            <td>{{ b.roomType }}</td>
+            <td>{{ b.checkInDate }}</td>
+            <td>{{ b.checkOutDate }}</td>
+            <td>{{ b.totalGuests }}</td>
+            <td>৳{{ b.totalAmount }}</td>
+            <td>৳{{ b.dueAmount }}</td>
+            <td>{{ b.status }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

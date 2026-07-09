@@ -1,0 +1,66 @@
+<div class="container mt-4">
+  <h2>Support Tickets</h2>
+
+  <button class="btn btn-primary mb-3" (click)="showForm = !showForm">
+    {{ showForm ? 'Cancel' : 'New Ticket' }}
+  </button>
+
+  @if (showForm) {
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="mb-2">
+          <label class="form-label">Subject</label>
+          <input class="form-control" [(ngModel)]="newTicket.subject" placeholder="Brief subject" />
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Description</label>
+          <textarea
+            class="form-control"
+            [(ngModel)]="newTicket.description"
+            rows="3"
+            placeholder="Describe your issue"
+          ></textarea>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Priority</label>
+          <select class="form-control" [(ngModel)]="newTicket.priority">
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+            <option value="URGENT">Urgent</option>
+          </select>
+        </div>
+        <button class="btn btn-success" (click)="submitTicket()">Submit</button>
+      </div>
+    </div>
+  }
+
+  @if (loading) {
+    <p class="text-muted">Loading...</p>
+  } @else if (tickets.length === 0) {
+    <p class="text-muted">No support tickets yet.</p>
+  } @else {
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Subject</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (t of tickets; track t.id) {
+          <tr>
+            <td>{{ t.id }}</td>
+            <td>{{ t.subject }}</td>
+            <td>{{ t.priority }}</td>
+            <td>{{ t.status }}</td>
+            <td>{{ t.createdAt }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

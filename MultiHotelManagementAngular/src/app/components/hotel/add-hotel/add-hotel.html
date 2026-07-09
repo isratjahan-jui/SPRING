@@ -38,16 +38,23 @@
       <label class="form-label">Hotel Image</label>
       <input type="file" class="form-control" accept="image/*" (change)="onFileSelected($event)" />
     </div>
-    <div class="mb-2 text-center" *ngIf="preview">
-      <img [src]="preview" class="img-thumbnail mt-2" width="200" />
-    </div>
+    @if (preview) {
+      <div class="mb-2 text-center">
+        <img [src]="preview" class="img-thumbnail mt-2" width="200" />
+      </div>
+    }
     <div class="mb-2">
       <label class="form-label">Location</label>
+      @if (locations.length === 0) {
+        <div class="alert alert-warning">
+          No locations available. Please add locations first via the backend API.
+        </div>
+      }
       <select [(ngModel)]="hotel.locationId" name="locationId" class="form-select" required>
         <option [ngValue]="0" disabled>Select Location</option>
-        <option *ngFor="let loc of locations" [ngValue]="loc.id">
-          {{ loc.locationName }} - {{ loc.city }}
-        </option>
+        @for (loc of locations; track loc.id) {
+          <option [ngValue]="loc.id">{{ loc.locationName }} - {{ loc.city }}</option>
+        }
       </select>
     </div>
     <button type="submit" class="btn btn-success" [disabled]="!hotel.locationId">Save</button>

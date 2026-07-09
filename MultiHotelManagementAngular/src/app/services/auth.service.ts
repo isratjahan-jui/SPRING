@@ -7,7 +7,6 @@ import { LoginRequest, LoginResponse, RegisterRequest, User } from '../models/au
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-
   private API_URL = environment.apiUrl;
 
   private readonly TOKEN_KEY = 'auth_token';
@@ -23,7 +22,10 @@ export class AuthService {
   readonly userId = computed(() => this.#user()?.userId ?? null);
   readonly userName = computed(() => this.#user()?.name ?? null);
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+  ) {}
 
   login(data: LoginRequest) {
     return this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, data);
@@ -42,12 +44,20 @@ export class AuthService {
   }
 
   resetPassword(token: string, newPassword: string) {
-    return this.http.post<{ message: string }>(`${this.API_URL}/auth/reset-password`, { token, newPassword });
+    return this.http.post<{ message: string }>(`${this.API_URL}/auth/reset-password`, {
+      token,
+      newPassword,
+    });
   }
 
   setSession(response: LoginResponse) {
     localStorage.setItem(this.TOKEN_KEY, response.token);
     localStorage.setItem(this.USER_KEY, JSON.stringify(response));
+    localStorage.setItem('token', response.token);
+    localStorage.setItem('role', response.role);
+    localStorage.setItem('userId', response.userId.toString());
+    if (response.ownerId) localStorage.setItem('ownerId', response.ownerId.toString());
+    if (response.hotelId) localStorage.setItem('hotelId', response.hotelId.toString());
     this.#token.set(response.token);
     this.#user.set(response);
   }
@@ -55,6 +65,11 @@ export class AuthService {
   logout() {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('ownerId');
+    localStorage.removeItem('hotelId');
     this.#token.set(null);
     this.#user.set(null);
     this.router.navigate(['/login']);

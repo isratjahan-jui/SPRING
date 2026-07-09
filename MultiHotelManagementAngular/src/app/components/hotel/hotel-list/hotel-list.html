@@ -1,18 +1,42 @@
 <div class="container mt-4">
-  <h2>Approved Hotels</h2>
-  <button routerLink="/hotels/add" class="btn btn-success mb-3">Add Hotel</button>
+  <h2>All Hotels</h2>
   <div class="row">
-    <div class="col-md-4" *ngFor="let hotel of hotels">
-      <div class="card mb-3">
-        <img [src]="hotel.image" class="card-img-top" alt="{{hotel.hotelName}}">
-        <div class="card-body">
-          <h5 class="card-title">{{hotel.hotelName}}</h5>
-          <p>{{hotel.address}}</p>
-          <p>৳{{hotel.pricePerNight}} / night</p>
-          <button routerLink="/hotels/edit/{{hotel.id}}" class="btn btn-primary btn-sm">Edit</button>
-          <button (click)="deleteHotel(hotel.id)" class="btn btn-danger btn-sm">Delete</button>
+    @for (hotel of hotels; track hotel.id) {
+      <div class="col-md-4 mb-3">
+        <div class="card h-100">
+          @if (hotel.image) {
+            <img
+              [src]="'http://localhost:8085/hotel/' + hotel.image"
+              class="card-img-top"
+              alt="{{ hotel.hotelName }}"
+              style="height: 180px; object-fit: cover"
+            />
+          }
+          <div class="card-body">
+            <h5 class="card-title">{{ hotel.hotelName }}</h5>
+            <p class="card-text text-muted">{{ hotel.address }}</p>
+            @if (hotel.locationName) {
+              <p class="card-text">
+                <small class="text-muted">{{ hotel.locationName }}</small>
+              </p>
+            }
+            <a [routerLink]="['/hotels', hotel.id]" class="btn btn-sm btn-outline-primary mt-2"
+              >View Details</a
+            >
+            <span
+              class="badge bg-{{
+                hotel.status === 'APPROVED'
+                  ? 'success'
+                  : hotel.status === 'REJECTED'
+                    ? 'danger'
+                    : 'warning'
+              }}"
+            >
+              {{ hotel.status }}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+    }
   </div>
 </div>

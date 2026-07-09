@@ -1,17 +1,14 @@
-import { Component, importProvidersFrom, inject, signal } from '@angular/core';
-import { Router, RouterOutlet, NavigationEnd, provideRouter } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { Header } from './components/shared/header/header';
 import { Footer } from './components/shared/footer/footer';
-import { FormsModule } from '@angular/forms';
+import { Sidebar } from './components/shared/sidebar/sidebar';
 import { filter, map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { bootstrapApplication } from '@angular/platform-browser';
-import { routes } from './app.routes';
-import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, FormsModule, Header, Footer],
+  imports: [RouterOutlet, Header, Footer, Sidebar],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
@@ -28,19 +25,14 @@ export class App {
     '/register/hotel-owner',
   ];
 
-  showDashboardLayout = toSignal(
+  showPublicLayout = toSignal(
     this.router.events.pipe(
       filter((e) => e instanceof NavigationEnd),
       map((e: NavigationEnd) => {
         const url = e.urlAfterRedirects || e.url;
-        return !this.publicPaths.includes(url);
+        return this.publicPaths.includes(url) || url.startsWith('/hotels');
       }),
     ),
-    { initialValue: false },
+    { initialValue: true },
   );
 }
-// 🔥 এখানে একই ফাইল থেকে bootstrap করা হচ্ছ
-
-bootstrapApplication(App, {
-  providers: [provideRouter(routes), importProvidersFrom(HttpClientModule, FormsModule)],
-});

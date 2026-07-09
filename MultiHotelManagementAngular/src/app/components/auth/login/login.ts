@@ -4,78 +4,52 @@ import { AuthService } from '../../../services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
-
 @Component({
-    selector: 'app-login',
+  selector: 'app-login',
   standalone: true,
-  imports: [CommonModule,FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.html',
-  styleUrls: ['./login.css']
-  
+  styleUrls: ['./login.css'],
 })
 export class LoginComponent {
-
   loginData = {
-
     email: '',
-    password: ''
-
+    password: '',
   };
 
   constructor(
     private auth: AuthService,
-    private router: Router
-  ) { }
+    private router: Router,
+  ) {}
 
   login() {
-
     this.auth.login(this.loginData).subscribe({
-
       next: (res) => {
-
-        localStorage.setItem("token", res.token);
-        localStorage.setItem("role", res.role);
-        localStorage.setItem("userId", res.userId.toString());
-
-        if (res.ownerId) {
-          localStorage.setItem("ownerId", res.ownerId.toString());
-        }
-
-        if (res.hotelId) {
-          localStorage.setItem("hotelId", res.hotelId.toString());
-        }
+        this.auth.setSession(res);
 
         switch (res.role) {
-
           case 'ADMIN':
-            this.router.navigate(['/admin-dashboard']);
+            this.router.navigate(['/admin']);
             break;
 
           case 'HOTEL_OWNER':
-            this.router.navigate(['/owner-dashboard']);
+            this.router.navigate(['/owner']);
             break;
 
           case 'CUSTOMER':
-            this.router.navigate(['/customer-dashboard']);
+            this.router.navigate(['/customer']);
             break;
 
           default:
             this.router.navigate(['/']);
-
         }
-
       },
 
-      error: err => {
-
-        alert("Invalid Email or Password");
+      error: (err) => {
+        alert('Invalid Email or Password');
 
         console.log(err);
-
-      }
-
+      },
     });
-
   }
-
 }

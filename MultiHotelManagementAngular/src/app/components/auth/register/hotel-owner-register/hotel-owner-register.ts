@@ -1,16 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HotelOwner } from '../../../models/hotel-owner.model';
-import { HotelOwenerService } from '../../../services/hotel-owener-service';
+import { HotelOwnerService } from '../../../../services/hotel-owner.service';
+import { HotelOwner } from '../../../../models/hotel-owner.model';
 
 @Component({
-  selector: 'app-add-hotel-owner-component',
+  selector: 'app-hotel-owner-register',
   imports: [CommonModule, FormsModule],
-  templateUrl: './add-hotel-owner-component.html',
-  styleUrl: './add-hotel-owner-component.css',
+  templateUrl: './hotel-owner-register.html',
+  styleUrl: './hotel-owner-register.css',
 })
-export class AddHotelOwnerComponent {
+export class HotelOwnerRegister {
   owner: HotelOwner = {
     name: '',
     email: '',
@@ -26,7 +26,7 @@ export class AddHotelOwnerComponent {
   selectedImage?: File;
   preview: string | ArrayBuffer | null = null;
 
-  constructor(private ownerService: HotelOwenerService) {}
+  constructor(private ownerService: HotelOwnerService) {}
 
   onFileSelected(event: any): void {
     if (event.target.files && event.target.files.length > 0) {
