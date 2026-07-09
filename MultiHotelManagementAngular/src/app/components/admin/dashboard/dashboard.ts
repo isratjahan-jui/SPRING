@@ -12,12 +12,14 @@ import { RouterLink } from '@angular/router';
   styleUrl: './dashboard.css',
 })
 export class AdminDashboard implements OnInit {
+
+
   private auth = inject(AuthService);
   private ownerService = inject(HotelOwnerService);
   private customerService = inject(CustomerService);
   private hotelService = inject(HotelService);
 
-  userName = this.auth.userName;
+  userName = "";
   ownerCount = 0;
   customerCount = 0;
   approvedHotelCount = 0;

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { LoginRequest } from '../../../models/auth.model';
 
 @Component({
   selector: 'app-login',
@@ -11,45 +12,38 @@ import { CommonModule } from '@angular/common';
   templateUrl: './login.html',
   styleUrls: ['./login.css'],
 })
-export class LoginComponent {
-  loginData = {
-    email: '',
-    password: '',
-  };
+export class Login {
 
-  constructor(
-    private auth: AuthService,
-    private router: Router,
-  ) {}
+  dto: LoginRequest = { email: '', password: '' };
 
-  login() {
-    this.auth.login(this.loginData).subscribe({
-      next: (res) => {
-        this.auth.setSession(res);
+  showPassword = false;
+  loading = false;
+  errorMessage: string | null = null;
 
-        switch (res.role) {
-          case 'ADMIN':
-            this.router.navigate(['/admin']);
-            break;
+  constructor(private auth: AuthService, private router: Router) { }
 
-          case 'HOTEL_OWNER':
-            this.router.navigate(['/owner']);
-            break;
 
-          case 'CUSTOMER':
-            this.router.navigate(['/customer']);
-            break;
+  login(): void {
+    this.loading = true;
+    this.errorMessage = null;
 
-          default:
-            this.router.navigate(['/']);
-        }
+    this.auth.login(this.dto).subscribe({
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/dashboard']);
       },
-
       error: (err) => {
-        alert('Invalid Email or Password');
-
-        console.log(err);
-      },
+        this.loading = false;
+        this.errorMessage =
+          err.status === 401
+            ? 'Invalid email or password.'
+            : err.status === 403
+              ? 'Your account is not verified or has been disabled.'
+              : 'Something went wrong. Please try again.';
+      }
     });
   }
+
+
+
 }

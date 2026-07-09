@@ -11,8 +11,8 @@ import { AuthService } from '../../../services/auth.service';
 export class Header {
   private auth = inject(AuthService);
   isLoggedIn = this.auth.isLoggedIn;
-  role = this.auth.role;
-  userName = this.auth.userName;
+  role = this.auth.getRole();
+  userName = this.auth.getUser()?.email;
 
   logout() {
     this.auth.logout();

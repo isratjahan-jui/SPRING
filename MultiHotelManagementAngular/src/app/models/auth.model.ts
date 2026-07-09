@@ -22,9 +22,20 @@ export interface LoginResponse {
   name: string;
   email: string;
   phone: string;
-  role: string;
+ 
+  role: 'ADMIN' | 'HOTEL_OWNER' | 'CUSTOMER';
   hotelId?: number;
   hotelName?: string;
   ownerId?: number;
   ownerName?: string;
+}
+
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
 }

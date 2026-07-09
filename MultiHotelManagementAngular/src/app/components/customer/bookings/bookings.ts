@@ -21,7 +21,7 @@ export class CustomerBookings implements OnInit {
   loading = true;
 
   ngOnInit() {
-    const userId = this.auth.userId();
+    const userId = 1;
     if (userId) {
       this.customerService.getCustomerByUserId(userId).subscribe({
         next: (customer) => {

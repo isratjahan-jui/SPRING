@@ -3,7 +3,7 @@ import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/ro
 import { AuthService } from '../../../services/auth.service';
 import { filter, map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { NgClass } from '@angular/common';
+
 
 @Component({
   selector: 'app-sidebar',
@@ -12,11 +12,12 @@ import { NgClass } from '@angular/common';
   styleUrl: './sidebar.css',
 })
 export class Sidebar {
+  
   private auth = inject(AuthService);
   private router = inject(Router);
-  role = this.auth.role;
+  role = this.auth.getRole;
   isLoggedIn = this.auth.isLoggedIn;
-  userName = this.auth.userName;
+  userName = this.auth.getUser()?.email;
 
   currentRole = toSignal(
     this.router.events.pipe(
@@ -26,10 +27,11 @@ export class Sidebar {
         if (url.startsWith('/admin')) return 'ADMIN';
         if (url.startsWith('/owner')) return 'HOTEL_OWNER';
         if (url.startsWith('/customer')) return 'CUSTOMER';
-        return this.role();
+        console.log(url);
+        return this.role;
       }),
     ),
-    { initialValue: this.role() ?? this.#detectRoleFromUrl() },
+    { initialValue: this.role ?? this.#detectRoleFromUrl() },
   );
 
   #detectRoleFromUrl(): string | null {

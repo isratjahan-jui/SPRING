@@ -1,90 +1,92 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable } from '@angular/core';
+
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-
+import { StorageService } from './storage.service';
+import { ForgotPasswordRequest, LoginRequest, LoginResponse, ResetPasswordRequest } from '../models/auth.model';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environments';
-import { LoginRequest, LoginResponse, RegisterRequest, User } from '../models/auth.model';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root',
+})
 export class AuthService {
-  private API_URL = environment.apiUrl;
 
-  private readonly TOKEN_KEY = 'auth_token';
-  private readonly USER_KEY = 'auth_user';
-
-  readonly #token = signal<string | null>(localStorage.getItem(this.TOKEN_KEY));
-  readonly #user = signal<LoginResponse | null>(this.#getStoredUser());
-
-  readonly token = this.#token.asReadonly();
-  readonly user = this.#user.asReadonly();
-  readonly isLoggedIn = computed(() => !!this.#token());
-  readonly role = computed(() => this.#user()?.role ?? null);
-  readonly userId = computed(() => this.#user()?.userId ?? null);
-  readonly userName = computed(() => this.#user()?.name ?? null);
+ private apiUrl = environment.apiUrl + 'auth';
 
   constructor(
     private http: HttpClient,
-    private router: Router,
-  ) {}
+    private storage: StorageService,
+    private router: Router
+  ) { }
 
-  login(data: LoginRequest) {
-    return this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, data);
+
+    // ── Login ────────────────────────────────────────────
+
+  login(dto: LoginRequest): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${this.apiUrl}/login`, dto)
+      .pipe(
+        tap(res => this.storage.saveSession(res))
+      );
   }
 
-  register(data: RegisterRequest) {
-    return this.http.post<{ message: string }>(`${this.API_URL}/auth/register`, data);
-  }
 
-  verifyEmail(token: string) {
-    return this.http.get<{ message: string }>(`${this.API_URL}/auth/verify`, { params: { token } });
-  }
+    // ── Logout ───────────────────────────────────────────
 
-  forgotPassword(email: string) {
-    return this.http.post<{ message: string }>(`${this.API_URL}/auth/forgot-password`, { email });
-  }
-
-  resetPassword(token: string, newPassword: string) {
-    return this.http.post<{ message: string }>(`${this.API_URL}/auth/reset-password`, {
-      token,
-      newPassword,
-    });
-  }
-
-  setSession(response: LoginResponse) {
-    localStorage.setItem(this.TOKEN_KEY, response.token);
-    localStorage.setItem(this.USER_KEY, JSON.stringify(response));
-    localStorage.setItem('token', response.token);
-    localStorage.setItem('role', response.role);
-    localStorage.setItem('userId', response.userId.toString());
-    if (response.ownerId) localStorage.setItem('ownerId', response.ownerId.toString());
-    if (response.hotelId) localStorage.setItem('hotelId', response.hotelId.toString());
-    this.#token.set(response.token);
-    this.#user.set(response);
-  }
-
-  logout() {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('ownerId');
-    localStorage.removeItem('hotelId');
-    this.#token.set(null);
-    this.#user.set(null);
+  logout(): void {
+    this.storage.clearSession();
     this.router.navigate(['/login']);
   }
 
-  getToken() {
-    return this.#token();
+
+    // ── Forgot Password ──────────────────────────────────
+
+  forgotPassword(dto: ForgotPasswordRequest): Observable<string> {
+    return this.http.post(
+      `${this.apiUrl}/forgot-password`,
+      dto,
+      { responseType: 'text' }
+    );
   }
 
-  #getStoredUser(): LoginResponse | null {
-    try {
-      const u = localStorage.getItem(this.USER_KEY);
-      return u ? JSON.parse(u) : null;
-    } catch {
-      return null;
-    }
+
+    // ── Reset Password ───────────────────────────────────
+
+  resetPassword(dto: ResetPasswordRequest): Observable<string> {
+    return this.http.post(
+      `${this.apiUrl}/reset-password`,
+      dto,
+      { responseType: 'text' }
+    );
   }
+
+
+  // ── Verify Email ─────────────────────────────────────
+
+  verifyEmail(token: string): Observable<string> {
+    return this.http.get(
+      `${this.apiUrl}/verify-email`,
+      { params: { token }, responseType: 'text' }
+    );
+  }
+
+
+   // ── Helpers ──────────────────────────────────────────
+
+  isLoggedIn(): boolean       { return this.storage.isLoggedIn(); }
+  getRole(): string | null    { return this.storage.getRole(); }
+  getUser(): LoginResponse | null { return this.storage.getUser(); }
+
+  
+
+
+
+
+
+
+
+
+
+
 }

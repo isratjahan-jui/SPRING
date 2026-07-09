@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { HotelRequest } from '../../../models/hotel.model';
 import { HotelService } from '../../../services/hotel.service';
 import { LocationService } from '../../../services/location.service';
@@ -14,6 +14,8 @@ import { Location } from '../../../models/location.model';
   styleUrl: './add-hotel.css',
 })
 export class AddHotel implements OnInit {
+
+
   hotel: HotelRequest = {
     hotelName: '',
     address: '',
@@ -32,6 +34,7 @@ export class AddHotel implements OnInit {
     private hotelService: HotelService,
     private locationService: LocationService,
     private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -43,13 +46,17 @@ export class AddHotel implements OnInit {
     this.locationService.getAll().subscribe({
       next: (data) => {
         this.locations = data;
+        
         if (data.length > 0 && !this.hotel.locationId) {
           this.hotel.locationId = data[0].id;
         }
+        console.log(this.locations)
+
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load locations', err);
-        alert('Failed to load locations. Make sure the backend is running on port 8085.');
+       
       },
     });
   }

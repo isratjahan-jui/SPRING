@@ -8,6 +8,7 @@ import { environment } from '../../environments/environments';
   providedIn: 'root',
 })
 export class HotelOwnerService {
+  
   private apiUrl = environment.apiUrl + 'hotel-owners';
 
   constructor(private http: HttpClient) {}

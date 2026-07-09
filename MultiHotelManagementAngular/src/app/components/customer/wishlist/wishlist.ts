@@ -13,6 +13,8 @@ import { WishlistResponse } from '../../../models/wishlist.model';
   styleUrl: './wishlist.css',
 })
 export class CustomerWishlist implements OnInit {
+
+
   private auth = inject(AuthService);
   private customerService = inject(CustomerService);
   private wishlistService = inject(WishlistService);
@@ -21,7 +23,9 @@ export class CustomerWishlist implements OnInit {
   loading = true;
 
   ngOnInit() {
-    const userId = this.auth.userId();
+
+    const userId = 1;
+    
     if (userId) {
       this.customerService.getCustomerByUserId(userId).subscribe({
         next: (customer) => {

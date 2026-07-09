@@ -27,7 +27,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity          // enables @PreAuthorize on controllers
+//@EnableMethodSecurity          // enables @PreAuthorize on controllers
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -52,7 +52,8 @@ public class SecurityConfig {
                                 "/api/auth/verify",
                                 "/api/auth/forgot-password",
                                 "/api/auth/reset-password",
-                                "/**"
+                                "/**",
+                                "/api/auth/**"
                         ).permitAll()
 
 //                        // Hotel Search APIs (public - regex for path variables)

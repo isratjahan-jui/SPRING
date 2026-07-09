@@ -53,7 +53,7 @@
       <select [(ngModel)]="hotel.locationId" name="locationId" class="form-select" required>
         <option [ngValue]="0" disabled>Select Location</option>
         @for (loc of locations; track loc.id) {
-          <option [ngValue]="loc.id">{{ loc.locationName }} - {{ loc.city }}</option>
+          <option [ngValue]="loc.id">{{ loc.locationName }}</option>
         }
       </select>
     </div>
