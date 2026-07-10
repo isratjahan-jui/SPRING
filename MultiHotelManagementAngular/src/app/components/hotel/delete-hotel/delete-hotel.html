@@ -1,0 +1,37 @@
+<div class="container mt-4">
+  <h2>Approved Hotels</h2>
+  <div class="row">
+    @for (hotel of hotels; track hotel.id) {
+      <div class="col-md-4 mb-3">
+        <div class="card h-100">
+          @if (hotel.image) {
+            <img
+              [src]="'http://localhost:8085/hotel/' + hotel.image"
+              class="card-img-top"
+              alt="{{ hotel.hotelName }}"
+              style="height: 180px; object-fit: cover"
+            />
+          }
+          <div class="card-body">
+            <h5 class="card-title">{{ hotel.hotelName }}</h5>
+            <p>{{ hotel.address }}</p>
+            <span
+              class="badge bg-{{
+                hotel.status === 'APPROVED'
+                  ? 'success'
+                  : hotel.status === 'REJECTED'
+                    ? 'danger'
+                    : 'warning'
+              }}"
+            >
+              {{ hotel.status }}
+            </span>
+            <button (click)="deleteHotel(hotel.id)" class="btn btn-danger btn-sm ms-2">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

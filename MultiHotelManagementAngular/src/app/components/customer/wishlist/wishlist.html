@@ -1,0 +1,27 @@
+<div class="container mt-4">
+  <h2>My Wishlist</h2>
+  @if (loading) {
+    <p class="text-muted">Loading...</p>
+  } @else if (items.length === 0) {
+    <p class="text-muted">
+      Your wishlist is empty. <a routerLink="/hotels">Browse hotels</a> to add your favorites.
+    </p>
+  } @else {
+    <div class="row">
+      @for (item of items; track item.id) {
+        <div class="col-md-4 mb-3">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">{{ item.hotelName }}</h5>
+              <p class="text-muted">{{ item.notes }}</p>
+              <a [routerLink]="['/hotels', item.hotelId]" class="btn btn-sm btn-primary"
+                >View Hotel</a
+              >
+              <button (click)="remove(item.id)" class="btn btn-sm btn-danger ms-1">Remove</button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
