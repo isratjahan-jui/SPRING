@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Room, RoomRequest } from '../../../models/room.model';
 import { Hotel } from '../../../models/hotel.model';
 import { RoomService } from '../../../services/room.service';
 import { HotelService } from '../../../services/hotel.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-owner-rooms',
@@ -22,6 +23,8 @@ export class OwnerRooms implements OnInit {
   selectedImage?: File;
   preview: string | ArrayBuffer | null = null;
   loading = false;
+  private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
 
   constructor(
     private roomService: RoomService,
@@ -29,10 +32,13 @@ export class OwnerRooms implements OnInit {
   ) {}
 
   ngOnInit() {
-    const ownerId = localStorage.getItem('ownerId');
+    const ownerId = this.authService.getUser()?.ownerId;
     if (ownerId) {
-      this.hotelService.getByOwner(Number(ownerId)).subscribe({
-        next: (data) => (this.hotels = data),
+      this.hotelService.getByOwner(ownerId).subscribe({
+        next: (data) => {
+          this.hotels = data;
+          this.cdr.markForCheck();
+        },
         error: () => alert('Failed to load hotels'),
       });
     }
@@ -57,7 +63,10 @@ export class OwnerRooms implements OnInit {
     this.showForm = false;
     if (this.selectedHotelId) {
       this.roomService.getByHotel(this.selectedHotelId).subscribe({
-        next: (data) => (this.rooms = data),
+        next: (data) => {
+          this.rooms = data;
+          this.cdr.markForCheck();
+        },
         error: () => alert('Failed to load rooms'),
       });
     }

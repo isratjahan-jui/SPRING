@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Gallery, GalleryRequest } from '../../../models/gallery.model';
 import { Hotel } from '../../../models/hotel.model';
 import { GalleryService } from '../../../services/gallery.service';
 import { HotelService } from '../../../services/hotel.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-owner-gallery',
@@ -22,6 +23,8 @@ export class OwnerGallery implements OnInit {
   selectedImage?: File;
   preview: string | ArrayBuffer | null = null;
   loading = false;
+  private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
 
   constructor(
     private galleryService: GalleryService,
@@ -29,10 +32,13 @@ export class OwnerGallery implements OnInit {
   ) {}
 
   ngOnInit() {
-    const ownerId = localStorage.getItem('ownerId');
+    const ownerId = this.authService.getUser()?.ownerId;
     if (ownerId) {
-      this.hotelService.getByOwner(Number(ownerId)).subscribe({
-        next: (data) => (this.hotels = data),
+      this.hotelService.getByOwner(ownerId).subscribe({
+        next: (data) => {
+          this.hotels = data;
+          this.cdr.markForCheck();
+        },
         error: () => alert('Failed to load hotels'),
       });
     }
@@ -47,7 +53,10 @@ export class OwnerGallery implements OnInit {
     this.showForm = false;
     if (this.selectedHotelId) {
       this.galleryService.getByHotel(this.selectedHotelId).subscribe({
-        next: (data) => (this.galleryItems = data),
+        next: (data) => {
+          this.galleryItems = data;
+          this.cdr.markForCheck();
+        },
         error: () => alert('Failed to load gallery'),
       });
     }

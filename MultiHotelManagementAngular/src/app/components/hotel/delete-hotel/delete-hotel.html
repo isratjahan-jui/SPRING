@@ -1,4 +1,29 @@
 <div class="container mt-4">
+
+  <h2>Pending Hotels</h2>
+  @if (pendingHotels.length === 0) {
+    <p>No pending hotels.</p>
+  }
+  <div class="row">
+    @for (hotel of pendingHotels; track hotel.id) {
+      <div class="col-md-4 mb-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5>{{ hotel.hotelName }}</h5>
+            <p>{{ hotel.address }}</p>
+            <span class="badge bg-warning">PENDING</span>
+            <button (click)="approveHotel(hotel.id)" class="btn btn-success btn-sm">Approve</button>
+            <button (click)="rejectHotel(hotel.id)" class="btn btn-danger btn-sm">Reject</button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+
+  
+
+
   <h2>Approved Hotels</h2>
   <div class="row">
     @for (hotel of hotels; track hotel.id) {

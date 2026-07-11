@@ -4,7 +4,6 @@ import { AuthService } from '../../../services/auth.service';
 import { filter, map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-
 @Component({
   selector: 'app-sidebar',
   imports: [RouterLink, RouterLinkActive],
@@ -12,11 +11,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
   styleUrl: './sidebar.css',
 })
 export class Sidebar {
-  
   private auth = inject(AuthService);
   private router = inject(Router);
-  role = this.auth.getRole;
-  isLoggedIn = this.auth.isLoggedIn;
+  role = () => this.auth.getRole();
+  isLoggedIn = () => this.auth.isLoggedIn();
   userName = this.auth.getUser()?.email;
 
   currentRole = toSignal(

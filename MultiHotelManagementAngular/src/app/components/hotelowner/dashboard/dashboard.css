@@ -28,3 +28,16 @@ h2{
 label{
     margin-bottom:5px;
 }
+
+
+
+.card a {
+  text-decoration: none;
+}
+.card a:hover {
+  text-decoration: underline;
+  color: #ffc107; /* hover এ হলুদ */
+}
+
+
+

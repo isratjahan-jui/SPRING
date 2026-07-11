@@ -27,18 +27,18 @@
               <select [(ngModel)]="form.locationId" name="locationId" class="form-select" required>
                 <option [ngValue]="0" disabled>Select Location</option>
                 @for (loc of locations; track loc.id) {
-                  <option [ngValue]="loc.id">{{ loc.locationName }} - {{ loc.city }}</option>
+                  <option [ngValue]="loc.id">{{ loc.locationName }}</option>
                 }
               </select>
             </div>
-            <div class="col-md-6 mb-2">
+            <!-- <div class="col-md-6 mb-2">
               <label class="form-label">Status</label>
               <select [(ngModel)]="form.status" name="status" class="form-select">
                 <option value="PENDING_APPROVAL">Pending Approval</option>
                 <option value="APPROVED">Approved</option>
                 <option value="REJECTED">Rejected</option>
               </select>
-            </div>
+            </div> -->
             <div class="col-md-12 mb-2">
               <label class="form-label">Description</label>
               <textarea

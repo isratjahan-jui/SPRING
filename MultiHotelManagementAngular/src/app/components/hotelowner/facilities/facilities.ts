@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Facility, FacilityRequest } from '../../../models/facility.model';
 import { Hotel } from '../../../models/hotel.model';
 import { FacilityService } from '../../../services/facility.service';
 import { HotelService } from '../../../services/hotel.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-owner-facilities',
@@ -20,6 +21,8 @@ export class OwnerFacilities implements OnInit {
   editingId: number | null = null;
   form: FacilityRequest = this.emptyForm();
   loading = false;
+  private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
 
   constructor(
     private facilityService: FacilityService,
@@ -27,10 +30,13 @@ export class OwnerFacilities implements OnInit {
   ) {}
 
   ngOnInit() {
-    const ownerId = localStorage.getItem('ownerId');
+    const ownerId = this.authService.getUser()?.ownerId;
     if (ownerId) {
-      this.hotelService.getByOwner(Number(ownerId)).subscribe({
-        next: (data) => (this.hotels = data),
+      this.hotelService.getByOwner(ownerId).subscribe({
+        next: (data) => {
+          this.hotels = data;
+          this.cdr.markForCheck();
+        },
         error: () => alert('Failed to load hotels'),
       });
     }
@@ -45,7 +51,10 @@ export class OwnerFacilities implements OnInit {
     this.showForm = false;
     if (this.selectedHotelId) {
       this.facilityService.getByHotel(this.selectedHotelId).subscribe({
-        next: (data) => (this.facilities = data),
+        next: (data) => {
+          this.facilities = data;
+          this.cdr.markForCheck();
+        },
         error: () => alert('Failed to load facilities'),
       });
     }

@@ -6,10 +6,11 @@ import { KEYS, StorageService } from '../../../services/storage.service';
 import { HotelOwnerService } from '../../../services/hotel-owner.service';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../../environments/environments';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-owner-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule,RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })

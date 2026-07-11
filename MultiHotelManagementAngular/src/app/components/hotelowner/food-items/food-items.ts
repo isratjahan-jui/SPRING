@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FoodItem, FoodItemRequest } from '../../../models/food-item.model';
 import { Hotel } from '../../../models/hotel.model';
 import { FoodItemService } from '../../../services/food-item.service';
 import { HotelService } from '../../../services/hotel.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-owner-food-items',
@@ -20,6 +21,8 @@ export class OwnerFoodItems implements OnInit {
   editingId: number | null = null;
   form: FoodItemRequest = this.emptyForm();
   loading = false;
+  private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
 
   constructor(
     private foodItemService: FoodItemService,
@@ -27,10 +30,13 @@ export class OwnerFoodItems implements OnInit {
   ) {}
 
   ngOnInit() {
-    const ownerId = localStorage.getItem('ownerId');
+    const ownerId = this.authService.getUser()?.ownerId;
     if (ownerId) {
-      this.hotelService.getByOwner(Number(ownerId)).subscribe({
-        next: (data) => (this.hotels = data),
+      this.hotelService.getByOwner(ownerId).subscribe({
+        next: (data) => {
+          this.hotels = data;
+          this.cdr.markForCheck();
+        },
         error: () => alert('Failed to load hotels'),
       });
     }
@@ -45,7 +51,10 @@ export class OwnerFoodItems implements OnInit {
     this.showForm = false;
     if (this.selectedHotelId) {
       this.foodItemService.getByHotel(this.selectedHotelId).subscribe({
-        next: (data) => (this.foodItems = data),
+        next: (data) => {
+          this.foodItems = data;
+          this.cdr.markForCheck();
+        },
         error: () => alert('Failed to load food items'),
       });
     }

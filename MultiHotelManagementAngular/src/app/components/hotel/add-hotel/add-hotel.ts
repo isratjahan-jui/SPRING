@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Location } from '../../../models/location.model';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-add-hotel',
@@ -14,8 +15,6 @@ import { Location } from '../../../models/location.model';
   styleUrl: './add-hotel.css',
 })
 export class AddHotel implements OnInit {
-
-
   hotel: HotelRequest = {
     hotelName: '',
     address: '',
@@ -34,29 +33,29 @@ export class AddHotel implements OnInit {
     private hotelService: HotelService,
     private locationService: LocationService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService,
   ) {}
 
   ngOnInit() {
-    const ownerId = localStorage.getItem('ownerId');
+    const ownerId = this.authService.getUser()?.ownerId;
     if (ownerId) {
-      this.hotel.ownerId = Number(ownerId);
+      this.hotel.ownerId = ownerId;
     }
 
     this.locationService.getAll().subscribe({
       next: (data) => {
         this.locations = data;
-        
+
         if (data.length > 0 && !this.hotel.locationId) {
           this.hotel.locationId = data[0].id;
         }
-        console.log(this.locations)
+        console.log(this.locations);
 
         this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load locations', err);
-       
       },
     });
   }
@@ -75,7 +74,7 @@ export class AddHotel implements OnInit {
   saveHotel() {
     this.hotelService.create(this.hotel, this.selectedImage).subscribe({
       next: () => {
-        const ownerId = localStorage.getItem('ownerId');
+        const ownerId = this.authService.getUser()?.ownerId;
         this.router.navigate([ownerId ? '/owner/my-hotels' : '/hotels']);
       },
       error: (err: any) => {

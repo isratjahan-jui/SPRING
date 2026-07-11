@@ -28,6 +28,7 @@ export interface LoginResponse {
   hotelName?: string;
   ownerId?: number;
   ownerName?: string;
+  
 }
 
 

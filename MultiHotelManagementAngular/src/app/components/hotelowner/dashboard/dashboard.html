@@ -9,21 +9,11 @@
 
         <div class="card-body text-center">
 
-          <img
-            *ngIf="owner?.image; else defaultImage"
-            [src]="imageUrl + owner?.image"
-            class="rounded-circle border shadow mb-3"
-            width="150"
-            height="150"
-          />
+          <img *ngIf="owner?.image; else defaultImage" [src]="imageUrl + owner?.image"
+            class="rounded-circle border shadow mb-3" width="150" height="150" />
 
           <ng-template #defaultImage>
-            <img
-              src="assets/images/user.png"
-              class="rounded-circle border shadow mb-3"
-              width="150"
-              height="150"
-            />
+            <img src="assets/images/user.png" class="rounded-circle border shadow mb-3" width="150" height="150" />
           </ng-template>
 
           <h3>{{owner?.name}}</h3>
@@ -141,7 +131,30 @@
 
           <h2>0</h2>
 
-          <h6>Total Hotels</h6>
+          <!-- <h6>Add Hotels</h6> -->
+          <h6>
+            <a routerLink="/hotels/add" class="text-white fw-bold">Add Hotels</a>
+          </h6>
+
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+      <div class="card shadow border-0 bg-primary text-white">
+
+        <div class="card-body text-center">
+
+          <h2>0</h2>
+
+          <h6>
+             <a routerLink="/owner/my-hotels" class="text-white fw-bold">Total Hotels</a>
+            </h6>
+          
 
         </div>
 

@@ -30,9 +30,9 @@ public class HotelController {
         return ResponseEntity.ok(hotelService.getAllApprovedHotels());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<HotelResponseDTO> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(hotelService.getHotelById(id));
+    @GetMapping("/pending")
+    public ResponseEntity<List<HotelResponseDTO>> getPending() {
+        return ResponseEntity.ok(hotelService.getPendingHotels());
     }
 
     @GetMapping("/owner/{ownerId}")
@@ -45,7 +45,22 @@ public class HotelController {
         return ResponseEntity.ok(hotelService.getHotelsByCity(city));
     }
 
-    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    @GetMapping("/{id:[0-9]+}")
+    public ResponseEntity<HotelResponseDTO> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(hotelService.getHotelById(id));
+    }
+
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<HotelResponseDTO> approve(@PathVariable Long id) {
+        return ResponseEntity.ok(hotelService.approveHotel(id));
+    }
+
+    @PutMapping("/{id}/reject")
+    public ResponseEntity<HotelResponseDTO> reject(@PathVariable Long id) {
+        return ResponseEntity.ok(hotelService.rejectHotel(id));
+    }
+
+    @PutMapping(value = "/{id:[0-9]+}", consumes = {"multipart/form-data"})
     public ResponseEntity<HotelResponseDTO> update(
             @PathVariable Long id,
             @RequestPart("data") HotelRequestDTO dto,
@@ -53,9 +68,10 @@ public class HotelController {
         return ResponseEntity.ok(hotelService.updateHotel(id, dto, image));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:[0-9]+}")
     public ResponseEntity<String> delete(@PathVariable Long id) {
         hotelService.deleteHotel(id);
         return ResponseEntity.ok("Hotel deleted successfully");
     }
+
 }

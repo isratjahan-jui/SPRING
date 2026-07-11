@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Hotel, HotelRequest } from '../../../models/hotel.model';
 import { HotelService } from '../../../services/hotel.service';
 import { LocationService } from '../../../services/location.service';
 import { Location } from '../../../models/location.model';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-my-hotels',
@@ -17,6 +18,8 @@ export class MyHotels implements OnInit {
   locations: Location[] = [];
   showForm = false;
   editingId: number | null = null;
+  private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
   form: HotelRequest = this.emptyForm();
   selectedImage?: File;
   preview: string | ArrayBuffer | null = null;
@@ -27,10 +30,16 @@ export class MyHotels implements OnInit {
     private locationService: LocationService,
   ) {}
 
-  ngOnInit() {
+  ngOnInit() { 
+    const user = this.authService.getUser();
+    console.log('LoginResponse:', user);
+    console.log('ownerId:', user?.ownerId);
     this.loadHotels();
     this.locationService.getAll().subscribe({
-      next: (data) => (this.locations = data),
+      next: (data) => {
+        this.locations = data;
+        this.cdr.markForCheck();
+      },
       error: () => alert('Failed to load locations'),
     });
   }
@@ -43,15 +52,28 @@ export class MyHotels implements OnInit {
       rating: '',
       status: 'PENDING_APPROVAL',
       locationId: 0,
-      ownerId: Number(localStorage.getItem('ownerId')) || 0,
+      // ownerId: Number(localStorage.getItem('ownerId')) || 0,
+      ownerId: this.authService.getUser()?.ownerId || 0,
     };
   }
 
+  // loadHotels() {
+  //   const ownerId = localStorage.getItem('ownerId');
+  //   if (!ownerId) return;
+  //   this.hotelService.getByOwner(Number(ownerId)).subscribe({
+  //     next: (data) => (this.hotels = data),
+  //     error: () => alert('Failed to load hotels'),
+  //   });
+  // }
   loadHotels() {
-    const ownerId = localStorage.getItem('ownerId');
+    const ownerId = this.authService.getUser()?.ownerId;
+    console.log('loadHotels called, ownerId:', ownerId);
     if (!ownerId) return;
-    this.hotelService.getByOwner(Number(ownerId)).subscribe({
-      next: (data) => (this.hotels = data),
+    this.hotelService.getByOwner(ownerId).subscribe({
+      next: (data) => {
+        this.hotels = data;
+        this.cdr.markForCheck();
+      },
       error: () => alert('Failed to load hotels'),
     });
   }

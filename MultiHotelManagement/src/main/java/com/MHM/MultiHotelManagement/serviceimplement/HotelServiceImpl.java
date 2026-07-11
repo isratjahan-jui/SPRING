@@ -143,6 +143,30 @@ public class HotelServiceImpl implements HotelService {
         }
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<HotelResponseDTO> getPendingHotels() {
+        return hotelRepo.findByStatus(HotelStatus.PENDING_APPROVAL)
+                .stream().map(HotelMapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public HotelResponseDTO approveHotel(Long id) {
+        Hotel hotel = hotelRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
+        hotel.setStatus(HotelStatus.APPROVED);
+        return HotelMapper.toDTO(hotelRepo.save(hotel));
+    }
+
+    @Override
+    @Transactional
+    public HotelResponseDTO rejectHotel(Long id) {
+        Hotel hotel = hotelRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
+        hotel.setStatus(HotelStatus.REJECTED);
+        return HotelMapper.toDTO(hotelRepo.save(hotel));
+    }
 
 
 }

@@ -47,4 +47,17 @@ export class HotelService {
   delete(id: number) {
     return this.http.delete<string>(`${this.API_URL}/${id}`);
   }
+getPending() {
+    return this.http.get<Hotel[]>(`${this.API_URL}/pending`);
+}
+
+approveHotel(id: number) {
+    return this.http.put<Hotel>(`${this.API_URL}/${id}/approve`, {});
+}
+
+rejectHotel(id: number) {
+    return this.http.put<Hotel>(`${this.API_URL}/${id}/reject`, {});
+}
+
+
 }
