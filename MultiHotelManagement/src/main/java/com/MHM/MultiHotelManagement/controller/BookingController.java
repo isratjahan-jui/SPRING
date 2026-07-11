@@ -70,4 +70,11 @@ public class BookingController {
     public ResponseEntity<BookingResponseDTO> cancelFoodItems(@PathVariable Long id) {
         return ResponseEntity.ok(bookingService.cancelFoodItemsFromBooking(id));
     }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<BookingResponseDTO> updateStatus(
+            @PathVariable Long id,
+            @RequestParam String status) {
+        return ResponseEntity.ok(bookingService.updateBookingStatus(id, status));
+    }
 }

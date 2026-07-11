@@ -4,57 +4,63 @@ import { LoginResponse } from '../../../models/auth.model';
 import { HotelOwner } from '../../../models/hotel-owner.model';
 import { KEYS, StorageService } from '../../../services/storage.service';
 import { HotelOwnerService } from '../../../services/hotel-owner.service';
+import { OwnerDashboardService } from '../../../services/owner-dashboard.service';
+import { OwnerDashboardStats } from '../../../models/owner-dashboard.model';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../../environments/environments';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-owner-dashboard',
-  imports: [CommonModule,RouterLink],
+  imports: [CommonModule, RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class OwnerDashboard implements OnInit {
-
   imageUrl = environment.imageurl + 'owner/';
 
   user: LoginResponse | null = null;
   userId!: number;
+  ownerId = 0;
   owner: HotelOwner | null = null;
+  stats: OwnerDashboardStats | null = null;
 
   private auth = inject(AuthService);
   private ownerService = inject(HotelOwnerService);
+  private dashboardService = inject(OwnerDashboardService);
   private storage = inject(StorageService);
   private cdr = inject(ChangeDetectorRef);
-
-  loadingParcels = false;
-
 
   ngOnInit(): void {
     this.user = this.storage.getUser();
     if (this.user?.userId) {
       this.userId = this.user.userId;
     }
-
     this.loadOwner();
-
   }
 
-
-loadOwner(): void {
+  loadOwner(): void {
     this.ownerService.getOwnerByUserId(this.userId).subscribe({
-      next: res => {
+      next: (res) => {
         this.owner = res;
-        
+        this.ownerId = res.id ?? 0;
         this.storage.saveData(KEYS.HOTEL_OWNER, res);
         this.cdr.markForCheck();
-        console.log(this.owner);
-       
+        if (this.ownerId) {
+          this.loadStats();
+        }
       },
-      error: err => console.error(err),
+      error: (err) => console.error(err),
     });
   }
 
-
-
+  loadStats(): void {
+    this.dashboardService.getStats(this.ownerId).subscribe({
+      next: (res) => {
+        this.stats = res;
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.error('Failed to load dashboard stats', err),
+    });
+  }
 }

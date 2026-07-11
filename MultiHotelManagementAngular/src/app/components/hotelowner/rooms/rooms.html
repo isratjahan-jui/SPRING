@@ -114,36 +114,43 @@
   }
 
   @if (rooms.length > 0) {
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Price</th>
-          <th>Total</th>
-          <th>Available</th>
-          <th>Adults</th>
-          <th>Children</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (r of rooms; track r.id) {
-          <tr>
-            <td>{{ r.roomType }}</td>
-            <td>{{ r.price | currency }}</td>
-            <td>{{ r.totalRooms }}</td>
-            <td>{{ r.availableRooms }}</td>
-            <td>{{ r.adults }}</td>
-            <td>{{ r.children }}</td>
-            <td>
-              <button class="btn btn-sm btn-outline-primary me-1" (click)="edit(r)">Edit</button>
+    <div class="row">
+      @for (r of rooms; track r.id) {
+        <div class="col-md-6 col-lg-4 mb-3">
+          <div class="card h-100">
+            @if (r.image) {
+              <img
+                [src]="getImageUrl(r.image)"
+                class="card-img-top"
+                alt="{{ r.roomType }}"
+                style="height: 160px; object-fit: cover"
+              />
+            }
+            <div class="card-body">
+              <h5 class="card-title">{{ r.roomType }}</h5>
+              <p class="card-text text-muted small">{{ r.description }}</p>
+              <p class="mb-1"><strong>Price:</strong> {{ r.price | currency }}</p>
+              <p class="mb-1">
+                <strong>Total:</strong> {{ r.totalRooms }} | <strong>Available:</strong>
+                {{ r.availableRooms }}
+              </p>
+              <p class="mb-1">
+                <strong>Adults:</strong> {{ r.adults }} | <strong>Children:</strong>
+                {{ r.children }}
+              </p>
+              @if (r.amenities) {
+                <p class="mb-0 small"><strong>Amenities:</strong> {{ r.amenities }}</p>
+              }
+            </div>
+            <div class="card-footer d-flex gap-2">
+              <button class="btn btn-sm btn-outline-primary" (click)="edit(r)">Edit</button>
               <button class="btn btn-sm btn-outline-danger" (click)="deleteRoom(r.id)">
                 Delete
               </button>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
   }
 </div>

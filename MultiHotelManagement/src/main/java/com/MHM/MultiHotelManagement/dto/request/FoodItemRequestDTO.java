@@ -8,5 +8,5 @@ public class FoodItemRequestDTO {
     private String description;
     private Double foodPrice;
     private String category;
-    private Long hotelId;   // কোন হোটেলের সাথে খাবার যুক্ত হবে
+    private Long hotelId;
 }

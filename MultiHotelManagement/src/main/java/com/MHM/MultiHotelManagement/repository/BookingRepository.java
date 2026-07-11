@@ -76,4 +76,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("checkIn") Date checkIn,
             @Param("checkOut") Date checkOut
     );
+
+    @Query("""
+        SELECT b FROM Booking b
+        LEFT JOIN FETCH b.customer c
+        LEFT JOIN FETCH b.hotel h
+        LEFT JOIN FETCH b.room r
+        WHERE h.owner.id = :ownerId
+    """)
+    List<Booking> findAllBookingsByOwnerId(@Param("ownerId") Long ownerId);
 }

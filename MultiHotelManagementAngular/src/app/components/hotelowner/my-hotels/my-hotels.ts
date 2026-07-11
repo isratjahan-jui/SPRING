@@ -1,15 +1,26 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Hotel, HotelRequest } from '../../../models/hotel.model';
+import { HotelDetails as HotelDetailsModel } from '../../../models/hotel-details.model';
+import { Facility } from '../../../models/facility.model';
+import { FoodItem } from '../../../models/food-item.model';
+import { Room } from '../../../models/room.model';
+import { Gallery } from '../../../models/gallery.model';
 import { HotelService } from '../../../services/hotel.service';
 import { LocationService } from '../../../services/location.service';
+import { HotelDetailsService } from '../../../services/hotel-details.service';
+import { FacilityService } from '../../../services/facility.service';
+import { FoodItemService } from '../../../services/food-item.service';
+import { RoomService } from '../../../services/room.service';
+import { GalleryService } from '../../../services/gallery.service';
 import { Location } from '../../../models/location.model';
 import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-my-hotels',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './my-hotels.html',
   styleUrl: './my-hotels.css',
 })
@@ -25,12 +36,25 @@ export class MyHotels implements OnInit {
   preview: string | ArrayBuffer | null = null;
   loading = false;
 
+  expandedHotelId: number | null = null;
+  hotelDetails: Map<number, HotelDetailsModel> = new Map();
+  hotelFacilities: Map<number, Facility[]> = new Map();
+  hotelFoodItems: Map<number, FoodItem[]> = new Map();
+  hotelRooms: Map<number, Room[]> = new Map();
+  hotelGallery: Map<number, Gallery[]> = new Map();
+  activeTab: Map<number, string> = new Map();
+
   constructor(
     private hotelService: HotelService,
     private locationService: LocationService,
+    private hotelDetailsService: HotelDetailsService,
+    private facilityService: FacilityService,
+    private foodItemService: FoodItemService,
+    private roomService: RoomService,
+    private galleryService: GalleryService,
   ) {}
 
-  ngOnInit() { 
+  ngOnInit() {
     const user = this.authService.getUser();
     console.log('LoginResponse:', user);
     console.log('ownerId:', user?.ownerId);
@@ -144,5 +168,63 @@ export class MyHotels implements OnInit {
       reader.onload = () => (this.preview = reader.result);
       reader.readAsDataURL(this.selectedImage!);
     }
+  }
+
+  toggleExpand(hotelId: number) {
+    if (this.expandedHotelId === hotelId) {
+      this.expandedHotelId = null;
+      return;
+    }
+    this.expandedHotelId = hotelId;
+    if (!this.activeTab.has(hotelId)) {
+      this.activeTab.set(hotelId, 'details');
+    }
+    this.loadHotelData(hotelId);
+  }
+
+  setTab(hotelId: number, tab: string) {
+    this.activeTab.set(hotelId, tab);
+  }
+
+  getTab(hotelId: number): string {
+    return this.activeTab.get(hotelId) || 'details';
+  }
+
+  loadHotelData(hotelId: number) {
+    this.hotelDetailsService.getByHotelId(hotelId).subscribe({
+      next: (data) => {
+        this.hotelDetails.set(hotelId, data);
+        this.cdr.markForCheck();
+      },
+      error: () => this.hotelDetails.set(hotelId, null as any),
+    });
+
+    this.facilityService.getByHotel(hotelId).subscribe({
+      next: (data) => {
+        this.hotelFacilities.set(hotelId, data);
+        this.cdr.markForCheck();
+      },
+    });
+
+    this.foodItemService.getByHotel(hotelId).subscribe({
+      next: (data) => {
+        this.hotelFoodItems.set(hotelId, data);
+        this.cdr.markForCheck();
+      },
+    });
+
+    this.roomService.getByHotel(hotelId).subscribe({
+      next: (data) => {
+        this.hotelRooms.set(hotelId, data);
+        this.cdr.markForCheck();
+      },
+    });
+
+    this.galleryService.getByHotel(hotelId).subscribe({
+      next: (data) => {
+        this.hotelGallery.set(hotelId, data);
+        this.cdr.markForCheck();
+      },
+    });
   }
 }

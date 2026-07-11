@@ -28,4 +28,8 @@ export class BookingService {
   delete(id: number) {
     return this.http.delete<string>(`${this.API_URL}/${id}`);
   }
+
+  updateStatus(id: number, status: string) {
+    return this.http.patch<Booking>(`${this.API_URL}/${id}/status?status=${status}`, {});
+  }
 }

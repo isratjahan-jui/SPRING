@@ -20,6 +20,8 @@ export class OwnerFoodItems implements OnInit {
   showForm = false;
   editingId: number | null = null;
   form: FoodItemRequest = this.emptyForm();
+  selectedImage?: File;
+  preview: string | ArrayBuffer | null = null;
   loading = false;
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
@@ -63,6 +65,8 @@ export class OwnerFoodItems implements OnInit {
   addNew() {
     this.editingId = null;
     this.form = { ...this.emptyForm(), hotelId: this.selectedHotelId };
+    this.selectedImage = undefined;
+    this.preview = null;
     this.showForm = true;
   }
 
@@ -75,19 +79,23 @@ export class OwnerFoodItems implements OnInit {
       category: item.category,
       hotelId: this.selectedHotelId,
     };
+    this.selectedImage = undefined;
+    this.preview = item.imageUrl ? 'http://localhost:8085/food/' + item.imageUrl : null;
     this.showForm = true;
   }
 
   cancelForm() {
     this.showForm = false;
     this.editingId = null;
+    this.selectedImage = undefined;
+    this.preview = null;
   }
 
   save() {
     this.loading = true;
     const request = this.editingId
-      ? this.foodItemService.update(this.editingId, this.form)
-      : this.foodItemService.create(this.form);
+      ? this.foodItemService.update(this.editingId, this.form, this.selectedImage)
+      : this.foodItemService.create(this.form, this.selectedImage);
 
     request.subscribe({
       next: () => {
@@ -108,5 +116,18 @@ export class OwnerFoodItems implements OnInit {
       next: () => this.onHotelChange(),
       error: () => alert('Failed to delete food item'),
     });
+  }
+
+  onFileSelected(event: any) {
+    if (event.target.files?.length) {
+      this.selectedImage = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = () => (this.preview = reader.result);
+      reader.readAsDataURL(this.selectedImage!);
+    }
+  }
+
+  getImageUrl(image: string): string {
+    return image ? 'http://localhost:8085/food/' + image : '';
   }
 }

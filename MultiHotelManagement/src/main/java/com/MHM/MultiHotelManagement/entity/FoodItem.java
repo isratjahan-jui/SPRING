@@ -22,6 +22,7 @@ public class FoodItem {
     private Long id;
 
     private String itemName;       // খাবারের নাম
+    private String image;          // খাবারের ছবির file name
     private String description;    // বিস্তারিত বর্ণনা
     private Double foodPrice;      // খাবারের দাম
     private String category;       // BREAKFAST, LUNCH, DINNER, BEVERAGE

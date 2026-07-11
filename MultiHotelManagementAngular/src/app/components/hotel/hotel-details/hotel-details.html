@@ -1,7 +1,13 @@
 <div class="container py-4">
   @if (loading) {
-    <p class="text-muted">Loading...</p>
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted mt-2">Loading hotel details...</p>
+    </div>
   } @else if (hotel) {
+    <a routerLink="/hotels" class="btn btn-outline-secondary btn-sm mb-3">&larr; Back to Hotels</a>
     <div class="card shadow-sm">
       @if (hotel.image) {
         <img
@@ -13,17 +19,22 @@
       }
       <div class="card-body">
         <h2 class="card-title">{{ hotel.hotelName }}</h2>
-        <p class="text-muted">{{ hotel.address }}</p>
-        <span class="badge bg-{{ hotel.status === 'APPROVED' ? 'success' : 'warning' }}">
-          {{ hotel.status }}
-        </span>
-        @if (hotel.locationName) {
-          <p class="mt-2"><strong>Location:</strong> {{ hotel.locationName }}</p>
-        }
-        <p><strong>Rating:</strong> {{ hotel.rating || 'N/A' }}</p>
+        <p class="text-muted mb-1">{{ hotel.address }}</p>
+        <div class="mb-2">
+          <span class="badge bg-{{ hotel.status === 'APPROVED' ? 'success' : 'warning' }}">
+            {{ hotel.status }}
+          </span>
+          @if (hotel.locationName) {
+            <span class="badge bg-info ms-1">{{ hotel.locationName }}</span>
+          }
+          @if (hotel.rating) {
+            <span class="badge bg-warning text-dark ms-1">Rating: {{ hotel.rating }}</span>
+          }
+        </div>
 
         @if (details) {
           <hr />
+          <h5>Details Information</h5>
           @if (details.description) {
             <p>{{ details.description }}</p>
           }
@@ -72,9 +83,92 @@
           <hr />
           <p class="text-muted">No detailed information available yet.</p>
         }
+
+        @if (facilities.length > 0) {
+          <hr />
+          <h5>Facilities</h5>
+          <div class="row">
+            @for (f of facilities; track f.id) {
+              <div class="col-md-6 mb-2">
+                <div class="border rounded p-2">
+                  <strong>{{ f.facilityName }}</strong>
+                  @if (f.description) {
+                    <p class="mb-0 text-muted small">{{ f.description }}</p>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (rooms.length > 0) {
+          <hr />
+          <h5>Available Rooms</h5>
+          <div class="row">
+            @for (r of rooms; track r.id) {
+              <div class="col-md-4 col-6 mb-3">
+                <div class="card h-100">
+                  @if (r.image) {
+                    <img
+                      [src]="getRoomImageUrl(r.image)"
+                      class="card-img-top"
+                      alt="{{ r.roomType }}"
+                      style="height: 120px; object-fit: cover"
+                    />
+                  }
+                  <div class="card-body p-2">
+                    <h6 class="card-title mb-1">{{ r.roomType }}</h6>
+                    <p class="card-text small text-muted mb-1">{{ r.description || '' }}</p>
+                    <p class="mb-0">
+                      <strong>&#2547;{{ r.price }}</strong
+                      >/night
+                    </p>
+                    <p class="card-text small mb-0">
+                      <span class="text-success">{{ r.availableRooms }} available</span> | Adults:
+                      {{ r.adults }} | Children: {{ r.children }}
+                    </p>
+                    @if (r.amenities) {
+                      <p class="card-text small text-muted mb-0">{{ r.amenities }}</p>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (foodItems.length > 0) {
+          <hr />
+          <h5>Food Items</h5>
+          <div class="row">
+            @for (item of foodItems; track item.id) {
+              <div class="col-md-4 col-6 mb-3">
+                <div class="card h-100">
+                  @if (item.imageUrl) {
+                    <img
+                      [src]="'http://localhost:8085/food/' + item.imageUrl"
+                      class="card-img-top"
+                      alt="{{ item.itemName }}"
+                      style="height: 120px; object-fit: cover"
+                    />
+                  }
+                  <div class="card-body p-2">
+                    <h6 class="card-title mb-1">{{ item.itemName }}</h6>
+                    <p class="card-text small text-muted mb-1">{{ item.description || '' }}</p>
+                    <p class="mb-0">
+                      <strong>&#2547;{{ item.foodPrice }}</strong>
+                    </p>
+                    <span class="badge bg-secondary">{{ item.category }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
       </div>
     </div>
   } @else {
-    <p class="text-danger">Hotel not found.</p>
+    <p class="text-danger">{{ errorMsg || 'Hotel not found.' }}</p>
+    <a routerLink="/hotels" class="btn btn-outline-primary">Back to Hotels</a>
   }
 </div>

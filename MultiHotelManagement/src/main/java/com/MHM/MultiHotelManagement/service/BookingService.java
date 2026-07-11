@@ -17,8 +17,5 @@ public interface BookingService {
 
     BookingResponseDTO addFoodItemsToBooking(Long bookingId, List<Long> foodItemIds);
     BookingResponseDTO cancelFoodItemsFromBooking(Long bookingId);
-
-
-
-
+    BookingResponseDTO updateBookingStatus(Long id, String status);
 }

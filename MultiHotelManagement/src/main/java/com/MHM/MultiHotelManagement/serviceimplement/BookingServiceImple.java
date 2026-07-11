@@ -176,4 +176,16 @@ public class BookingServiceImple implements BookingService {
 
         return BookingMapperDTO.toResponseDTO(booking);
     }
+
+    @Override
+    @Transactional
+    public BookingResponseDTO updateBookingStatus(Long id, String status) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
+
+        BookingStatus newStatus = BookingStatus.valueOf(status);
+        booking.setStatus(newStatus);
+        Booking updated = bookingRepository.save(booking);
+        return BookingMapperDTO.toResponseDTO(updated);
+    }
 }

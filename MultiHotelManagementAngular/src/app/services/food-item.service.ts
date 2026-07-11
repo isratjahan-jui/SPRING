@@ -17,12 +17,18 @@ export class FoodItemService {
     return this.http.get<FoodItem[]>(`${this.API_URL}/hotel/${hotelId}`);
   }
 
-  create(data: FoodItemRequest) {
-    return this.http.post<FoodItem>(this.API_URL, data);
+  create(data: FoodItemRequest, image?: File) {
+    const formData = new FormData();
+    formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    if (image) formData.append('image', image);
+    return this.http.post<FoodItem>(this.API_URL, formData);
   }
 
-  update(id: number, data: FoodItemRequest) {
-    return this.http.put<FoodItem>(`${this.API_URL}/${id}`, data);
+  update(id: number, data: FoodItemRequest, image?: File) {
+    const formData = new FormData();
+    formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    if (image) formData.append('image', image);
+    return this.http.put<FoodItem>(`${this.API_URL}/${id}`, formData);
   }
 
   delete(id: number) {

@@ -16,7 +16,9 @@ import { AuthService } from '../../../services/auth.service';
 export class OwnerBookings implements OnInit {
   hotels: Hotel[] = [];
   bookings: Booking[] = [];
+  allBookings: Booking[] = [];
   selectedHotelId = 0;
+  filterStatus = '';
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -40,14 +42,57 @@ export class OwnerBookings implements OnInit {
 
   onHotelChange() {
     this.bookings = [];
+    this.allBookings = [];
+    this.filterStatus = '';
     if (this.selectedHotelId) {
       this.bookingService.getByHotel(this.selectedHotelId).subscribe({
         next: (data) => {
+          this.allBookings = data;
           this.bookings = data;
           this.cdr.markForCheck();
         },
         error: () => alert('Failed to load bookings'),
       });
     }
+  }
+
+  filterByStatus() {
+    if (!this.filterStatus) {
+      this.bookings = this.allBookings;
+    } else {
+      this.bookings = this.allBookings.filter((b) => b.status === this.filterStatus);
+    }
+  }
+
+  confirmBooking(booking: Booking) {
+    if (!confirm('Confirm this booking?')) return;
+    this.bookingService.updateStatus(booking.id, 'CONFIRMED').subscribe({
+      next: () => this.onHotelChange(),
+      error: () => alert('Failed to confirm booking'),
+    });
+  }
+
+  checkIn(booking: Booking) {
+    if (!confirm('Check-in this guest?')) return;
+    this.bookingService.updateStatus(booking.id, 'CHECKED_IN').subscribe({
+      next: () => this.onHotelChange(),
+      error: () => alert('Failed to check-in'),
+    });
+  }
+
+  checkOut(booking: Booking) {
+    if (!confirm('Check-out this guest?')) return;
+    this.bookingService.updateStatus(booking.id, 'CHECKED_OUT').subscribe({
+      next: () => this.onHotelChange(),
+      error: () => alert('Failed to check-out'),
+    });
+  }
+
+  cancelBooking(booking: Booking) {
+    if (!confirm('Cancel this booking?')) return;
+    this.bookingService.updateStatus(booking.id, 'CANCELLED').subscribe({
+      next: () => this.onHotelChange(),
+      error: () => alert('Failed to cancel booking'),
+    });
   }
 }

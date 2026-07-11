@@ -19,10 +19,12 @@ public class FoodItemMapper {
         FoodItemResponseDTO response = new FoodItemResponseDTO();
         response.setId(foodItem.getId());
         response.setItemName(foodItem.getItemName());
+        response.setImageUrl(foodItem.getImage());
         response.setDescription(foodItem.getDescription());
         response.setFoodPrice(foodItem.getFoodPrice());
         response.setCategory(foodItem.getCategory());
         if (foodItem.getHotel() != null) {
+            response.setHotelId(foodItem.getHotel().getId());
             response.setHotelName(foodItem.getHotel().getHotelName());
         }
         return response;

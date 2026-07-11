@@ -44,6 +44,18 @@
                 placeholder="e.g. Breakfast, Dinner"
               />
             </div>
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Image</label>
+              <input
+                type="file"
+                class="form-control"
+                accept="image/*"
+                (change)="onFileSelected($event)"
+              />
+              @if (preview) {
+                <img [src]="preview" class="img-thumbnail mt-2" width="150" />
+              }
+            </div>
             <div class="col-md-12 mb-2">
               <label class="form-label">Description</label>
               <textarea
@@ -70,32 +82,33 @@
   }
 
   @if (foodItems.length > 0) {
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Description</th>
-          <th>Price</th>
-          <th>Category</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (item of foodItems; track item.id) {
-          <tr>
-            <td>{{ item.itemName }}</td>
-            <td>{{ item.description }}</td>
-            <td>{{ item.foodPrice | currency }}</td>
-            <td>{{ item.category }}</td>
-            <td>
-              <button class="btn btn-sm btn-outline-primary me-1" (click)="edit(item)">Edit</button>
+    <div class="row">
+      @for (item of foodItems; track item.id) {
+        <div class="col-md-6 col-lg-4 mb-3">
+          <div class="card h-100">
+            @if (item.imageUrl) {
+              <img
+                [src]="getImageUrl(item.imageUrl)"
+                class="card-img-top"
+                alt="{{ item.itemName }}"
+                style="height: 160px; object-fit: cover"
+              />
+            }
+            <div class="card-body">
+              <h5 class="card-title">{{ item.itemName }}</h5>
+              <p class="card-text text-muted small">{{ item.description }}</p>
+              <p class="mb-1"><strong>Price:</strong> &#2547;{{ item.foodPrice }}</p>
+              <span class="badge bg-secondary">{{ item.category }}</span>
+            </div>
+            <div class="card-footer d-flex gap-2">
+              <button class="btn btn-sm btn-outline-primary" (click)="edit(item)">Edit</button>
               <button class="btn btn-sm btn-outline-danger" (click)="deleteItem(item.id)">
                 Delete
               </button>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
   }
 </div>

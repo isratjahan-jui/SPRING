@@ -1,215 +1,193 @@
 <div class="container py-4">
-
   <div class="row">
-
     <!-- Profile Card -->
     <div class="col-lg-4 mb-4">
-
       <div class="card shadow border-0 rounded-4">
-
         <div class="card-body text-center">
-
-          <img *ngIf="owner?.image; else defaultImage" [src]="imageUrl + owner?.image"
-            class="rounded-circle border shadow mb-3" width="150" height="150" />
+          <img
+            *ngIf="owner?.image; else defaultImage"
+            [src]="imageUrl + owner?.image"
+            class="rounded-circle border shadow mb-3"
+            width="150"
+            height="150"
+          />
 
           <ng-template #defaultImage>
-            <img src="assets/images/user.png" class="rounded-circle border shadow mb-3" width="150" height="150" />
+            <img
+              src="assets/images/user.png"
+              class="rounded-circle border shadow mb-3"
+              width="150"
+              height="150"
+            />
           </ng-template>
 
-          <h3>{{owner?.name}}</h3>
+          <h3>{{ owner?.name }}</h3>
 
-          <p class="text-muted">
-            Hotel Owner
-          </p>
+          <p class="text-muted">Hotel Owner</p>
 
-          <span class="badge bg-success px-3 py-2">
-            Active
-          </span>
-
+          <span class="badge bg-success px-3 py-2"> Active </span>
         </div>
-
       </div>
-
     </div>
 
     <!-- Information -->
     <div class="col-lg-8">
-
       <div class="card shadow border-0 rounded-4">
-
         <div class="card-header bg-primary text-white">
-
-          <h4 class="mb-0">
-            Owner Information
-          </h4>
-
+          <h4 class="mb-0">Owner Information</h4>
         </div>
 
         <div class="card-body">
-
           <div class="row">
-
             <div class="col-md-6 mb-3">
-
               <label class="fw-bold">Full Name</label>
 
               <div class="form-control bg-light">
-                {{owner?.name}}
+                {{ owner?.name }}
               </div>
-
             </div>
 
             <div class="col-md-6 mb-3">
-
               <label class="fw-bold">Email</label>
 
               <div class="form-control bg-light">
-                {{owner?.email}}
+                {{ owner?.email }}
               </div>
-
             </div>
 
             <div class="col-md-6 mb-3">
-
               <label class="fw-bold">Phone</label>
 
               <div class="form-control bg-light">
-                {{owner?.phone}}
+                {{ owner?.phone }}
               </div>
-
             </div>
 
             <div class="col-md-6 mb-3">
-
               <label class="fw-bold">Gender</label>
 
               <div class="form-control bg-light">
-                {{owner?.gender}}
+                {{ owner?.gender }}
               </div>
-
             </div>
 
             <div class="col-md-6 mb-3">
-
               <label class="fw-bold">Date of Birth</label>
 
               <div class="form-control bg-light">
-                {{owner?.dateOfBirth}}
+                {{ owner?.dateOfBirth }}
               </div>
-
             </div>
 
             <div class="col-md-6 mb-3">
-
               <label class="fw-bold">Address</label>
 
               <div class="form-control bg-light">
-                {{owner?.address}}
+                {{ owner?.address }}
               </div>
-
             </div>
-
           </div>
-
         </div>
-
       </div>
-
     </div>
-
   </div>
 
-  <!-- Dashboard Cards -->
-
+  <!-- Dashboard Stats Cards -->
   <div class="row mt-4">
-
-    <div class="col-md-3">
-
+    <div class="col-md-3 mb-3">
       <div class="card shadow border-0 bg-primary text-white">
-
         <div class="card-body text-center">
-
-          <h2>0</h2>
-
-          <!-- <h6>Add Hotels</h6> -->
+          <h2>{{ stats?.totalHotels ?? 0 }}</h2>
           <h6>
-            <a routerLink="/hotels/add" class="text-white fw-bold">Add Hotels</a>
+            <a routerLink="/owner/my-hotels" class="text-white fw-bold">Total Hotels</a>
           </h6>
-
-
         </div>
-
       </div>
-
     </div>
 
-    <div class="col-md-3">
-
-      <div class="card shadow border-0 bg-primary text-white">
-
-        <div class="card-body text-center">
-
-          <h2>0</h2>
-
-          <h6>
-             <a routerLink="/owner/my-hotels" class="text-white fw-bold">Total Hotels</a>
-            </h6>
-          
-
-        </div>
-
-      </div>
-
-    </div>
-
-    <div class="col-md-3">
-
+    <div class="col-md-3 mb-3">
       <div class="card shadow border-0 bg-success text-white">
-
         <div class="card-body text-center">
-
-          <h2>0</h2>
-
-          <h6>Total Rooms</h6>
-
+          <h2>{{ stats?.totalRooms ?? 0 }}</h2>
+          <h6>
+            <a routerLink="/owner/rooms" class="text-white fw-bold">Total Rooms</a>
+          </h6>
         </div>
-
       </div>
-
     </div>
 
-    <div class="col-md-3">
-
+    <div class="col-md-3 mb-3">
       <div class="card shadow border-0 bg-warning text-dark">
-
         <div class="card-body text-center">
-
-          <h2>0</h2>
-
-          <h6>Bookings</h6>
-
+          <h2>{{ stats?.totalBookings ?? 0 }}</h2>
+          <h6>
+            <a routerLink="/owner/bookings" class="text-dark fw-bold">Total Bookings</a>
+          </h6>
         </div>
-
       </div>
-
     </div>
 
-    <div class="col-md-3">
-
+    <div class="col-md-3 mb-3">
       <div class="card shadow border-0 bg-danger text-white">
-
         <div class="card-body text-center">
-
-          <h2>0</h2>
-
-          <h6>Revenue</h6>
-
+          <h2>&#2547;{{ stats?.totalRevenue ?? 0 | number: '1.0-0' }}</h2>
+          <h6 class="text-white fw-bold">Total Revenue</h6>
         </div>
-
       </div>
-
     </div>
-
   </div>
 
+  <!-- Booking Status Cards -->
+  <div class="row mt-2">
+    <div class="col-md-3 mb-3">
+      <div class="card shadow border-0">
+        <div class="card-body text-center">
+          <h3 class="text-primary">{{ stats?.pendingBookings ?? 0 }}</h3>
+          <h6 class="text-muted">Pending</h6>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <div class="card shadow border-0">
+        <div class="card-body text-center">
+          <h3 class="text-success">{{ stats?.confirmedBookings ?? 0 }}</h3>
+          <h6 class="text-muted">Confirmed</h6>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <div class="card shadow border-0">
+        <div class="card-body text-center">
+          <h3 class="text-info">{{ stats?.checkedInBookings ?? 0 }}</h3>
+          <h6 class="text-muted">Checked In</h6>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <div class="card shadow border-0">
+        <div class="card-body text-center">
+          <h3 class="text-danger">{{ stats?.cancelledBookings ?? 0 }}</h3>
+          <h6 class="text-muted">Cancelled</h6>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Due Amount -->
+  @if (stats && stats.totalDue > 0) {
+    <div class="row mt-2">
+      <div class="col-12">
+        <div class="card shadow border-0 bg-light">
+          <div class="card-body text-center">
+            <h4 class="text-warning mb-0">
+              Total Due: &#2547;{{ stats.totalDue | number: '1.0-0' }}
+            </h4>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
 </div>

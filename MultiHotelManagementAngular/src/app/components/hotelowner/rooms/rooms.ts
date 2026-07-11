@@ -100,6 +100,8 @@ export class OwnerRooms implements OnInit {
   cancelForm() {
     this.showForm = false;
     this.editingId = null;
+    this.selectedImage = undefined;
+    this.preview = null;
   }
 
   save() {
@@ -136,5 +138,9 @@ export class OwnerRooms implements OnInit {
       reader.onload = () => (this.preview = reader.result);
       reader.readAsDataURL(this.selectedImage!);
     }
+  }
+
+  getImageUrl(image: string): string {
+    return image ? 'http://localhost:8085/room/' + image : '';
   }
 }

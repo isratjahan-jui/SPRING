@@ -58,6 +58,8 @@ export class DeleteHotel implements OnInit {
       this.hotelService.delete(id).subscribe(() => {
         // delete successful → reload list
         this.loadHotels();
+        this.cdr.markForCheck();
+
       });
     }
   }

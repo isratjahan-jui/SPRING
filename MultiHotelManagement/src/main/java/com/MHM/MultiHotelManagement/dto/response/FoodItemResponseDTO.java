@@ -6,8 +6,10 @@ import lombok.Data;
 public class FoodItemResponseDTO {
     private Long id;
     private String itemName;
+    private String imageUrl;
     private String description;
     private Double foodPrice;
     private String category;
-    private String hotelName;   // হোটেলের নাম দেখানোর জন্য
+    private Long hotelId;
+    private String hotelName;
 }

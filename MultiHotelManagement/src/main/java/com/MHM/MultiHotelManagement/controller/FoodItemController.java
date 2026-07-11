@@ -6,6 +6,7 @@ import com.MHM.MultiHotelManagement.service.FoodItemService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -19,14 +20,19 @@ public class FoodItemController {
         this.foodItemService = foodItemService;
     }
 
-    @PostMapping
-    public ResponseEntity<FoodItemResponseDTO> createFoodItem(@RequestBody FoodItemRequestDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(foodItemService.createFoodItem(dto));
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<FoodItemResponseDTO> createFoodItem(
+            @RequestPart("data") FoodItemRequestDTO dto,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(foodItemService.createFoodItem(dto, image));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<FoodItemResponseDTO> updateFoodItem(@PathVariable Long id, @RequestBody FoodItemRequestDTO dto) {
-        return ResponseEntity.ok(foodItemService.updateFoodItem(id, dto));
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<FoodItemResponseDTO> updateFoodItem(
+            @PathVariable Long id,
+            @RequestPart("data") FoodItemRequestDTO dto,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        return ResponseEntity.ok(foodItemService.updateFoodItem(id, dto, image));
     }
 
     @GetMapping("/{id}")

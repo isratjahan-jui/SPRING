@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { HotelService } from '../../../services/hotel.service';
 import { Hotel } from '../../../models/hotel.model';
 
@@ -13,15 +13,17 @@ import { Hotel } from '../../../models/hotel.model';
 export class HotelList implements OnInit {
   hotels: Hotel[] = [];
 
-  constructor(private hotelService: HotelService) {}
+  constructor(private hotelService: HotelService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.loadHotels();
+
   }
 
   loadHotels() {
     this.hotelService.getAllApproved().subscribe((data) => {
       this.hotels = data;
+      this.cdr.markForCheck();
     });
   }
 }
