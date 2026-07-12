@@ -10,7 +10,7 @@
   </div>
 
   <nav class="sidebar-nav">
-    @if ((isLoggedIn() ? role : currentRole()) === 'ADMIN') {
+    @if ( userRole  === 'ADMIN') {
       <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
         >Dashboard</a
       >
@@ -18,7 +18,7 @@
       <a routerLink="/admin/owners" routerLinkActive="active">Owners</a>
       <a routerLink="/admin/customers" routerLinkActive="active">Customers</a>
       <a routerLink="/admin/commissions" routerLinkActive="active">Commissions</a>
-    } @else if ((isLoggedIn() ? role : currentRole()) === 'HOTEL_OWNER') {
+    } @else if (userRole  ===  'HOTEL_OWNER') {
       <a routerLink="/owner" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
         >Dashboard</a
       >
@@ -30,7 +30,7 @@
       <a routerLink="/owner/food-items" routerLinkActive="active">Food Items</a>
       <a routerLink="/owner/bookings" routerLinkActive="active">Bookings</a>
       <a routerLink="/owner/payments" routerLinkActive="active">Payments</a>
-    } @else if ((isLoggedIn() ? role : currentRole()) === 'CUSTOMER') {
+    } @else if (userRole  === 'CUSTOMER') {
       <a
         routerLink="/customer"
         routerLinkActive="active"
