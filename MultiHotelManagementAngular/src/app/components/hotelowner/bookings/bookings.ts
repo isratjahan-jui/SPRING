@@ -19,6 +19,7 @@ export class OwnerBookings implements OnInit {
   allBookings: Booking[] = [];
   selectedHotelId = 0;
   filterStatus = '';
+  extraChargeAmount: { [bookingId: number]: number } = {};
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -44,6 +45,7 @@ export class OwnerBookings implements OnInit {
     this.bookings = [];
     this.allBookings = [];
     this.filterStatus = '';
+    this.extraChargeAmount = {};
     if (this.selectedHotelId) {
       this.bookingService.getByHotel(this.selectedHotelId).subscribe({
         next: (data) => {
@@ -65,31 +67,56 @@ export class OwnerBookings implements OnInit {
   }
 
   confirmBooking(booking: Booking) {
-    if (!confirm('Confirm this booking?')) return;
+    if (!confirm(`Confirm booking #${booking.id}?`)) return;
     this.bookingService.updateStatus(booking.id, 'CONFIRMED').subscribe({
       next: () => this.onHotelChange(),
       error: () => alert('Failed to confirm booking'),
     });
   }
 
+  markNoShow(booking: Booking) {
+    if (!confirm(`Mark booking #${booking.id} as No-Show? The guest did not arrive.`)) return;
+    this.bookingService.markNoShow(booking.id).subscribe({
+      next: () => this.onHotelChange(),
+      error: () => alert('Failed to mark as no-show'),
+    });
+  }
+
   checkIn(booking: Booking) {
-    if (!confirm('Check-in this guest?')) return;
+    if (!confirm(`Check-in guest ${booking.customerName}?`)) return;
     this.bookingService.updateStatus(booking.id, 'CHECKED_IN').subscribe({
       next: () => this.onHotelChange(),
       error: () => alert('Failed to check-in'),
     });
   }
 
-  checkOut(booking: Booking) {
-    if (!confirm('Check-out this guest?')) return;
-    this.bookingService.updateStatus(booking.id, 'CHECKED_OUT').subscribe({
-      next: () => this.onHotelChange(),
-      error: () => alert('Failed to check-out'),
-    });
+  checkOutWithExtraCharges(booking: Booking) {
+    const extra = this.extraChargeAmount[booking.id] || 0;
+    let msg = `Check-out guest ${booking.customerName}?`;
+    if (extra > 0) {
+      msg = `Add extra charges BDT ${extra} and check-out guest ${booking.customerName}?`;
+    }
+    if (!confirm(msg)) return;
+
+    const doCheckout = () => {
+      this.bookingService.updateStatus(booking.id, 'CHECKED_OUT').subscribe({
+        next: () => this.onHotelChange(),
+        error: () => alert('Failed to check-out'),
+      });
+    };
+
+    if (extra > 0) {
+      this.bookingService.addExtraCharges(booking.id, extra).subscribe({
+        next: () => doCheckout(),
+        error: () => alert('Failed to add extra charges'),
+      });
+    } else {
+      doCheckout();
+    }
   }
 
   cancelBooking(booking: Booking) {
-    if (!confirm('Cancel this booking?')) return;
+    if (!confirm(`Cancel booking #${booking.id}?`)) return;
     this.bookingService.updateStatus(booking.id, 'CANCELLED').subscribe({
       next: () => this.onHotelChange(),
       error: () => alert('Failed to cancel booking'),

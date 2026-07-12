@@ -3,12 +3,15 @@ package com.MHM.MultiHotelManagement.controller;
 import com.MHM.MultiHotelManagement.dto.request.NotificationRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.NotificationResponseDTO;
 import com.MHM.MultiHotelManagement.service.NotificationService;
+import com.MHM.MultiHotelManagement.service.SseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-        import java.util.List;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final SseService sseService;
 
     @PostMapping
     public ResponseEntity<NotificationResponseDTO> create(@RequestBody NotificationRequestDTO dto) {
@@ -42,5 +46,10 @@ public class NotificationController {
     @GetMapping("/user/{userId}/unread")
     public ResponseEntity<List<NotificationResponseDTO>> getUnread(@PathVariable Long userId) {
         return ResponseEntity.ok(notificationService.getUnreadNotifications(userId));
+    }
+
+    @GetMapping(value = "/subscribe/{userId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter subscribe(@PathVariable Long userId) {
+        return sseService.subscribe(userId);
     }
 }

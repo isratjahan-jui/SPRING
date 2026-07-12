@@ -30,16 +30,6 @@
             <div class="card-body">
               <h5 class="card-title">{{ hotel.hotelName }}</h5>
               <p class="card-text text-muted">{{ hotel.address }}</p>
-              <span
-                class="badge bg-{{
-                  hotel.status === 'APPROVED'
-                    ? 'success'
-                    : hotel.status === 'REJECTED'
-                      ? 'danger'
-                      : 'warning'
-                }}"
-                >{{ hotel.status }}</span
-              >
               <a [routerLink]="['/hotels', hotel.id]" class="btn btn-outline-primary w-100"
                 >View Details</a
               >

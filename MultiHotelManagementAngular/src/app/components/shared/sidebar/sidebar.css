@@ -10,11 +10,41 @@
   height: 100vh;
 }
 .sidebar-header {
-  padding: 20px;
+  padding: 16px 20px;
   border-bottom: 1px solid #343a40;
+}
+.sidebar-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
 }
 .sidebar-header small {
   color: #adb5bd;
+  display: block;
+}
+.sidebar-header-top .notification-bell {
+  color: #adb5bd;
+}
+.sidebar-header-top .notification-bell:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+.sidebar-header-top .badge {
+  top: -2px;
+  right: -2px;
+  font-size: 9px;
+  min-width: 14px;
+  height: 14px;
+}
+.sidebar-header-top .dropdown {
+  right: -8px;
+}
+.sidebar-header-top .dropdown-header {
+  color: #333;
+}
+.sidebar-header-top .notification-item {
+  color: #333;
 }
 .sidebar-nav {
   flex: 1;

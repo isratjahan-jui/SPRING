@@ -18,4 +18,11 @@ public interface BookingService {
     BookingResponseDTO addFoodItemsToBooking(Long bookingId, List<Long> foodItemIds);
     BookingResponseDTO cancelFoodItemsFromBooking(Long bookingId);
     BookingResponseDTO updateBookingStatus(Long id, String status);
+
+    BookingResponseDTO onlineCheckIn(Long bookingId, org.springframework.web.multipart.MultipartFile idImage);
+    BookingResponseDTO expressCheckOut(Long bookingId);
+
+    List<BookingResponseDTO> getBookingsByOwner(Long ownerId);
+    BookingResponseDTO markNoShow(Long bookingId);
+    BookingResponseDTO addExtraCharges(Long bookingId, double amount);
 }

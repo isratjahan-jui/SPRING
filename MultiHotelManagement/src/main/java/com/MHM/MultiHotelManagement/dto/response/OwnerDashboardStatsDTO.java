@@ -12,6 +12,7 @@ public class OwnerDashboardStatsDTO {
     private Long checkedInBookings;
     private Long checkedOutBookings;
     private Long cancelledBookings;
+    private Long noShowBookings;
     private Double totalRevenue;
     private Double totalDue;
 }

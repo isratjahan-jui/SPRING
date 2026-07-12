@@ -8,5 +8,6 @@ public interface PaymentService {
     PaymentResponseDTO updatePayment(Long id, PaymentRequestDTO dto);
     PaymentResponseDTO getPaymentById(Long id);
     PaymentResponseDTO getPaymentByBooking(Long bookingId);
+    PaymentResponseDTO processRefund(Long bookingId);
     void deletePayment(Long id);
 }

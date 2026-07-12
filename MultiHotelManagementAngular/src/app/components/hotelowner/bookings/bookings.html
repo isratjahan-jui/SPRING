@@ -1,5 +1,5 @@
 <div class="container-fluid py-3">
-  <h3 class="mb-3">Bookings</h3>
+  <h3 class="mb-3">Booking Management</h3>
 
   <div class="row mb-3">
     <div class="col-md-4">
@@ -20,6 +20,7 @@
         <option value="CHECKED_IN">Checked In</option>
         <option value="CHECKED_OUT">Checked Out</option>
         <option value="CANCELLED">Cancelled</option>
+        <option value="NO_SHOW">No Show</option>
       </select>
     </div>
   </div>
@@ -35,6 +36,7 @@
           <tr>
             <th>#</th>
             <th>Customer</th>
+            <th>Phone</th>
             <th>Room</th>
             <th>Check In</th>
             <th>Check Out</th>
@@ -42,6 +44,7 @@
             <th>Guests</th>
             <th>Total</th>
             <th>Due</th>
+            <th>Extra</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -50,7 +53,14 @@
           @for (b of bookings; track b.id; let i = $index) {
             <tr>
               <td>{{ i + 1 }}</td>
-              <td>{{ b.customerName }}</td>
+              <td>
+                <span
+                  title="Customer: {{ b.customerName }}{{ b.phone ? ' | Phone: ' + b.phone : '' }}"
+                >
+                  {{ b.customerName }}
+                </span>
+              </td>
+              <td>{{ b.phone || '—' }}</td>
               <td>{{ b.roomType }}</td>
               <td>{{ b.checkInDate | date: 'dd MMM yyyy' }}</td>
               <td>{{ b.checkOutDate | date: 'dd MMM yyyy' }}</td>
@@ -58,6 +68,13 @@
               <td>{{ b.totalGuests }}</td>
               <td>&#2547;{{ b.totalAmount | number: '1.0-0' }}</td>
               <td>&#2547;{{ b.dueAmount | number: '1.0-0' }}</td>
+              <td>
+                @if (b.extraCharges > 0) {
+                  <span class="text-warning">+&#2547;{{ b.extraCharges }}</span>
+                } @else {
+                  —
+                }
+              </td>
               <td>
                 <span
                   class="badge bg-{{
@@ -69,10 +86,12 @@
                           ? 'secondary'
                           : b.status === 'CANCELLED'
                             ? 'danger'
-                            : 'warning'
+                            : b.status === 'NO_SHOW'
+                              ? 'dark'
+                              : 'warning'
                   }}"
                 >
-                  {{ b.status }}
+                  {{ b.status === 'NO_SHOW' ? 'No Show' : b.status }}
                 </span>
               </td>
               <td>
@@ -80,13 +99,32 @@
                   <button class="btn btn-sm btn-success me-1" (click)="confirmBooking(b)">
                     Confirm
                   </button>
+                  <button class="btn btn-sm btn-outline-dark me-1" (click)="markNoShow(b)">
+                    No Show
+                  </button>
                   <button class="btn btn-sm btn-danger" (click)="cancelBooking(b)">Cancel</button>
                 }
                 @if (b.status === 'CONFIRMED') {
-                  <button class="btn btn-sm btn-info" (click)="checkIn(b)">Check In</button>
+                  <button class="btn btn-sm btn-info me-1" (click)="checkIn(b)">Check In</button>
+                  <button class="btn btn-sm btn-outline-dark me-1" (click)="markNoShow(b)">
+                    No Show
+                  </button>
+                  <button class="btn btn-sm btn-danger" (click)="cancelBooking(b)">Cancel</button>
                 }
                 @if (b.status === 'CHECKED_IN') {
-                  <button class="btn btn-sm btn-secondary" (click)="checkOut(b)">Check Out</button>
+                  <div class="d-flex align-items-center gap-1">
+                    <input
+                      type="number"
+                      class="form-control form-control-sm"
+                      style="width: 80px"
+                      placeholder="Extra BDT"
+                      [(ngModel)]="extraChargeAmount[b.id]"
+                      min="0"
+                    />
+                    <button class="btn btn-sm btn-secondary" (click)="checkOutWithExtraCharges(b)">
+                      Check Out
+                    </button>
+                  </div>
                 }
               </td>
             </tr>

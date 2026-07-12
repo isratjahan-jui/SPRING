@@ -16,11 +16,18 @@ import com.MHM.MultiHotelManagement.repository.RoomRepository;
 import com.MHM.MultiHotelManagement.repository.FoodItemRepository;
 import com.MHM.MultiHotelManagement.service.BookingService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class BookingServiceImple implements BookingService {
@@ -30,6 +37,9 @@ public class BookingServiceImple implements BookingService {
     private final HotelRepository hotelRepository;
     private final RoomRepository roomRepository;
     private final FoodItemRepository foodItemRepository;
+
+    @Value("${image.upload.dir:uploads}")
+    private String uploadDir;
 
     public BookingServiceImple(BookingRepository bookingRepository,
                                CustomerRepository customerRepository,
@@ -60,6 +70,13 @@ public class BookingServiceImple implements BookingService {
         booking.setRoom(room);
         booking.setStatus(BookingStatus.PENDING);
 
+        // Double booking check
+        List<Booking> conflicting = bookingRepository.findConflictingBookings(
+                room.getId(), dto.getCheckInDate(), dto.getCheckOutDate());
+        if (!conflicting.isEmpty()) {
+            throw new IllegalStateException("Room is already booked for the selected dates");
+        }
+
         // Calculate totalAmount and dueAmount
         double roomTotal = room.getPricePerNight() * dto.getNumberOfRooms();
         double discount = roomTotal * dto.getDiscountRate() / 100.0;
@@ -67,6 +84,15 @@ public class BookingServiceImple implements BookingService {
         booking.setTotalPrice(roomTotal);
         booking.setTotalAmount(totalAmount);
         booking.setDueAmount(totalAmount - dto.getAdvanceAmount());
+
+        // Set cancellation deadline: 24 hours before check-in
+        if (dto.getCheckInDate() != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(dto.getCheckInDate());
+            cal.add(Calendar.HOUR, -24);
+            booking.setCancellationDeadline(cal.getTime());
+            booking.setCancellationPolicyText("Free cancellation up to 24 hours before check-in");
+        }
 
         // FoodItem integration
         if (dto.getFoodItemIds() != null && !dto.getFoodItemIds().isEmpty()) {
@@ -187,5 +213,102 @@ public class BookingServiceImple implements BookingService {
         booking.setStatus(newStatus);
         Booking updated = bookingRepository.save(booking);
         return BookingMapperDTO.toResponseDTO(updated);
+    }
+
+    @Override
+    @Transactional
+    public BookingResponseDTO onlineCheckIn(Long bookingId, MultipartFile idImage) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
+
+        if (booking.getStatus() != BookingStatus.CONFIRMED) {
+            throw new IllegalStateException("Booking must be CONFIRMED before online check-in");
+        }
+
+        if (idImage != null && !idImage.isEmpty()) {
+            String imagePath = uploadIdImage(idImage, booking.getId());
+            booking.setIdImagePath(imagePath);
+        }
+
+        booking.setOnlineCheckIn(true);
+        booking.setStatus(BookingStatus.CHECKED_IN);
+
+        // Generate digital key: bookingId-roomId-randomUUID
+        String key = "DK-" + booking.getId() + "-" + booking.getRoom().getId() + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        booking.setDigitalKey(key);
+
+        Booking updated = bookingRepository.save(booking);
+        return BookingMapperDTO.toResponseDTO(updated);
+    }
+
+    @Override
+    @Transactional
+    public BookingResponseDTO expressCheckOut(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
+
+        if (booking.getStatus() != BookingStatus.CHECKED_IN) {
+            throw new IllegalStateException("Booking must be CHECKED_IN before check-out");
+        }
+
+        booking.setStatus(BookingStatus.CHECKED_OUT);
+        Booking updated = bookingRepository.save(booking);
+        return BookingMapperDTO.toResponseDTO(updated);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookingResponseDTO> getBookingsByOwner(Long ownerId) {
+        return bookingRepository.findAllBookingsByOwnerId(ownerId)
+                .stream().map(BookingMapperDTO::toResponseDTO).toList();
+    }
+
+    @Override
+    @Transactional
+    public BookingResponseDTO markNoShow(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
+
+        if (booking.getStatus() != BookingStatus.CONFIRMED && booking.getStatus() != BookingStatus.PENDING) {
+            throw new IllegalStateException("Only CONFIRMED or PENDING bookings can be marked as No-Show");
+        }
+
+        booking.setStatus(BookingStatus.NO_SHOW);
+        Booking updated = bookingRepository.save(booking);
+        return BookingMapperDTO.toResponseDTO(updated);
+    }
+
+    @Override
+    @Transactional
+    public BookingResponseDTO addExtraCharges(Long bookingId, double amount) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
+
+        booking.setExtraCharges(booking.getExtraCharges() + amount);
+        booking.setDueAmount(booking.getDueAmount() + amount);
+        booking.setTotalAmount(booking.getTotalAmount() + amount);
+        Booking updated = bookingRepository.save(booking);
+        return BookingMapperDTO.toResponseDTO(updated);
+    }
+
+    private String uploadIdImage(MultipartFile file, Long bookingId) {
+        try {
+            Path path = Paths.get(uploadDir, "checkin-id");
+            if (!Files.exists(path)) {
+                Files.createDirectories(path);
+            }
+
+            String ext = "";
+            String original = file.getOriginalFilename();
+            if (original != null && original.contains(".")) {
+                ext = original.substring(original.lastIndexOf("."));
+            }
+
+            String fileName = "booking_" + bookingId + "_" + UUID.randomUUID() + ext;
+            Files.copy(file.getInputStream(), path.resolve(fileName));
+            return fileName;
+        } catch (Exception e) {
+            throw new RuntimeException("ID image upload failed: " + e.getMessage());
+        }
     }
 }

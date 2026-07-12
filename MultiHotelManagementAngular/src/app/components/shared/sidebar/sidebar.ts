@@ -1,21 +1,28 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { NotificationDropdown } from '../notification-dropdown/notification-dropdown';
+import { NotificationService } from '../../../services/notification.service';
 import { filter, map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, NotificationDropdown],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
 })
-export class Sidebar {
+export class Sidebar implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private notificationService = inject(NotificationService);
   role = () => this.auth.getRole();
   isLoggedIn = () => this.auth.isLoggedIn();
   userName = this.auth.getUser()?.email;
+
+  ngOnInit() {
+    this.notificationService.connect();
+  }
 
   currentRole = toSignal(
     this.router.events.pipe(

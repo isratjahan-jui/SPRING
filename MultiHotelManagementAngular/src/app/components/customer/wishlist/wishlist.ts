@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { WishlistService } from '../../../services/wishlist.service';
@@ -13,19 +13,16 @@ import { WishlistResponse } from '../../../models/wishlist.model';
   styleUrl: './wishlist.css',
 })
 export class CustomerWishlist implements OnInit {
-
-
   private auth = inject(AuthService);
   private customerService = inject(CustomerService);
   private wishlistService = inject(WishlistService);
+  private cdr = inject(ChangeDetectorRef);
 
   items: WishlistResponse[] = [];
   loading = true;
 
   ngOnInit() {
-
-    const userId = 1;
-    
+    const userId = this.auth.getUser()?.userId;
     if (userId) {
       this.customerService.getCustomerByUserId(userId).subscribe({
         next: (customer) => {
@@ -34,14 +31,22 @@ export class CustomerWishlist implements OnInit {
               next: (data) => {
                 this.items = data;
                 this.loading = false;
+                this.cdr.markForCheck();
               },
-              error: () => (this.loading = false),
+              error: () => {
+                this.loading = false;
+                this.cdr.markForCheck();
+              },
             });
           } else {
             this.loading = false;
+            this.cdr.markForCheck();
           }
         },
-        error: () => (this.loading = false),
+        error: () => {
+          this.loading = false;
+          this.cdr.markForCheck();
+        },
       });
     } else {
       this.loading = false;
@@ -52,6 +57,7 @@ export class CustomerWishlist implements OnInit {
     this.wishlistService.delete(id).subscribe({
       next: () => {
         this.items = this.items.filter((i) => i.id !== id);
+        this.cdr.markForCheck();
       },
     });
   }

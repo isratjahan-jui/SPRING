@@ -7,6 +7,7 @@ export interface OwnerDashboardStats {
   checkedInBookings: number;
   checkedOutBookings: number;
   cancelledBookings: number;
+  noShowBookings: number;
   totalRevenue: number;
   totalDue: number;
 }

@@ -1,6 +1,11 @@
 <div class="sidebar">
   <div class="sidebar-header">
-    <h5 class="mb-0">MultiHotel</h5>
+    <div class="sidebar-header-top">
+      <h5 class="mb-0">MultiHotel</h5>
+      @if (isLoggedIn()) {
+        <app-notification-dropdown />
+      }
+    </div>
     <small>{{ isLoggedIn() ? userName : 'Guest' }}</small>
   </div>
 
@@ -24,6 +29,7 @@
       <a routerLink="/owner/gallery" routerLinkActive="active">Gallery</a>
       <a routerLink="/owner/food-items" routerLinkActive="active">Food Items</a>
       <a routerLink="/owner/bookings" routerLinkActive="active">Bookings</a>
+      <a routerLink="/owner/payments" routerLinkActive="active">Payments</a>
     } @else if ((isLoggedIn() ? role : currentRole()) === 'CUSTOMER') {
       <a
         routerLink="/customer"

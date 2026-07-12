@@ -1,6 +1,7 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Hotel } from '../../../models/hotel.model';
 import { HotelDetails as HotelDetailsModel } from '../../../models/hotel-details.model';
 import { Facility } from '../../../models/facility.model';
@@ -11,10 +12,14 @@ import { HotelDetailsService } from '../../../services/hotel-details.service';
 import { FacilityService } from '../../../services/facility.service';
 import { FoodItemService } from '../../../services/food-item.service';
 import { RoomService } from '../../../services/room.service';
+import { ReviewService } from '../../../services/review.service';
+import { AuthService } from '../../../services/auth.service';
+import { CustomerService } from '../../../services/customer.service';
+import { ReviewResponse } from '../../../models/review.model';
 
 @Component({
   selector: 'app-hotel-details',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './hotel-details.html',
   styleUrl: './hotel-details.css',
 })
@@ -24,9 +29,21 @@ export class HotelDetails implements OnInit {
   facilities: Facility[] = [];
   foodItems: FoodItem[] = [];
   rooms: Room[] = [];
+  reviews: ReviewResponse[] = [];
   detailsError = false;
   loading = true;
   errorMsg = '';
+
+  reviewRating = 5;
+  reviewComment = '';
+  submittingReview = false;
+  reviewSubmitted = false;
+  isCustomer = false;
+  customerId: number | null = null;
+
+  private auth = inject(AuthService);
+  private customerService = inject(CustomerService);
+  private reviewService = inject(ReviewService);
 
   constructor(
     private route: ActivatedRoute,
@@ -40,6 +57,18 @@ export class HotelDetails implements OnInit {
 
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
+
+    this.isCustomer = this.auth.getRole() === 'CUSTOMER';
+    const userId = this.auth.getUser()?.userId;
+    if (userId) {
+      this.customerService.getCustomerByUserId(userId).subscribe({
+        next: (c) => {
+          this.customerId = c.id ?? null;
+          this.cdr.markForCheck();
+        },
+        error: () => {},
+      });
+    }
 
     this.hotelService.getById(id).subscribe({
       next: (data) => {
@@ -89,6 +118,40 @@ export class HotelDetails implements OnInit {
       },
       error: () => {},
     });
+
+    this.reviewService.getByHotel(id).subscribe({
+      next: (data) => {
+        this.reviews = data;
+        this.cdr.markForCheck();
+      },
+      error: () => {},
+    });
+  }
+
+  submitReview() {
+    if (!this.reviewComment.trim() || !this.customerId || !this.hotel) return;
+    this.submittingReview = true;
+    this.reviewService
+      .create({
+        rating: this.reviewRating,
+        comment: this.reviewComment,
+        hotelId: this.hotel.id,
+        customerId: this.customerId,
+      })
+      .subscribe({
+        next: (review) => {
+          this.reviews.unshift(review);
+          this.reviewComment = '';
+          this.reviewRating = 5;
+          this.reviewSubmitted = true;
+          this.submittingReview = false;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.submittingReview = false;
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   getImageUrl(image: string): string {

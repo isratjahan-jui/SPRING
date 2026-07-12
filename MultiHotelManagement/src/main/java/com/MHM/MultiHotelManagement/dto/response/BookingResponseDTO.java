@@ -17,5 +17,12 @@ public class BookingResponseDTO {
     private double totalAmount;
     private double dueAmount;
     private String status;
+    private boolean onlineCheckIn;
+    private String idImagePath;
+    private String digitalKey;
+    private Date cancellationDeadline;
+    private String cancellationPolicyText;
+    private double extraCharges;
+    private String phone;
     private List<String> foodItems;
 }

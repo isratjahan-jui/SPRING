@@ -1,6 +1,7 @@
 package com.MHM.MultiHotelManagement.repository;
 
 import com.MHM.MultiHotelManagement.entity.Booking;
+import com.MHM.MultiHotelManagement.enums.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -85,4 +86,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         WHERE h.owner.id = :ownerId
     """)
     List<Booking> findAllBookingsByOwnerId(@Param("ownerId") Long ownerId);
+
+    List<Booking> findByStatus(BookingStatus status);
 }

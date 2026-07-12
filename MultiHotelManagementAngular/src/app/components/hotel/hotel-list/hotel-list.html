@@ -23,17 +23,6 @@
             <a [routerLink]="['/hotels', hotel.id]" class="btn btn-sm btn-outline-primary mt-2"
               >View Details</a
             >
-            <span
-              class="badge bg-{{
-                hotel.status === 'APPROVED'
-                  ? 'success'
-                  : hotel.status === 'REJECTED'
-                    ? 'danger'
-                    : 'warning'
-              }}"
-            >
-              {{ hotel.status }}
-            </span>
           </div>
         </div>
       </div>

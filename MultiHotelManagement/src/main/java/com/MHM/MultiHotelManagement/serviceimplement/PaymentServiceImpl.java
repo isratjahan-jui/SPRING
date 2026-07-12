@@ -6,6 +6,7 @@ import com.MHM.MultiHotelManagement.dto.response.PaymentResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Booking;
 import com.MHM.MultiHotelManagement.entity.ExtraService;
 import com.MHM.MultiHotelManagement.entity.Payment;
+import com.MHM.MultiHotelManagement.enums.BookingStatus;
 import com.MHM.MultiHotelManagement.enums.PaymentStatus;
 import com.MHM.MultiHotelManagement.repository.BookingRepository;
 import com.MHM.MultiHotelManagement.repository.ExtraServiceRepository;
@@ -77,6 +78,21 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = paymentRepository.findByBooking_Id(bookingId)
                 .orElseThrow(() -> new EntityNotFoundException("Payment not found for booking"));
         return PaymentMapper.toResponseDTO(payment);
+    }
+
+    @Override
+    @Transactional
+    public PaymentResponseDTO processRefund(Long bookingId) {
+        Payment payment = paymentRepository.findByBooking_Id(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Payment not found for booking"));
+
+        Booking booking = payment.getBooking();
+        booking.setStatus(BookingStatus.CANCELLED);
+        bookingRepository.save(booking);
+
+        payment.setStatus(PaymentStatus.REFUNDED);
+        Payment saved = paymentRepository.save(payment);
+        return PaymentMapper.toResponseDTO(saved);
     }
 
     @Override

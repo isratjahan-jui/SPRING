@@ -27,6 +27,9 @@ public class WebConfig implements WebMvcConfigurer {
 
         registry.addResourceHandler("/customer/**")
                 .addResourceLocations("file:uploads/customer/");
+
+        registry.addResourceHandler("/checkin-id/**")
+                .addResourceLocations("file:uploads/checkin-id/");
     }
 
     @Override

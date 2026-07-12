@@ -39,6 +39,7 @@ public class HotelOwnerDashboardServiceImpl implements HotelOwnerDashboardServic
         stats.setCheckedInBookings(allBookings.stream().filter(b -> b.getStatus() != null && b.getStatus().name().equals("CHECKED_IN")).count());
         stats.setCheckedOutBookings(allBookings.stream().filter(b -> b.getStatus() != null && b.getStatus().name().equals("CHECKED_OUT")).count());
         stats.setCancelledBookings(allBookings.stream().filter(b -> b.getStatus() != null && b.getStatus().name().equals("CANCELLED")).count());
+        stats.setNoShowBookings(allBookings.stream().filter(b -> b.getStatus() != null && b.getStatus().name().equals("NO_SHOW")).count());
 
         double totalRevenue = allBookings.stream()
                 .filter(b -> b.getStatus() != null && !b.getStatus().name().equals("CANCELLED"))

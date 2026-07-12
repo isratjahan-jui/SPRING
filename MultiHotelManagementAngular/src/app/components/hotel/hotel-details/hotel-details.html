@@ -21,9 +21,6 @@
         <h2 class="card-title">{{ hotel.hotelName }}</h2>
         <p class="text-muted mb-1">{{ hotel.address }}</p>
         <div class="mb-2">
-          <span class="badge bg-{{ hotel.status === 'APPROVED' ? 'success' : 'warning' }}">
-            {{ hotel.status }}
-          </span>
           @if (hotel.locationName) {
             <span class="badge bg-info ms-1">{{ hotel.locationName }}</span>
           }
@@ -130,6 +127,13 @@
                     @if (r.amenities) {
                       <p class="card-text small text-muted mb-0">{{ r.amenities }}</p>
                     }
+                    @if (isCustomer) {
+                      <a
+                        [routerLink]="['/book-hotel', hotel.id, r.id]"
+                        class="btn btn-sm btn-primary w-100 mt-2"
+                        >Book Now</a
+                      >
+                    }
                   </div>
                 </div>
               </div>
@@ -163,6 +167,67 @@
                 </div>
               </div>
             }
+          </div>
+        }
+
+        <hr />
+        <h5>Reviews</h5>
+        @if (reviews.length > 0) {
+          <div class="mb-3">
+            @for (r of reviews; track r.id) {
+              <div class="border rounded p-3 mb-2">
+                <div class="d-flex justify-content-between">
+                  <strong>{{ r.customerName }}</strong>
+                  <span class="text-warning">
+                    @for (s of [1, 2, 3, 4, 5]; track s) {
+                      <span [class.text-muted]="s > r.rating">&#9733;</span>
+                    }
+                  </span>
+                </div>
+                <p class="mb-1">{{ r.comment }}</p>
+                <small class="text-muted">{{ r.createdAt | date: 'medium' }}</small>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="text-muted">No reviews yet.</p>
+        }
+
+        @if (isCustomer && customerId) {
+          <div class="card bg-light p-3">
+            <h6>Write a Review</h6>
+            @if (reviewSubmitted) {
+              <div class="alert alert-success">Review submitted successfully!</div>
+            }
+            <div class="mb-2">
+              <label class="form-label">Rating</label>
+              <select class="form-select" [(ngModel)]="reviewRating">
+                <option value="5">5 - Excellent</option>
+                <option value="4">4 - Good</option>
+                <option value="3">3 - Average</option>
+                <option value="2">2 - Poor</option>
+                <option value="1">1 - Terrible</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Comment</label>
+              <textarea
+                class="form-control"
+                [(ngModel)]="reviewComment"
+                rows="3"
+                placeholder="Share your experience..."
+              ></textarea>
+            </div>
+            <button
+              class="btn btn-primary"
+              (click)="submitReview()"
+              [disabled]="submittingReview || !reviewComment.trim()"
+            >
+              @if (submittingReview) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              Submit Review
+            </button>
           </div>
         }
       </div>

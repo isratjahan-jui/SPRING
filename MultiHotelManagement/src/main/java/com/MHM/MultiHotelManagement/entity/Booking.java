@@ -44,6 +44,18 @@ public class Booking {
     private Date foodCancellableUntil;
     private Boolean foodCancelled = false;
 
+    // Online check-in / ID verification
+    private boolean onlineCheckIn = false;
+    private String idImagePath;
+    private String digitalKey;
+
+    // Cancellation policy
+    private Date cancellationDeadline;
+    private String cancellationPolicyText;
+
+    // Extra charges added by hotel (food, minibar, damages)
+    private double extraCharges = 0;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private BookingStatus status;

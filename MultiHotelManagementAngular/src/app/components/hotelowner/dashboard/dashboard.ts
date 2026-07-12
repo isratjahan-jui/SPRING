@@ -5,7 +5,9 @@ import { HotelOwner } from '../../../models/hotel-owner.model';
 import { KEYS, StorageService } from '../../../services/storage.service';
 import { HotelOwnerService } from '../../../services/hotel-owner.service';
 import { OwnerDashboardService } from '../../../services/owner-dashboard.service';
+import { BookingService } from '../../../services/booking.service';
 import { OwnerDashboardStats } from '../../../models/owner-dashboard.model';
+import { Booking } from '../../../models/booking.model';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../../environments/environments';
 import { RouterLink } from '@angular/router';
@@ -24,10 +26,12 @@ export class OwnerDashboard implements OnInit {
   ownerId = 0;
   owner: HotelOwner | null = null;
   stats: OwnerDashboardStats | null = null;
+  todaysArrivals: Booking[] = [];
 
   private auth = inject(AuthService);
   private ownerService = inject(HotelOwnerService);
   private dashboardService = inject(OwnerDashboardService);
+  private bookingService = inject(BookingService);
   private storage = inject(StorageService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -48,6 +52,7 @@ export class OwnerDashboard implements OnInit {
         this.cdr.markForCheck();
         if (this.ownerId) {
           this.loadStats();
+          this.loadTodaysArrivals();
         }
       },
       error: (err) => console.error(err),
@@ -61,6 +66,26 @@ export class OwnerDashboard implements OnInit {
         this.cdr.markForCheck();
       },
       error: (err) => console.error('Failed to load dashboard stats', err),
+    });
+  }
+
+  loadTodaysArrivals(): void {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+
+    this.bookingService.getByOwner(this.ownerId).subscribe({
+      next: (bookings) => {
+        this.todaysArrivals = bookings.filter((b) => {
+          const checkIn = new Date(b.checkInDate);
+          const checkInStr = checkIn.toISOString().split('T')[0];
+          return checkInStr === todayStr && (b.status === 'CONFIRMED' || b.status === 'PENDING');
+        });
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.todaysArrivals = [];
+        this.cdr.markForCheck();
+      },
     });
   }
 }

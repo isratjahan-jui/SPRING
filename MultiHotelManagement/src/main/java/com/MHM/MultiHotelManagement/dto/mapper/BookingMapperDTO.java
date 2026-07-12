@@ -43,6 +43,16 @@ public class BookingMapperDTO {
             response.setStatus(booking.getStatus().name());
         }
 
+        response.setOnlineCheckIn(booking.isOnlineCheckIn());
+        response.setIdImagePath(booking.getIdImagePath());
+        response.setDigitalKey(booking.getDigitalKey());
+        response.setCancellationDeadline(booking.getCancellationDeadline());
+        response.setCancellationPolicyText(booking.getCancellationPolicyText());
+        response.setExtraCharges(booking.getExtraCharges());
+        if (booking.getCustomer() != null) {
+            response.setPhone(booking.getCustomer().getPhone());
+        }
+
         return response;
     }
 }

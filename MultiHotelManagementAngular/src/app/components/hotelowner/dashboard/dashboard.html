@@ -174,6 +174,24 @@
         </div>
       </div>
     </div>
+
+    <div class="col-md-3 mb-3">
+      <div class="card shadow border-0">
+        <div class="card-body text-center">
+          <h3 class="text-dark">{{ stats?.noShowBookings ?? 0 }}</h3>
+          <h6 class="text-muted">No Show</h6>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <div class="card shadow border-0">
+        <div class="card-body text-center">
+          <h3 class="text-secondary">{{ stats?.checkedOutBookings ?? 0 }}</h3>
+          <h6 class="text-muted">Checked Out</h6>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Due Amount -->
@@ -185,6 +203,54 @@
             <h4 class="text-warning mb-0">
               Total Due: &#2547;{{ stats.totalDue | number: '1.0-0' }}
             </h4>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Today's Arrivals -->
+  @if (todaysArrivals.length > 0) {
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card shadow border-0">
+          <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Today's Arrivals ({{ todaysArrivals.length }})</h5>
+          </div>
+          <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Phone</th>
+                  <th>Hotel</th>
+                  <th>Room</th>
+                  <th>Guests</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (b of todaysArrivals; track b.id) {
+                  <tr>
+                    <td>{{ b.customerName }}</td>
+                    <td>{{ b.phone || '—' }}</td>
+                    <td>{{ b.hotelName }}</td>
+                    <td>{{ b.roomType }}</td>
+                    <td>{{ b.totalGuests }}</td>
+                    <td>
+                      <span class="badge bg-{{ b.status === 'CONFIRMED' ? 'success' : 'warning' }}">
+                        {{ b.status }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <div class="card-footer text-end">
+            <a routerLink="/owner/bookings" class="btn btn-sm btn-outline-info"
+              >View All Bookings</a
+            >
           </div>
         </div>
       </div>

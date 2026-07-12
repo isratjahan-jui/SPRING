@@ -4,8 +4,10 @@ import com.MHM.MultiHotelManagement.dto.request.BookingRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.BookingResponseDTO;
 import com.MHM.MultiHotelManagement.service.BookingService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -76,5 +78,34 @@ public class BookingController {
             @PathVariable Long id,
             @RequestParam String status) {
         return ResponseEntity.ok(bookingService.updateBookingStatus(id, status));
+    }
+
+    @PostMapping(value = "/{id}/online-checkin", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BookingResponseDTO> onlineCheckIn(
+            @PathVariable Long id,
+            @RequestPart(value = "idImage", required = false) MultipartFile idImage) {
+        return ResponseEntity.ok(bookingService.onlineCheckIn(id, idImage));
+    }
+
+    @PostMapping("/{id}/express-checkout")
+    public ResponseEntity<BookingResponseDTO> expressCheckOut(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.expressCheckOut(id));
+    }
+
+    @GetMapping("/owner/{ownerId}")
+    public ResponseEntity<List<BookingResponseDTO>> getByOwner(@PathVariable Long ownerId) {
+        return ResponseEntity.ok(bookingService.getBookingsByOwner(ownerId));
+    }
+
+    @PostMapping("/{id}/no-show")
+    public ResponseEntity<BookingResponseDTO> markNoShow(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.markNoShow(id));
+    }
+
+    @PatchMapping("/{id}/extra-charges")
+    public ResponseEntity<BookingResponseDTO> addExtraCharges(
+            @PathVariable Long id,
+            @RequestParam double amount) {
+        return ResponseEntity.ok(bookingService.addExtraCharges(id, amount));
     }
 }

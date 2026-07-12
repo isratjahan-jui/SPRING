@@ -9,6 +9,7 @@ import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.repository.NotificationRepository;
 import com.MHM.MultiHotelManagement.repository.UserRepository;
 import com.MHM.MultiHotelManagement.service.NotificationService;
+import com.MHM.MultiHotelManagement.service.SseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+    private final SseService sseService;
 
     @Override
     @Transactional
@@ -37,7 +39,9 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setReadStatus(false);
 
         Notification saved = notificationRepository.save(notification);
-        return NotificationMapper.toDTO(saved);
+        NotificationResponseDTO response = NotificationMapper.toDTO(saved);
+        sseService.sendNotification(dto.getUserId(), response);
+        return response;
     }
 
     @Override

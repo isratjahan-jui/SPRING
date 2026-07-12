@@ -38,6 +38,11 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getPaymentByBooking(bookingId));
     }
 
+    @PostMapping("/{bookingId}/refund")
+    public ResponseEntity<PaymentResponseDTO> refund(@PathVariable Long bookingId) {
+        return ResponseEntity.ok(paymentService.processRefund(bookingId));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePayment(@PathVariable Long id) {
         paymentService.deletePayment(id);
