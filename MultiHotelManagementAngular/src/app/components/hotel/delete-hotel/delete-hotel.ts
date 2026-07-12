@@ -11,12 +11,13 @@ import { Hotel } from '../../../models/hotel.model';
   styleUrl: './delete-hotel.css',
 })
 export class DeleteHotel implements OnInit {
-
   hotels: Hotel[] = [];
   pendingHotels: Hotel[] = [];
 
-
-  constructor(private hotelService: HotelService, private cdr: ChangeDetectorRef) { }
+  constructor(
+    private hotelService: HotelService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
     this.loadHotels();
@@ -24,15 +25,21 @@ export class DeleteHotel implements OnInit {
   }
 
   loadHotels() {
-    this.hotelService.getAllApproved().subscribe(data => {
-      this.hotels = data;
-      this.cdr.markForCheck();
+    this.hotelService.getAllApproved().subscribe({
+      next: (data) => {
+        this.hotels = data;
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.error('Approved hotels error:', err.error),
     });
   }
   loadPending() {
-    this.hotelService.getPending().subscribe(data => {
-      this.pendingHotels = data;
-      this.cdr.markForCheck();
+    this.hotelService.getPending().subscribe({
+      next: (data) => {
+        this.pendingHotels = data;
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.error('Pending hotels error:', err.error),
     });
   }
 
@@ -49,21 +56,13 @@ export class DeleteHotel implements OnInit {
     });
   }
 
-
-
-
-
   deleteHotel(id: number) {
     if (confirm('Are you sure you want to delete this hotel?')) {
       this.hotelService.delete(id).subscribe(() => {
         // delete successful → reload list
         this.loadHotels();
         this.cdr.markForCheck();
-
       });
     }
   }
-
-
-
 }

@@ -15,6 +15,15 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
 
     List<Hotel> findByStatus(HotelStatus status);
 
+    @Query("""
+        SELECT h FROM Hotel h
+        LEFT JOIN FETCH h.location l
+        LEFT JOIN FETCH h.hotelDetails hd
+        LEFT JOIN FETCH h.owner o
+        WHERE h.status = :status
+    """)
+    List<Hotel> findByStatusWithDetails(@Param("status") HotelStatus status);
+
     Optional<Hotel> findByHotelName(String hotelname);
 
     @Query("""
@@ -22,7 +31,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
         LEFT JOIN FETCH h.location l
         LEFT JOIN FETCH h.hotelDetails hd
         LEFT JOIN FETCH h.owner o
-        LEFT JOIN FETCH o.user
         WHERE h.id = :id
     """)
     Optional<Hotel> findByIdWithDetails(@Param("id") Long id);
@@ -32,7 +40,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
         LEFT JOIN FETCH h.location l
         LEFT JOIN FETCH h.hotelDetails hd
         LEFT JOIN FETCH h.owner o
-        LEFT JOIN FETCH o.user
         WHERE h.status = 'APPROVED'
     """)
     List<Hotel> findAllApprovedWithDetails();
@@ -42,7 +49,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
         LEFT JOIN FETCH h.location l
         LEFT JOIN FETCH h.hotelDetails hd
         LEFT JOIN FETCH h.owner o
-        LEFT JOIN FETCH o.user
         WHERE o.id = :ownerId
     """)
     List<Hotel> findByOwner_IdWithDetails(@Param("ownerId") Long ownerId);
@@ -52,7 +58,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
         LEFT JOIN FETCH h.location l
         LEFT JOIN FETCH h.hotelDetails hd
         LEFT JOIN FETCH h.owner o
-        LEFT JOIN FETCH o.user
         WHERE h.location.city = :city
     """)
     List<Hotel> findByCityWithDetails(@Param("city") String city);
@@ -62,7 +67,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
         LEFT JOIN FETCH h.location l
         LEFT JOIN FETCH h.hotelDetails hd
         LEFT JOIN FETCH h.owner o
-        LEFT JOIN FETCH o.user
         WHERE h.location.locationName = :locationName
     """)
     List<Hotel> findHotelByLocationName(@Param("locationName") String locationName);
@@ -72,7 +76,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
         LEFT JOIN FETCH h.location l
         LEFT JOIN FETCH h.hotelDetails hd
         LEFT JOIN FETCH h.owner o
-        LEFT JOIN FETCH o.user
         WHERE h.location.id = :locationId
     """)
     List<Hotel> findHotelsByLocationId(@Param("locationId") Long locationId);

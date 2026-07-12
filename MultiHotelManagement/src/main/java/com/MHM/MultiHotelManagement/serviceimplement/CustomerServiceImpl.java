@@ -53,6 +53,14 @@ public class CustomerServiceImpl implements CustomerService {
             );
         }
 
+        // Phone আগে থেকে আছে কিনা check (User table এ)
+        if (dto.getPhone() != null && !dto.getPhone().isBlank()
+                && userRepo.existsByPhone(dto.getPhone())) {
+            throw new AlreadyExistsException(
+                    "Phone number already registered: " + dto.getPhone()
+            );
+        }
+
         // 1. User account তৈরি করো (login credentials)
         User user = new User();
         user.setName(dto.getName());

@@ -146,7 +146,7 @@ public class HotelServiceImpl implements HotelService {
     @Override
     @Transactional(readOnly = true)
     public List<HotelResponseDTO> getPendingHotels() {
-        return hotelRepo.findByStatus(HotelStatus.PENDING_APPROVAL)
+        return hotelRepo.findByStatusWithDetails(HotelStatus.PENDING_APPROVAL)
                 .stream().map(HotelMapper::toDTO).collect(Collectors.toList());
     }
 

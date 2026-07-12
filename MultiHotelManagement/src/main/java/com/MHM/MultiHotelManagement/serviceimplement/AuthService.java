@@ -63,7 +63,7 @@ public class AuthService {
      * @return LoginResponseDTO containing token and user details
      */
 
-    @Transactional(readOnly = true)
+    @Transactional
     public LoginResponseDTO login(LoginRequestDTO dto){
         // =====================================================
         // STEP 1: Authenticate user credentials
@@ -156,21 +156,28 @@ public class AuthService {
 
         if (user.getRole() == Role.HOTEL_OWNER) {
 
-            hotelOwnerRepository.findByUser_IdWithUser(user.getId())
-                    .ifPresent(owner -> {
+            var existingOwner = hotelOwnerRepository.findByUser_IdWithUser(user.getId());
 
-                        // Owner er sathe jodi hotel thake
-                        if (owner.getHotels() != null && !owner.getHotels().isEmpty()) {
+            if (existingOwner.isEmpty()) {
+                HotelOwner newOwner = new HotelOwner();
+                newOwner.setName(user.getName());
+                newOwner.setEmail(user.getEmail());
+                newOwner.setPhone(user.getPhone());
+                newOwner.setUser(user);
+                newOwner = hotelOwnerRepository.save(newOwner);
+                response.setOwnerId(newOwner.getId());
+                response.setOwnerName(newOwner.getName());
+            } else {
+                HotelOwner owner = existingOwner.get();
 
+                if (owner.getHotels() != null && !owner.getHotels().isEmpty()) {
+                    response.setHotelId(owner.getHotels().get(0).getId());
+                    response.setHotelName(owner.getHotels().get(0).getHotelName());
+                }
 
-                            response.setHotelId(owner.getHotels().get(0).getId());
-                            response.setHotelName(owner.getHotels().get(0).getHotelName());
-                        }
-
-                        // Owner er name response dite pare
-                        response.setOwnerId(owner.getId());
-                        response.setOwnerName(owner.getName());
-                    });
+                response.setOwnerId(owner.getId());
+                response.setOwnerName(owner.getName());
+            }
         }
 
 
