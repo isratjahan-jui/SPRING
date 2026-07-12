@@ -4,9 +4,10 @@ import lombok.Data;
 
 @Data
 public class PaymentRequestDTO {
-    private String method;       // CARD, CASH, BKASH
+    private String method;
     private Double amount;
-    private String status;       // Enum value as String: "PAID", "FAILED", "UNPAID", "REFUNDED"
+    private String status;
     private Long bookingId;
-    private Long extraServiceId; // Optional
+    private Long customerId;
+    private Long extraServiceId;
 }

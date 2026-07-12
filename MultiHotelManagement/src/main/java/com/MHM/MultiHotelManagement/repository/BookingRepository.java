@@ -88,4 +88,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllBookingsByOwnerId(@Param("ownerId") Long ownerId);
 
     List<Booking> findByStatus(BookingStatus status);
+
+    @Query("""
+        SELECT b FROM Booking b
+        LEFT JOIN FETCH b.customer c
+        LEFT JOIN FETCH c.user
+        LEFT JOIN FETCH b.hotel h
+        LEFT JOIN FETCH b.room
+    """)
+    List<Booking> findAllWithDetails();
 }

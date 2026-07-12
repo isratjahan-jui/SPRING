@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/payments")
 public class PaymentController {
@@ -28,6 +30,11 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.updatePayment(id, dto));
     }
 
+    @GetMapping
+    public ResponseEntity<List<PaymentResponseDTO>> getAll() {
+        return ResponseEntity.ok(paymentService.getAllPayments());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<PaymentResponseDTO> getPaymentById(@PathVariable Long id) {
         return ResponseEntity.ok(paymentService.getPaymentById(id));
@@ -36,6 +43,11 @@ public class PaymentController {
     @GetMapping("/booking/{bookingId}")
     public ResponseEntity<PaymentResponseDTO> getPaymentByBooking(@PathVariable Long bookingId) {
         return ResponseEntity.ok(paymentService.getPaymentByBooking(bookingId));
+    }
+
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<List<PaymentResponseDTO>> getByCustomer(@PathVariable Long customerId) {
+        return ResponseEntity.ok(paymentService.getPaymentsByCustomer(customerId));
     }
 
     @PostMapping("/{bookingId}/refund")

@@ -11,6 +11,7 @@ export interface Hotel {
   locationName?: string;
   city?: string;
   ownerName?: string;
+  rejectionReason?: string;
 }
 
 export interface HotelRequest {

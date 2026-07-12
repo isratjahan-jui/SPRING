@@ -10,6 +10,10 @@ export class BookingService {
 
   constructor(private http: HttpClient) {}
 
+  getAll() {
+    return this.http.get<Booking[]>(this.API_URL);
+  }
+
   create(data: BookingRequest) {
     return this.http.post<Booking>(this.API_URL, data);
   }

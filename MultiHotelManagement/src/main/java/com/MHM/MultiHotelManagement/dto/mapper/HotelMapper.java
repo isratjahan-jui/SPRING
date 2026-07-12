@@ -19,6 +19,7 @@ public class HotelMapper {
         dto.setOwnerId(hotel.getOwner() != null ? hotel.getOwner().getId() : null);
         dto.setLocationName(hotel.getLocation() != null ? hotel.getLocation().getLocationName() : null);
         dto.setOwnerName(hotel.getOwner() != null ? hotel.getOwner().getName() : null);
+        dto.setRejectionReason(hotel.getRejectionReason());
         return dto;
     }
 

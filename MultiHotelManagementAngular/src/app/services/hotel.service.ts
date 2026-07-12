@@ -47,17 +47,19 @@ export class HotelService {
   delete(id: number) {
     return this.http.delete<string>(`${this.API_URL}/${id}`);
   }
-getPending() {
+  getAll() {
+    return this.http.get<Hotel[]>(`${this.API_URL}/all`);
+  }
+
+  getPending() {
     return this.http.get<Hotel[]>(`${this.API_URL}/pending`);
-}
+  }
 
-approveHotel(id: number) {
+  approveHotel(id: number) {
     return this.http.put<Hotel>(`${this.API_URL}/${id}/approve`, {});
-}
+  }
 
-rejectHotel(id: number) {
-    return this.http.put<Hotel>(`${this.API_URL}/${id}/reject`, {});
-}
-
-
+  rejectHotel(id: number, reason: string) {
+    return this.http.put<Hotel>(`${this.API_URL}/${id}/reject`, { reason });
+  }
 }

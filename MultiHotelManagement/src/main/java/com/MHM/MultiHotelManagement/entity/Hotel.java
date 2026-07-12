@@ -31,6 +31,9 @@ public class Hotel {
     @Enumerated(EnumType.STRING)
     private HotelStatus status;
 
+    @Column(columnDefinition = "TEXT")
+    private String rejectionReason;
+
 //    private Boolean approved;   // Admin approval status
 
     // Extra fields for food service

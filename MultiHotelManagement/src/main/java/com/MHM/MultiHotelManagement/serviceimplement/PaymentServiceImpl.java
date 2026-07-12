@@ -16,6 +16,9 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
@@ -39,6 +42,10 @@ public class PaymentServiceImpl implements PaymentService {
 
         Payment payment = PaymentMapper.toEntity(dto);
         payment.setBooking(booking);
+        payment.setCustomerId(dto.getCustomerId() != null ? dto.getCustomerId()
+                : (booking.getCustomer() != null ? booking.getCustomer().getId() : null));
+        payment.setTransactionDate(LocalDateTime.now());
+        payment.setStatus(PaymentStatus.PAID);
 
         if (dto.getExtraServiceId() != null) {
             ExtraService extraService = extraServiceRepository.findById(dto.getExtraServiceId())
@@ -47,6 +54,13 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         Payment saved = paymentRepository.save(payment);
+
+        // Auto-update booking due amount
+        double paid = saved.getAmount();
+        booking.setAdvanceAmount(booking.getAdvanceAmount() + paid);
+        booking.setDueAmount(Math.max(0, booking.getDueAmount() - paid));
+        bookingRepository.save(booking);
+
         return PaymentMapper.toResponseDTO(saved);
     }
 
@@ -70,6 +84,20 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = paymentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Payment not found"));
         return PaymentMapper.toResponseDTO(payment);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PaymentResponseDTO> getAllPayments() {
+        return paymentRepository.findAll()
+                .stream().map(PaymentMapper::toResponseDTO).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PaymentResponseDTO> getPaymentsByCustomer(Long customerId) {
+        return paymentRepository.findByCustomerId(customerId)
+                .stream().map(PaymentMapper::toResponseDTO).toList();
     }
 
     @Override

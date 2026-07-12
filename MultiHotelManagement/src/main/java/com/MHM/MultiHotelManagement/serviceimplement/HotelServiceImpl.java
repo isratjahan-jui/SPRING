@@ -145,6 +145,13 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<HotelResponseDTO> getAllHotels() {
+        return hotelRepo.findAllWithDetails()
+                .stream().map(HotelMapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<HotelResponseDTO> getPendingHotels() {
         return hotelRepo.findByStatusWithDetails(HotelStatus.PENDING_APPROVAL)
                 .stream().map(HotelMapper::toDTO).collect(Collectors.toList());
@@ -161,10 +168,11 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     @Transactional
-    public HotelResponseDTO rejectHotel(Long id) {
+    public HotelResponseDTO rejectHotel(Long id, String reason) {
         Hotel hotel = hotelRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
         hotel.setStatus(HotelStatus.REJECTED);
+        hotel.setRejectionReason(reason);
         return HotelMapper.toDTO(hotelRepo.save(hotel));
     }
 

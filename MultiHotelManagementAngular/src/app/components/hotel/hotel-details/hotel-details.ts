@@ -45,6 +45,9 @@ export class HotelDetails implements OnInit {
   private customerService = inject(CustomerService);
   private reviewService = inject(ReviewService);
 
+  backRoute = '/hotels';
+  backLabel = 'Back to Hotels';
+
   constructor(
     private route: ActivatedRoute,
     private hotelService: HotelService,
@@ -58,7 +61,15 @@ export class HotelDetails implements OnInit {
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
 
-    this.isCustomer = this.auth.getRole() === 'CUSTOMER';
+    const role = this.auth.getRole();
+    this.isCustomer = role === 'CUSTOMER';
+    if (role === 'ADMIN') {
+      this.backRoute = '/admin/hotels/manage';
+      this.backLabel = 'Back to Manage Hotels';
+    } else if (role === 'HOTEL_OWNER') {
+      this.backRoute = '/owner/my-hotels';
+      this.backLabel = 'Back to My Hotels';
+    }
     const userId = this.auth.getUser()?.userId;
     if (userId) {
       this.customerService.getCustomerByUserId(userId).subscribe({

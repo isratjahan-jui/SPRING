@@ -10,24 +10,52 @@
 
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-icon">🏨</div>
+      <div class="stat-icon">&#10003;</div>
       <div class="stat-info">
         <h3>Approved Hotels</h3>
         <p class="stat-value">{{ approvedHotelCount }}</p>
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">👥</div>
+      <div class="stat-icon">&#9203;</div>
+      <div class="stat-info">
+        <h3>Pending Hotels</h3>
+        <p class="stat-value">{{ pendingHotelCount }}</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">&#10060;</div>
+      <div class="stat-info">
+        <h3>Rejected Hotels</h3>
+        <p class="stat-value">{{ rejectedHotelCount }}</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">&#128101;</div>
       <div class="stat-info">
         <h3>Total Owners</h3>
         <p class="stat-value">{{ ownerCount }}</p>
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">🧑‍🤝‍🧑</div>
+      <div class="stat-icon">&#128101;</div>
       <div class="stat-info">
         <h3>Total Customers</h3>
         <p class="stat-value">{{ customerCount }}</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">&#128197;</div>
+      <div class="stat-info">
+        <h3>Total Bookings</h3>
+        <p class="stat-value">{{ totalBookings }}</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">&#128176;</div>
+      <div class="stat-info">
+        <h3>Total Commission</h3>
+        <p class="stat-value">BDT {{ totalCommission | number }}</p>
       </div>
     </div>
   </div>

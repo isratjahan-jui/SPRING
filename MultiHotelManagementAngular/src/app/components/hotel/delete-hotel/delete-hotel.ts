@@ -1,18 +1,24 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { HotelService } from '../../../services/hotel.service';
 import { Hotel } from '../../../models/hotel.model';
 
 @Component({
   selector: 'app-delete-hotel',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './delete-hotel.html',
   styleUrl: './delete-hotel.css',
 })
 export class DeleteHotel implements OnInit {
-  hotels: Hotel[] = [];
   pendingHotels: Hotel[] = [];
+  approvedHotels: Hotel[] = [];
+  rejectedHotels: Hotel[] = [];
+
+  showRejectModal = false;
+  rejectHotelId: number | null = null;
+  rejectReason = '';
 
   constructor(
     private hotelService: HotelService,
@@ -20,49 +26,47 @@ export class DeleteHotel implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadHotels();
-    this.loadPending();
+    this.loadAllHotels();
   }
 
-  loadHotels() {
-    this.hotelService.getAllApproved().subscribe({
+  loadAllHotels() {
+    this.hotelService.getAll().subscribe({
       next: (data) => {
-        this.hotels = data;
+        this.pendingHotels = data.filter((h) => h.status === 'PENDING_APPROVAL');
+        this.approvedHotels = data.filter((h) => h.status === 'APPROVED');
+        this.rejectedHotels = data.filter((h) => h.status === 'REJECTED');
         this.cdr.markForCheck();
       },
-      error: (err) => console.error('Approved hotels error:', err.error),
-    });
-  }
-  loadPending() {
-    this.hotelService.getPending().subscribe({
-      next: (data) => {
-        this.pendingHotels = data;
-        this.cdr.markForCheck();
-      },
-      error: (err) => console.error('Pending hotels error:', err.error),
+      error: (err) => console.error('Hotels error:', err.error),
     });
   }
 
   approveHotel(id: number) {
     this.hotelService.approveHotel(id).subscribe(() => {
-      this.loadPending();
-      this.loadHotels();
-    });
-  }
-  rejectHotel(id: number) {
-    this.hotelService.rejectHotel(id).subscribe(() => {
-      this.loadPending();
-      this.loadHotels();
+      this.loadAllHotels();
     });
   }
 
-  deleteHotel(id: number) {
-    if (confirm('Are you sure you want to delete this hotel?')) {
-      this.hotelService.delete(id).subscribe(() => {
-        // delete successful → reload list
-        this.loadHotels();
-        this.cdr.markForCheck();
-      });
-    }
+  openRejectModal(id: number) {
+    console.log('openRejectModal called for hotel:', id);
+    this.rejectHotelId = id;
+    this.rejectReason = '';
+    this.showRejectModal = true;
+    this.cdr.markForCheck();
+  }
+
+  closeRejectModal() {
+    this.showRejectModal = false;
+    this.rejectHotelId = null;
+    this.rejectReason = '';
+    this.cdr.markForCheck();
+  }
+
+  confirmReject() {
+    if (this.rejectHotelId == null) return;
+    this.hotelService.rejectHotel(this.rejectHotelId, this.rejectReason).subscribe(() => {
+      this.closeRejectModal();
+      this.loadAllHotels();
+    });
   }
 }

@@ -1,32 +1,10 @@
 <div class="container mt-4">
-
   <h2>Pending Hotels</h2>
   @if (pendingHotels.length === 0) {
     <p>No pending hotels.</p>
   }
   <div class="row">
     @for (hotel of pendingHotels; track hotel.id) {
-      <div class="col-md-4 mb-3">
-        <div class="card h-100">
-          <div class="card-body">
-            <h5>{{ hotel.hotelName }}</h5>
-            <p>{{ hotel.address }}</p>
-            <span class="badge bg-warning">PENDING</span>
-            <button (click)="approveHotel(hotel.id)" class="btn btn-success btn-sm">Approve</button>
-            <button (click)="rejectHotel(hotel.id)" class="btn btn-danger btn-sm">Reject</button>
-          </div>
-        </div>
-      </div>
-    }
-  </div>
-
-
-  
-
-
-  <h2>Approved Hotels</h2>
-  <div class="row">
-    @for (hotel of hotels; track hotel.id) {
       <div class="col-md-4 mb-3">
         <div class="card h-100">
           @if (hotel.image) {
@@ -39,24 +17,147 @@
           }
           <div class="card-body">
             <h5 class="card-title">{{ hotel.hotelName }}</h5>
-            <p>{{ hotel.address }}</p>
-            <span
-              class="badge bg-{{
-                hotel.status === 'APPROVED'
-                  ? 'success'
-                  : hotel.status === 'REJECTED'
-                    ? 'danger'
-                    : 'warning'
-              }}"
-            >
-              {{ hotel.status }}
-            </span>
-            <button (click)="deleteHotel(hotel.id)" class="btn btn-danger btn-sm ms-2">
-              Delete
-            </button>
+            <p><strong>Address:</strong> {{ hotel.address }}</p>
+            <p><strong>Description:</strong> {{ hotel.description }}</p>
+            <p><strong>Rating:</strong> {{ hotel.rating }}</p>
+            @if (hotel.ownerName) {
+              <p><strong>Owner:</strong> {{ hotel.ownerName }}</p>
+            }
+            @if (hotel.locationName) {
+              <p><strong>Location:</strong> {{ hotel.locationName }}</p>
+            }
+            <span class="badge bg-warning">PENDING</span>
+            <div class="mt-2">
+              <a [routerLink]="['/hotels', hotel.id]" class="btn btn-info btn-sm me-1">Details</a>
+              <button (click)="approveHotel(hotel.id)" class="btn btn-success btn-sm me-1">
+                Approve
+              </button>
+              <button (click)="openRejectModal(hotel.id)" class="btn btn-danger btn-sm">
+                Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <hr class="my-4" />
+
+  <h2>Approved Hotels</h2>
+  @if (approvedHotels.length === 0) {
+    <p>No approved hotels.</p>
+  }
+  <div class="row">
+    @for (hotel of approvedHotels; track hotel.id) {
+      <div class="col-md-4 mb-3">
+        <div class="card h-100">
+          @if (hotel.image) {
+            <img
+              [src]="'http://localhost:8085/hotel/' + hotel.image"
+              class="card-img-top"
+              alt="{{ hotel.hotelName }}"
+              style="height: 180px; object-fit: cover"
+            />
+          }
+          <div class="card-body">
+            <h5 class="card-title">{{ hotel.hotelName }}</h5>
+            <p><strong>Address:</strong> {{ hotel.address }}</p>
+            <p><strong>Description:</strong> {{ hotel.description }}</p>
+            <p><strong>Rating:</strong> {{ hotel.rating }}</p>
+            @if (hotel.ownerName) {
+              <p><strong>Owner:</strong> {{ hotel.ownerName }}</p>
+            }
+            @if (hotel.locationName) {
+              <p><strong>Location:</strong> {{ hotel.locationName }}</p>
+            }
+            <span class="badge bg-success">APPROVED</span>
+            <div class="mt-2">
+              <a [routerLink]="['/hotels', hotel.id]" class="btn btn-info btn-sm">Details</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <hr class="my-4" />
+
+  <h2>Rejected Hotels</h2>
+  @if (rejectedHotels.length === 0) {
+    <p>No rejected hotels.</p>
+  }
+  <div class="row">
+    @for (hotel of rejectedHotels; track hotel.id) {
+      <div class="col-md-4 mb-3">
+        <div class="card h-100">
+          @if (hotel.image) {
+            <img
+              [src]="'http://localhost:8085/hotel/' + hotel.image"
+              class="card-img-top"
+              alt="{{ hotel.hotelName }}"
+              style="height: 180px; object-fit: cover"
+            />
+          }
+          <div class="card-body">
+            <h5 class="card-title">{{ hotel.hotelName }}</h5>
+            <p><strong>Address:</strong> {{ hotel.address }}</p>
+            <p><strong>Description:</strong> {{ hotel.description }}</p>
+            <p><strong>Rating:</strong> {{ hotel.rating }}</p>
+            @if (hotel.ownerName) {
+              <p><strong>Owner:</strong> {{ hotel.ownerName }}</p>
+            }
+            @if (hotel.locationName) {
+              <p><strong>Location:</strong> {{ hotel.locationName }}</p>
+            }
+            <span class="badge bg-danger">REJECTED</span>
+            @if (hotel.rejectionReason) {
+              <div class="mt-2 p-2 bg-danger-subtle border border-danger rounded">
+                <strong>Reason:</strong> {{ hotel.rejectionReason }}
+              </div>
+            }
+            <div class="mt-2">
+              <a [routerLink]="['/hotels', hotel.id]" class="btn btn-info btn-sm">Details</a>
+            </div>
           </div>
         </div>
       </div>
     }
   </div>
 </div>
+
+@if (showRejectModal) {
+  <div class="modal-backdrop fade show" style="z-index: 1040"></div>
+  <div class="modal fade show d-block" tabindex="-1" style="z-index: 1050">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Reject Hotel</h5>
+          <button type="button" class="btn-close" (click)="closeRejectModal()"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted">Please provide a reason for rejecting this hotel.</p>
+          <textarea
+            class="form-control"
+            rows="4"
+            [(ngModel)]="rejectReason"
+            placeholder="Enter rejection reason..."
+          ></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeRejectModal()">
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="confirmReject()"
+            [disabled]="!rejectReason.trim()"
+          >
+            Reject
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

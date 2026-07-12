@@ -14,6 +14,7 @@ public class PaymentMapper {
         if (dto.getStatus() != null) {
             payment.setStatus(PaymentStatus.valueOf(dto.getStatus()));
         }
+        payment.setCustomerId(dto.getCustomerId());
         return payment;
     }
 
@@ -25,14 +26,21 @@ public class PaymentMapper {
         if (payment.getStatus() != null) {
             response.setStatus(payment.getStatus().name());
         }
+        response.setCustomerId(payment.getCustomerId());
         if (payment.getBooking() != null) {
             response.setBookingId(payment.getBooking().getId());
             response.setBookingReference("BOOK-" + payment.getBooking().getId());
+            if (payment.getBooking().getCustomer() != null) {
+                response.setCustomerName(payment.getBooking().getCustomer().getUser() != null
+                        ? payment.getBooking().getCustomer().getUser().getName()
+                        : null);
+            }
         }
         if (payment.getExtraService() != null) {
             response.setExtraServiceId(payment.getExtraService().getId());
             response.setServiceType(payment.getExtraService().getServiceType());
         }
+        response.setTransactionDate(payment.getTransactionDate());
         return response;
     }
 }

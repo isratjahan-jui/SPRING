@@ -15,6 +15,7 @@ public class HotelResponseDTO {
     private Long ownerId;
     private String locationName;
     private String ownerName;
+    private String rejectionReason;
 }
 
 

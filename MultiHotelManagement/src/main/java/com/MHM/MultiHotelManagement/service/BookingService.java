@@ -23,6 +23,7 @@ public interface BookingService {
     BookingResponseDTO expressCheckOut(Long bookingId);
 
     List<BookingResponseDTO> getBookingsByOwner(Long ownerId);
+    List<BookingResponseDTO> getAllBookings();
     BookingResponseDTO markNoShow(Long bookingId);
     BookingResponseDTO addExtraCharges(Long bookingId, double amount);
 }

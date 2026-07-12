@@ -79,4 +79,12 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
         WHERE h.location.id = :locationId
     """)
     List<Hotel> findHotelsByLocationId(@Param("locationId") Long locationId);
+
+    @Query("""
+        SELECT h FROM Hotel h
+        LEFT JOIN FETCH h.location l
+        LEFT JOIN FETCH h.hotelDetails hd
+        LEFT JOIN FETCH h.owner o
+    """)
+    List<Hotel> findAllWithDetails();
 }

@@ -7,7 +7,9 @@
       <p class="text-muted mt-2">Loading hotel details...</p>
     </div>
   } @else if (hotel) {
-    <a routerLink="/hotels" class="btn btn-outline-secondary btn-sm mb-3">&larr; Back to Hotels</a>
+    <a [routerLink]="backRoute" class="btn btn-outline-secondary btn-sm mb-3"
+      >&larr; {{ backLabel }}</a
+    >
     <div class="card shadow-sm">
       @if (hotel.image) {
         <img
@@ -234,6 +236,6 @@
     </div>
   } @else {
     <p class="text-danger">{{ errorMsg || 'Hotel not found.' }}</p>
-    <a routerLink="/hotels" class="btn btn-outline-primary">Back to Hotels</a>
+    <a [routerLink]="backRoute" class="btn btn-outline-primary">{{ backLabel }}</a>
   }
 </div>

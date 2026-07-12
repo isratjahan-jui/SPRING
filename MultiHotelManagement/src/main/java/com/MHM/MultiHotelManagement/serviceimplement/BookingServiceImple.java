@@ -258,6 +258,13 @@ public class BookingServiceImple implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<BookingResponseDTO> getAllBookings() {
+        return bookingRepository.findAllWithDetails()
+                .stream().map(BookingMapperDTO::toResponseDTO).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<BookingResponseDTO> getBookingsByOwner(Long ownerId) {
         return bookingRepository.findAllBookingsByOwnerId(ownerId)
                 .stream().map(BookingMapperDTO::toResponseDTO).toList();

@@ -13,6 +13,8 @@ import { CustomerBookings } from './components/customer/bookings/bookings';
 import { CustomerWishlist } from './components/customer/wishlist/wishlist';
 import { BookHotel } from './components/customer/book-hotel/book-hotel';
 import { BookingDetails } from './components/customer/booking-details/booking-details';
+import { MakePayment } from './components/customer/make-payment/make-payment';
+import { CustomerInvoices } from './components/customer/invoices/invoices';
 
 import { HotelList } from './components/hotel/hotel-list/hotel-list';
 import { AddHotel } from './components/hotel/add-hotel/add-hotel';
@@ -75,6 +77,8 @@ export const routes: Routes = [
   { path: 'customer', component: CustomerDashboard },
   { path: 'customer/bookings', component: CustomerBookings },
   { path: 'customer/booking/:id', component: BookingDetails },
+  { path: 'customer/pay/:bookingId', component: MakePayment },
+  { path: 'customer/invoices', component: CustomerInvoices },
   { path: 'customer/wishlist', component: CustomerWishlist },
 
   { path: 'dashboard', component: RoleRedirect },

@@ -5,12 +5,9 @@
   </div> -->
 
   <div class="d-flex justify-content-between align-items-center mb-3">
-  <h3 class="mb-0">My Hotels</h3>
-  <button class="btn btn-primary" routerLink="/hotels/add">
-    + Add Hotel
-  </button>
+    <h3 class="mb-0">My Hotels</h3>
+    <button class="btn btn-primary" routerLink="/hotels/add">+ Add Hotel</button>
   </div>
-
 
   <!-- @if (showForm) {
     <div class="card mb-4">
@@ -101,6 +98,11 @@
             >
               {{ hotel.status }}
             </span>
+            @if (hotel.status === 'REJECTED' && hotel.rejectionReason) {
+              <div class="mt-1 small text-danger">
+                <strong>Reason:</strong> {{ hotel.rejectionReason }}
+              </div>
+            }
           </div>
           <div class="d-flex gap-2">
             <button class="btn btn-sm btn-outline-primary" (click)="edit(hotel)">Edit</button>

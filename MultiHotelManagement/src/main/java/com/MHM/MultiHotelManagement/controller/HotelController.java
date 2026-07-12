@@ -1,6 +1,7 @@
 package com.MHM.MultiHotelManagement.controller;
 
 import com.MHM.MultiHotelManagement.dto.request.HotelRequestDTO;
+import com.MHM.MultiHotelManagement.dto.request.RejectRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.HotelResponseDTO;
 import com.MHM.MultiHotelManagement.service.HotelService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,11 @@ public class HotelController {
         return ResponseEntity.ok(hotelService.getAllApprovedHotels());
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<HotelResponseDTO>> getAll() {
+        return ResponseEntity.ok(hotelService.getAllHotels());
+    }
+
     @GetMapping("/pending")
     public ResponseEntity<List<HotelResponseDTO>> getPending() {
         return ResponseEntity.ok(hotelService.getPendingHotels());
@@ -56,8 +62,8 @@ public class HotelController {
     }
 
     @PutMapping("/{id}/reject")
-    public ResponseEntity<HotelResponseDTO> reject(@PathVariable Long id) {
-        return ResponseEntity.ok(hotelService.rejectHotel(id));
+    public ResponseEntity<HotelResponseDTO> reject(@PathVariable Long id, @RequestBody RejectRequestDTO request) {
+        return ResponseEntity.ok(hotelService.rejectHotel(id, request.getReason()));
     }
 
     @PutMapping(value = "/{id:[0-9]+}", consumes = {"multipart/form-data"})

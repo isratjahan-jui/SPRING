@@ -19,8 +19,10 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String method;     // CARD, CASH, BKASH ইত্যাদি
+    private String method;
     private Double amount;
+    private Long customerId;
+    private LocalDateTime transactionDate;
 
 
     @Enumerated(EnumType.STRING)

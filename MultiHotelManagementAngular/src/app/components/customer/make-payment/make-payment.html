@@ -1,0 +1,91 @@
+<div class="container py-4">
+  <h2>Make a Payment</h2>
+
+  @if (loading) {
+    <p class="text-muted">Loading...</p>
+  } @else if (error && !booking) {
+    <div class="alert alert-danger">{{ error }}</div>
+    <a routerLink="/customer/bookings" class="btn btn-outline-primary">Back to Bookings</a>
+  } @else if (success && booking) {
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <div class="mb-3 text-success" style="font-size: 64px">&#10003;</div>
+        <h3 class="text-success">Payment Successful!</h3>
+        <p class="mb-1">Booking #{{ booking.id }} &mdash; {{ booking.hotelName }}</p>
+        <p class="mb-3">
+          Amount Paid: <strong>BDT {{ payAmount }}</strong>
+        </p>
+        <button class="btn btn-primary" (click)="goToBookings()">Back to My Bookings</button>
+      </div>
+    </div>
+  } @else if (booking) {
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h5>{{ booking.hotelName }}</h5>
+        <p class="text-muted mb-1">
+          {{ booking.roomType }} &middot; {{ booking.numberOfRooms }} room(s)
+        </p>
+        <p class="mb-1">
+          <strong>Check-in:</strong> {{ booking.checkInDate | date: 'dd MMM yyyy' }}
+        </p>
+        <p class="mb-1">
+          <strong>Check-out:</strong> {{ booking.checkOutDate | date: 'dd MMM yyyy' }}
+        </p>
+        <div class="d-flex justify-content-between border-bottom pb-1 mt-2">
+          <span>Total Amount</span>
+          <span class="fw-bold">BDT {{ booking.totalAmount }}</span>
+        </div>
+        <div class="d-flex justify-content-between border-bottom pb-1 text-success">
+          <span>Already Paid</span>
+          <span class="fw-bold">BDT {{ booking.totalAmount - booking.dueAmount }}</span>
+        </div>
+        <div class="d-flex justify-content-between text-danger fs-5">
+          <span><strong>Due Amount</strong></span>
+          <span class="fw-bold">BDT {{ booking.dueAmount }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5>Select Payment Method</h5>
+
+        <div class="row g-2 mb-4">
+          @for (m of methods; track m.id) {
+            <div class="col-md-3 col-6">
+              <div
+                class="border rounded p-3 text-center cursor-pointer"
+                [class.border-primary]="selectedMethod === m.id"
+                [class.bg-light]="selectedMethod === m.id"
+                style="cursor: pointer"
+                (click)="selectedMethod = m.id"
+              >
+                <div class="fw-bold">{{ m.label }}</div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label"><strong>Amount to Pay (BDT)</strong></label>
+          <input type="number" class="form-control" [(ngModel)]="payAmount" min="1" />
+        </div>
+
+        @if (error) {
+          <div class="alert alert-danger">{{ error }}</div>
+        }
+
+        <button
+          class="btn btn-success btn-lg w-100"
+          (click)="submitPayment()"
+          [disabled]="submitting || payAmount <= 0"
+        >
+          @if (submitting) {
+            <span class="spinner-border spinner-border-sm me-1"></span>
+          }
+          Pay BDT {{ payAmount }}
+        </button>
+      </div>
+    </div>
+  }
+</div>

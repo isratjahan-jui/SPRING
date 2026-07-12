@@ -15,6 +15,7 @@ public interface HotelService {
     HotelResponseDTO updateHotel(Long id, HotelRequestDTO dto, MultipartFile image);
     void deleteHotel(Long id);
     List<HotelResponseDTO> getPendingHotels();
+    List<HotelResponseDTO> getAllHotels();
     HotelResponseDTO approveHotel(Long id);
-    HotelResponseDTO rejectHotel(Long id);
+    HotelResponseDTO rejectHotel(Long id, String reason);
 }

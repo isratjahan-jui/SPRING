@@ -3,6 +3,7 @@ export interface PaymentRequest {
   amount: number;
   status: string;
   bookingId: number;
+  customerId?: number;
   extraServiceId?: number;
 }
 
@@ -12,5 +13,10 @@ export interface PaymentResponse {
   amount: number;
   status: string;
   bookingId: number;
+  bookingReference: string;
+  customerId: number;
+  customerName: string;
   extraServiceId?: number;
+  serviceType?: string;
+  transactionDate: string;
 }

@@ -104,6 +104,11 @@
                   </button>
                 }
                 @if (b.status === 'PENDING') {
+                  @if (b.dueAmount > 0) {
+                    <a [routerLink]="['/customer/pay', b.id]" class="btn btn-success btn-sm">
+                      Pay Now (BDT {{ b.dueAmount }})
+                    </a>
+                  }
                   <button
                     class="btn btn-danger btn-sm"
                     (click)="openCancelModal(b.id)"
