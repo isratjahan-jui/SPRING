@@ -1,0 +1,305 @@
+<div class="container py-4">
+  <a routerLink="/customer/bookings" class="btn btn-outline-secondary btn-sm mb-3"
+    >&larr; Back to My Bookings</a
+  >
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted mt-2">Loading booking details...</p>
+    </div>
+  } @else if (error) {
+    <div class="alert alert-danger">{{ error }}</div>
+  } @else if (booking) {
+    <div class="card shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Booking Voucher</h4>
+        <span class="badge fs-6 {{ statusClass(booking.status) }}">{{ booking.status }}</span>
+      </div>
+      <div class="card-body">
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <h5>Booking Reference</h5>
+            <p class="fs-4 fw-bold text-primary">#{{ booking.id }}</p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <button class="btn btn-outline-primary" (click)="printVoucher()">Print Voucher</button>
+          </div>
+        </div>
+
+        <hr />
+
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <h5>Hotel Information</h5>
+            <p class="mb-1 fw-bold">{{ booking.hotelName }}</p>
+            <p class="mb-1"><strong>Room Type:</strong> {{ booking.roomType }}</p>
+          </div>
+          <div class="col-md-6">
+            <h5>Guest Information</h5>
+            <p class="mb-1"><strong>Name:</strong> {{ booking.customerName }}</p>
+            <p class="mb-1"><strong>Guests:</strong> {{ booking.totalGuests }}</p>
+            <p class="mb-1"><strong>Rooms:</strong> {{ booking.numberOfRooms }}</p>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <h5>Check-in</h5>
+            <p class="mb-1 fw-bold">{{ booking.checkInDate | date: 'fullDate' }}</p>
+            <p class="text-muted">From 12:00 PM</p>
+          </div>
+          <div class="col-md-6">
+            <h5>Check-out</h5>
+            <p class="mb-1 fw-bold">{{ booking.checkOutDate | date: 'fullDate' }}</p>
+            <p class="text-muted">Until 11:00 AM</p>
+          </div>
+        </div>
+
+        <hr />
+
+        <div class="row mb-4">
+          <div class="col-md-12">
+            <h5>Payment Summary</h5>
+            <div class="table-responsive">
+              <table class="table table-borderless">
+                <tbody>
+                  <tr>
+                    <td>Total Amount</td>
+                    <td class="text-end fw-bold">BDT {{ booking.totalAmount }}</td>
+                  </tr>
+                  <tr class="text-success">
+                    <td>Paid Amount</td>
+                    <td class="text-end fw-bold">BDT {{ paidAmount }}</td>
+                  </tr>
+                  <tr class="text-danger">
+                    <td>Due at Hotel</td>
+                    <td class="text-end fw-bold">BDT {{ booking.dueAmount }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        @if (booking.foodItems && booking.foodItems.length > 0) {
+          <hr />
+          <div class="row mb-4">
+            <div class="col-md-12">
+              <h5>Food Items Ordered</h5>
+              <ul>
+                @for (item of booking.foodItems; track item) {
+                  <li>{{ item }}</li>
+                }
+              </ul>
+            </div>
+          </div>
+        }
+
+        <!-- Online Check-in Section -->
+        @if (booking.status === 'CONFIRMED' && !booking.onlineCheckIn) {
+          <hr />
+          <div class="row mb-4">
+            <div class="col-md-12">
+              <h5>Online Check-in</h5>
+              <p class="text-muted small">
+                Upload your NID/Passport to complete online check-in and receive your digital key.
+              </p>
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <input
+                  type="file"
+                  class="form-control"
+                  style="max-width: 300px"
+                  accept="image/*,.pdf"
+                  (change)="onFileSelected($event)"
+                />
+                <button
+                  class="btn btn-primary"
+                  (click)="submitOnlineCheckIn()"
+                  [disabled]="!selectedFile || processing"
+                >
+                  @if (processing) {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                  }
+                  Submit Check-in
+                </button>
+              </div>
+              @if (uploadMessage) {
+                <div
+                  class="mt-2 alert alert-{{
+                    uploadMessage.includes('successful') ? 'success' : 'danger'
+                  }} py-2 small"
+                >
+                  {{ uploadMessage }}
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Digital Key / QR Code -->
+        @if (booking.onlineCheckIn && booking.digitalKey) {
+          <hr />
+          <div class="row mb-4">
+            <div class="col-md-12 text-center">
+              <h5>Digital Room Key</h5>
+              <p class="text-muted small">Show this QR code at the hotel for room access.</p>
+              <div class="d-inline-block border rounded p-3 bg-light">
+                <img
+                  [src]="qrCodeUrl"
+                  alt="Digital Key QR Code"
+                  class="img-fluid"
+                  style="max-width: 200px"
+                />
+              </div>
+              <p class="mt-2 fw-bold text-primary">{{ booking.digitalKey }}</p>
+            </div>
+          </div>
+        }
+
+        <!-- Express Check-out with Extra Bills -->
+        @if (booking.status === 'CHECKED_IN') {
+          <hr />
+          <div class="row mb-4">
+            <div class="col-md-12">
+              <h5>Express Check-out</h5>
+              <p class="text-muted small">
+                Pay any outstanding dues and check out without visiting the reception. After
+                check-out, you can leave the key in your room and depart.
+              </p>
+              <div class="bg-light p-3 rounded mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="fw-bold">Remaining Due Amount:</span>
+                  <span class="fs-5 fw-bold text-danger">BDT {{ booking.dueAmount }}</span>
+                </div>
+                @if (booking.dueAmount > 0) {
+                  <p class="text-muted small mt-1 mb-0">
+                    Please settle the due amount at the hotel reception or pay online if available.
+                  </p>
+                }
+              </div>
+              <button class="btn btn-secondary" (click)="expressCheckOut()" [disabled]="processing">
+                @if (processing) {
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                Confirm Express Check-out
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- Cancellation Policy with Countdown Timer -->
+        @if (booking.status === 'PENDING' || booking.status === 'CONFIRMED') {
+          <hr />
+          <div class="row mb-4">
+            <div class="col-md-12">
+              <h5>Cancellation Policy</h5>
+              <p class="mb-1">
+                {{
+                  booking.cancellationPolicyText ||
+                    'Free cancellation up to 24 hours before check-in.'
+                }}
+              </p>
+              @if (booking.cancellationDeadline) {
+                <div class="d-flex align-items-center gap-2 mt-2">
+                  <span class="fw-bold">Free cancellation ends in:</span>
+                  <span
+                    class="badge fs-6 {{ isDeadlinePassed ? 'bg-danger' : 'bg-warning text-dark' }}"
+                  >
+                    @if (isDeadlinePassed) {
+                      Expired
+                    } @else {
+                      {{ countdownText }}
+                    }
+                  </span>
+                </div>
+                @if (isDeadlinePassed) {
+                  <p class="text-danger small mt-1">
+                    The free cancellation period has passed. Cancellation may incur charges.
+                  </p>
+                }
+              }
+            </div>
+          </div>
+        }
+
+        <hr />
+
+        <div class="row">
+          <div class="col-md-12">
+            <h5>Actions</h5>
+            <div class="d-flex gap-2 flex-wrap">
+              @if (booking.status === 'PENDING') {
+                <button class="btn btn-danger" (click)="cancelBooking()" [disabled]="processing">
+                  @if (processing) {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                  }
+                  Cancel Booking
+                </button>
+              }
+              @if (booking.status === 'CONFIRMED') {
+                <button class="btn btn-primary" (click)="requestCheckIn()" [disabled]="processing">
+                  @if (processing) {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                  }
+                  Request Check-in
+                </button>
+                <button class="btn btn-danger" (click)="cancelBooking()" [disabled]="processing">
+                  @if (processing) {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                  }
+                  Cancel Booking
+                </button>
+              }
+              @if (booking.status === 'CHECKED_IN') {
+                <button
+                  class="btn btn-secondary"
+                  (click)="requestCheckOut()"
+                  [disabled]="processing"
+                >
+                  @if (processing) {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                  }
+                  Request Check-out
+                </button>
+              }
+              @if (booking.status === 'CHECKED_OUT') {
+                <p class="text-muted mb-0">Thank you for staying with us!</p>
+              }
+              @if (booking.status === 'CANCELLED') {
+                <p class="text-muted mb-0">This booking has been cancelled.</p>
+              }
+            </div>
+          </div>
+        </div>
+
+        <hr class="mt-4" />
+
+        <div class="row">
+          <div class="col-md-12">
+            <h5>Important Information</h5>
+            <ul class="small text-muted">
+              <li>Check-in time starts from 12:00 PM. Early check-in subject to availability.</li>
+              <li>Check-out time is 11:00 AM. Late check-out may incur additional charges.</li>
+              <li>
+                Please carry a valid government ID (NID/Passport/Driving License) for check-in.
+              </li>
+              @if (booking.cancellationDeadline) {
+                <li>
+                  Free cancellation deadline:
+                  <strong>{{ booking.cancellationDeadline | date: 'medium' }}</strong
+                  >. Cancellations after this time may incur charges.
+                </li>
+              } @else {
+                <li>Free cancellation is available up to 24 hours before check-in.</li>
+              }
+              <li>No-show will result in full charges for the first night.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,199 @@
+<div class="container-fluid py-3">
+  <h3 class="mb-3">Hotel Details</h3>
+
+  <div class="mb-3">
+    <label class="form-label fw-bold">Select Hotel</label>
+    <select [(ngModel)]="selectedHotelId" (change)="onHotelChange()" class="form-select">
+      <option [ngValue]="0" disabled>-- Choose a hotel --</option>
+      @for (h of hotels; track h.id) {
+        <option [ngValue]="h.id">{{ h.hotelName }}</option>
+      }
+    </select>
+  </div>
+
+  @if (selectedHotelId && !showForm && !details) {
+    <div class="alert alert-info">
+      No details added yet for this hotel.
+      <button class="btn btn-primary btn-sm ms-2" (click)="addNew()">+ Add Details</button>
+    </div>
+  }
+
+  @if (selectedHotelId && !showForm && details) {
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Details Information</h5>
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-outline-primary" (click)="edit()">Edit</button>
+          <button class="btn btn-sm btn-outline-danger" (click)="deleteDetails()">Delete</button>
+        </div>
+      </div>
+      <div class="card-body">
+        @if (details.description) {
+          <p><strong>Description:</strong> {{ details.description }}</p>
+        }
+        @if (details.ownerSpeach) {
+          <p><strong>Owner Speech:</strong> {{ details.ownerSpeach }}</p>
+        }
+        @if (details.pricePerNight) {
+          <p><strong>Price per Night:</strong> &#2547;{{ details.pricePerNight }}</p>
+        }
+        @if (details.checkInTime || details.checkOutTime) {
+          <p>
+            <strong>Check-in:</strong> {{ details.checkInTime || 'N/A' }} |
+            <strong>Check-out:</strong> {{ details.checkOutTime || 'N/A' }}
+          </p>
+        }
+        @if (details.contactEmail || details.contactPhone) {
+          <p>
+            <strong>Contact:</strong> {{ details.contactEmail || '' }}
+            {{ details.contactPhone ? '| ' + details.contactPhone : '' }}
+          </p>
+        }
+        @if (details.hotelPolicy) {
+          <p><strong>Hotel Policy:</strong> {{ details.hotelPolicy }}</p>
+        }
+        @if (details.cancellationPolicy) {
+          <p><strong>Cancellation Policy:</strong> {{ details.cancellationPolicy }}</p>
+        }
+        @if (details.petPolicy) {
+          <p><strong>Pet Policy:</strong> {{ details.petPolicy }}</p>
+        }
+        @if (details.smokingPolicy) {
+          <p><strong>Smoking Policy:</strong> {{ details.smokingPolicy }}</p>
+        }
+        @if (details.childPolicy) {
+          <p><strong>Child Policy:</strong> {{ details.childPolicy }}</p>
+        }
+        @if (details.languages) {
+          <p><strong>Languages:</strong> {{ details.languages }}</p>
+        }
+        @if (details.nearbyAttractions) {
+          <p><strong>Nearby Attractions:</strong> {{ details.nearbyAttractions }}</p>
+        }
+      </div>
+    </div>
+  }
+
+  @if (showForm) {
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5>{{ editingId ? 'Edit Hotel Details' : 'Add Hotel Details' }}</h5>
+        <form (ngSubmit)="save()">
+          <div class="row">
+            <div class="col-md-12 mb-2">
+              <label class="form-label">Description</label>
+              <textarea
+                [(ngModel)]="form.description"
+                name="description"
+                class="form-control"
+                rows="3"
+              ></textarea>
+            </div>
+            <div class="col-md-12 mb-2">
+              <label class="form-label">Owner Speech</label>
+              <textarea
+                [(ngModel)]="form.ownerSpeach"
+                name="ownerSpeach"
+                class="form-control"
+                rows="2"
+              ></textarea>
+            </div>
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Price per Night (&#2547;)</label>
+              <input
+                [(ngModel)]="form.pricePerNight"
+                name="pricePerNight"
+                type="number"
+                class="form-control"
+              />
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label">Check-in Time</label>
+              <input
+                [(ngModel)]="form.checkInTime"
+                name="checkInTime"
+                class="form-control"
+                placeholder="14:00"
+              />
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label">Check-out Time</label>
+              <input
+                [(ngModel)]="form.checkOutTime"
+                name="checkOutTime"
+                class="form-control"
+                placeholder="12:00"
+              />
+            </div>
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Contact Email</label>
+              <input
+                [(ngModel)]="form.contactEmail"
+                name="contactEmail"
+                type="email"
+                class="form-control"
+              />
+            </div>
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Contact Phone</label>
+              <input [(ngModel)]="form.contactPhone" name="contactPhone" class="form-control" />
+            </div>
+            <div class="col-md-12 mb-2">
+              <label class="form-label">Hotel Policy</label>
+              <textarea
+                [(ngModel)]="form.hotelPolicy"
+                name="hotelPolicy"
+                class="form-control"
+                rows="2"
+              ></textarea>
+            </div>
+            <div class="col-md-12 mb-2">
+              <label class="form-label">Cancellation Policy</label>
+              <textarea
+                [(ngModel)]="form.cancellationPolicy"
+                name="cancellationPolicy"
+                class="form-control"
+                rows="2"
+              ></textarea>
+            </div>
+            <div class="col-md-4 mb-2">
+              <label class="form-label">Pet Policy</label>
+              <input [(ngModel)]="form.petPolicy" name="petPolicy" class="form-control" />
+            </div>
+            <div class="col-md-4 mb-2">
+              <label class="form-label">Smoking Policy</label>
+              <input [(ngModel)]="form.smokingPolicy" name="smokingPolicy" class="form-control" />
+            </div>
+            <div class="col-md-4 mb-2">
+              <label class="form-label">Child Policy</label>
+              <input [(ngModel)]="form.childPolicy" name="childPolicy" class="form-control" />
+            </div>
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Languages</label>
+              <input
+                [(ngModel)]="form.languages"
+                name="languages"
+                class="form-control"
+                placeholder="English, Bengali"
+              />
+            </div>
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Nearby Attractions</label>
+              <input
+                [(ngModel)]="form.nearbyAttractions"
+                name="nearbyAttractions"
+                class="form-control"
+              />
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-2">
+            <button type="submit" class="btn btn-success" [disabled]="loading">
+              {{ editingId ? 'Update' : 'Create' }} {{ loading ? '...' : '' }}
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="cancelForm()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

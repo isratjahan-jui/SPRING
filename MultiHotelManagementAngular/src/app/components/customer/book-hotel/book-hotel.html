@@ -1,0 +1,116 @@
+<div class="container py-4">
+  <a routerLink="/hotels" class="btn btn-outline-secondary btn-sm mb-3">&larr; Back to Hotels</a>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted mt-2">Loading booking details...</p>
+    </div>
+  } @else if (successMessage) {
+    <div class="alert alert-success text-center py-5">
+      <i class="bi bi-check-circle-fill fs-1 d-block mb-3"></i>
+      <h4>{{ successMessage }}</h4>
+      <p class="mb-0">Redirecting to your bookings...</p>
+    </div>
+  } @else {
+    <div class="row">
+      <div class="col-md-5">
+        <div class="card shadow-sm">
+          @if (hotel?.image) {
+            <img
+              [src]="'http://localhost:8085/hotel/' + hotel!.image"
+              class="card-img-top"
+              alt="{{ hotel!.hotelName }}"
+              style="height: 200px; object-fit: cover"
+            />
+          }
+          <div class="card-body">
+            <h4>{{ hotel?.hotelName }}</h4>
+            <p class="text-muted">{{ hotel?.address }}</p>
+            <hr />
+            @if (room) {
+              <h5>{{ room.roomType }}</h5>
+              <p class="mb-1"><strong>Price:</strong> BDT {{ room.price }}/night</p>
+              <p class="mb-1">
+                <strong>Adults:</strong> {{ room.adults }} | <strong>Children:</strong>
+                {{ room.children }}
+              </p>
+              <p class="mb-0"><strong>Available:</strong> {{ room.availableRooms }} rooms</p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-7">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h4>Book Now</h4>
+
+            @if (errorMessage) {
+              <div class="alert alert-danger">{{ errorMessage }}</div>
+            }
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Check-in Date</label>
+                <input type="date" class="form-control" [(ngModel)]="checkInDate" [min]="today" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Check-out Date</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  [(ngModel)]="checkOutDate"
+                  [min]="minCheckOut"
+                />
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Number of Rooms</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="numberOfRooms"
+                  min="1"
+                  [max]="room?.availableRooms || 1"
+                />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Total Guests</label>
+                <input type="number" class="form-control" [(ngModel)]="totalGuests" min="1" />
+              </div>
+            </div>
+
+            @if (checkInDate && checkOutDate && room) {
+              <div class="alert alert-info">
+                <strong>Estimated Total:</strong> BDT
+                {{ calculateNights() * room.price * numberOfRooms }} <br /><small
+                  >{{ calculateNights() }} night(s) &times; {{ numberOfRooms }} room(s)</small
+                >
+              </div>
+            }
+
+            <button
+              class="btn btn-primary w-100"
+              (click)="submit()"
+              [disabled]="submitting || !customerId"
+            >
+              @if (submitting) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              {{ submitting ? 'Processing...' : 'Confirm Booking' }}
+            </button>
+
+            @if (!customerId) {
+              <p class="text-danger small mt-2">Please log in as a customer to book.</p>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

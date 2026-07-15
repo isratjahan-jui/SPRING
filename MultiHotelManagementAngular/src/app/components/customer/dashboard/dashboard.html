@@ -1,0 +1,74 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Customer Dashboard</h1>
+    <p>Welcome,</p>
+  </div>
+
+  @if (loading) {
+    <p class="text-muted">Loading...</p>
+  }
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">📅</div>
+      <div class="stat-info">
+        <h3>My Bookings</h3>
+        <p class="stat-value">{{ bookings.length }}</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">❤️</div>
+      <div class="stat-info">
+        <h3>Wishlist</h3>
+        <p class="stat-value">--</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⭐</div>
+      <div class="stat-info">
+        <h3>Reviews</h3>
+        <p class="stat-value">--</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="quick-actions">
+    <h2>Quick Actions</h2>
+    <div class="actions-grid">
+      <a routerLink="/hotels" class="action-btn">Browse Hotels</a>
+      <a routerLink="/customer/bookings" class="action-btn">My Bookings</a>
+      <a routerLink="/customer/invoices" class="action-btn">My Invoices</a>
+      <a routerLink="/customer/wishlist" class="action-btn">Wishlist</a>
+    </div>
+  </div>
+
+  @if (bookings.length > 0) {
+    <div class="recent-bookings mt-4">
+      <h2>Recent Bookings</h2>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Hotel</th>
+            <th>Room</th>
+            <th>Check-in</th>
+            <th>Check-out</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (b of bookings.slice(0, 5); track b.id) {
+            <tr>
+              <td>{{ b.hotelName }}</td>
+              <td>{{ b.roomType }}</td>
+              <td>{{ b.checkInDate }}</td>
+              <td>{{ b.checkOutDate }}</td>
+              <td>৳{{ b.totalAmount }}</td>
+              <td>{{ b.status }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

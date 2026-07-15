@@ -1,0 +1,338 @@
+<div class="container-fluid py-3">
+  <!-- <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">My Hotels</h3>
+    <button class="btn btn-primary" (click)="addNew()">+ Add Hotel</button>
+  </div> -->
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">My Hotels</h3>
+    <button class="btn btn-primary" routerLink="/hotels/add">+ Add Hotel</button>
+  </div>
+
+  <!-- @if (showForm) {
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5>{{ editingId ? 'Edit Hotel' : 'Add Hotel' }}</h5>
+        <form (ngSubmit)="save()">
+          <div class="row">
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Hotel Name</label>
+              <input [(ngModel)]="form.hotelName" name="hotelName" class="form-control" required />
+            </div>
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Rating</label>
+              <input [(ngModel)]="form.rating" name="rating" class="form-control" />
+            </div>
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Address</label>
+              <input [(ngModel)]="form.address" name="address" class="form-control" required />
+            </div>
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Location</label>
+              <select [(ngModel)]="form.locationId" name="locationId" class="form-select" required>
+                <option [ngValue]="0" disabled>Select Location</option>
+                @for (loc of locations; track loc.id) {
+                  <option [ngValue]="loc.id">{{ loc.locationName }}</option>
+                }
+              </select>
+            </div>
+            <div class="col-md-12 mb-2">
+              <label class="form-label">Description</label>
+              <textarea
+                [(ngModel)]="form.description"
+                name="description"
+                class="form-control"
+                rows="2"
+              ></textarea>
+            </div>
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Image</label>
+              <input
+                type="file"
+                class="form-control"
+                accept="image/*"
+                (change)="onFileSelected($event)"
+              />
+              @if (preview) {
+                <img [src]="preview" class="img-thumbnail mt-2" width="150" />
+              }
+            </div>
+            <div class="col-md-6 mb-2 d-flex align-items-end gap-2">
+              <button type="submit" class="btn btn-success" [disabled]="loading">
+                {{ loading ? 'Saving...' : 'Save' }}
+              </button>
+              <button type="button" class="btn btn-secondary" (click)="cancelForm()">Cancel</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  } -->
+
+  @if (hotels.length === 0) {
+    <div class="alert alert-info">No hotels found. Click "Add Hotel" to create one.</div>
+  }
+
+  @for (hotel of hotels; track hotel.id) {
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex align-items-center gap-3">
+          @if (hotel.image) {
+            <img
+              [src]="'http://localhost:8085/hotel/' + hotel.image"
+              alt="{{ hotel.hotelName }}"
+              style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px"
+            />
+          }
+          <div class="flex-grow-1">
+            <h5 class="mb-1">{{ hotel.hotelName }}</h5>
+            <p class="text-muted small mb-1">{{ hotel.address }}</p>
+            <span
+              class="badge bg-{{
+                hotel.status === 'APPROVED'
+                  ? 'success'
+                  : hotel.status === 'REJECTED'
+                    ? 'danger'
+                    : 'warning'
+              }}"
+            >
+              {{ hotel.status }}
+            </span>
+            @if (hotel.status === 'REJECTED' && hotel.rejectionReason) {
+              <div class="mt-1 small text-danger">
+                <strong>Reason:</strong> {{ hotel.rejectionReason }}
+              </div>
+            }
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-primary" (click)="edit(hotel)">Edit</button>
+            <button class="btn btn-sm btn-outline-danger" (click)="deleteHotel(hotel.id)">
+              Delete
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" (click)="toggleExpand(hotel.id)">
+              {{ expandedHotelId === hotel.id ? 'Collapse' : 'View All' }}
+            </button>
+          </div>
+        </div>
+
+        @if (expandedHotelId === hotel.id) {
+          <hr />
+          <ul class="nav nav-tabs mt-2">
+            <li class="nav-item">
+              <button
+                class="nav-link"
+                [class.active]="getTab(hotel.id) === 'details'"
+                (click)="setTab(hotel.id, 'details')"
+              >
+                Details
+              </button>
+            </li>
+            <li class="nav-item">
+              <button
+                class="nav-link"
+                [class.active]="getTab(hotel.id) === 'facilities'"
+                (click)="setTab(hotel.id, 'facilities')"
+              >
+                Facilities
+              </button>
+            </li>
+            <li class="nav-item">
+              <button
+                class="nav-link"
+                [class.active]="getTab(hotel.id) === 'food'"
+                (click)="setTab(hotel.id, 'food')"
+              >
+                Food Items
+              </button>
+            </li>
+            <li class="nav-item">
+              <button
+                class="nav-link"
+                [class.active]="getTab(hotel.id) === 'rooms'"
+                (click)="setTab(hotel.id, 'rooms')"
+              >
+                Rooms
+              </button>
+            </li>
+            <li class="nav-item">
+              <button
+                class="nav-link"
+                [class.active]="getTab(hotel.id) === 'gallery'"
+                (click)="setTab(hotel.id, 'gallery')"
+              >
+                Gallery
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content mt-3">
+            @if (getTab(hotel.id) === 'details') {
+              @if (hotelDetails.get(hotel.id); as details) {
+                <div class="row">
+                  <div class="col-md-6">
+                    <p><strong>Description:</strong> {{ details.description || 'Not set' }}</p>
+                    <p><strong>Owner Speech:</strong> {{ details.ownerSpeach || 'Not set' }}</p>
+                    <p>
+                      <strong>Price/Night:</strong> &#2547;{{ details.pricePerNight || 'Not set' }}
+                    </p>
+                  </div>
+                  <div class="col-md-6">
+                    <p><strong>Check-in:</strong> {{ details.checkInTime || 'N/A' }}</p>
+                    <p><strong>Check-out:</strong> {{ details.checkOutTime || 'N/A' }}</p>
+                    <p>
+                      <strong>Contact:</strong> {{ details.contactEmail || '' }}
+                      {{ details.contactPhone ? '| ' + details.contactPhone : '' }}
+                    </p>
+                  </div>
+                  <div class="col-12">
+                    <p><strong>Hotel Policy:</strong> {{ details.hotelPolicy || 'Not set' }}</p>
+                    <p>
+                      <strong>Cancellation:</strong> {{ details.cancellationPolicy || 'Not set' }}
+                    </p>
+                  </div>
+                </div>
+                <a routerLink="/owner/hotel-details" class="btn btn-sm btn-primary mt-2"
+                  >Edit Details</a
+                >
+              } @else {
+                <p class="text-muted">No details added yet.</p>
+                <a routerLink="/owner/hotel-details" class="btn btn-sm btn-primary"
+                  >+ Add Details</a
+                >
+              }
+            }
+
+            @if (getTab(hotel.id) === 'facilities') {
+              @if (hotelFacilities.get(hotel.id); as facilities) {
+                @if (facilities.length > 0) {
+                  <div class="row">
+                    @for (f of facilities; track f.id) {
+                      <div class="col-md-6 mb-2">
+                        <div class="border rounded p-2">
+                          <strong>{{ f.facilityName }}</strong>
+                          @if (f.description) {
+                            <p class="mb-0 text-muted small">{{ f.description }}</p>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="text-muted">No facilities added yet.</p>
+                }
+                <a routerLink="/owner/facilities" class="btn btn-sm btn-primary mt-2"
+                  >Manage Facilities</a
+                >
+              } @else {
+                <p class="text-muted">Loading...</p>
+              }
+            }
+
+            @if (getTab(hotel.id) === 'food') {
+              @if (hotelFoodItems.get(hotel.id); as foodItems) {
+                @if (foodItems.length > 0) {
+                  <div class="row">
+                    @for (item of foodItems; track item.id) {
+                      <div class="col-md-4 col-6 mb-2">
+                        <div class="card h-100">
+                          @if (item.imageUrl) {
+                            <img
+                              [src]="'http://localhost:8085/food/' + item.imageUrl"
+                              class="card-img-top"
+                              style="height: 100px; object-fit: cover"
+                            />
+                          }
+                          <div class="card-body p-2">
+                            <p class="card-text small mb-0">
+                              <strong>{{ item.itemName }}</strong>
+                            </p>
+                            <p class="card-text small text-muted mb-0">
+                              {{ item.category }} - &#2547;{{ item.foodPrice }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="text-muted">No food items added yet.</p>
+                }
+                <a routerLink="/owner/food-items" class="btn btn-sm btn-primary mt-2"
+                  >Manage Food Items</a
+                >
+              } @else {
+                <p class="text-muted">Loading...</p>
+              }
+            }
+
+            @if (getTab(hotel.id) === 'rooms') {
+              @if (hotelRooms.get(hotel.id); as rooms) {
+                @if (rooms.length > 0) {
+                  <div class="row">
+                    @for (r of rooms; track r.id) {
+                      <div class="col-md-4 col-6 mb-2">
+                        <div class="card h-100">
+                          @if (r.image) {
+                            <img
+                              [src]="'http://localhost:8085/room/' + r.image"
+                              class="card-img-top"
+                              style="height: 100px; object-fit: cover"
+                            />
+                          }
+                          <div class="card-body p-2">
+                            <p class="card-text small mb-0">
+                              <strong>{{ r.roomType }}</strong>
+                            </p>
+                            <p class="card-text small text-muted mb-0">
+                              &#2547;{{ r.price }} | Avail: {{ r.availableRooms }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="text-muted">No rooms added yet.</p>
+                }
+                <a routerLink="/owner/rooms" class="btn btn-sm btn-primary mt-2">Manage Rooms</a>
+              } @else {
+                <p class="text-muted">Loading...</p>
+              }
+            }
+
+            @if (getTab(hotel.id) === 'gallery') {
+              @if (hotelGallery.get(hotel.id); as gallery) {
+                @if (gallery.length > 0) {
+                  <div class="row">
+                    @for (item of gallery; track item.id) {
+                      <div class="col-md-3 col-6 mb-2">
+                        <div class="card">
+                          <img
+                            [src]="item.imageUrl"
+                            class="card-img-top"
+                            style="height: 120px; object-fit: cover"
+                          />
+                          <div class="card-body p-1">
+                            <p class="card-text small mb-0">{{ item.caption }}</p>
+                            <span class="badge bg-secondary">{{ item.category }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="text-muted">No gallery images added yet.</p>
+                }
+                <a routerLink="/owner/gallery" class="btn btn-sm btn-primary mt-2"
+                  >Manage Gallery</a
+                >
+              } @else {
+                <p class="text-muted">Loading...</p>
+              }
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
