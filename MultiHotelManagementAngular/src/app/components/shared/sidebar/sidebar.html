@@ -1,0 +1,53 @@
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-header-top">
+      <h5 class="mb-0">MultiHotel</h5>
+      @if (isLoggedIn()) {
+        <app-notification-dropdown />
+      }
+    </div>
+    <small>{{ isLoggedIn() ? userName : 'Guest' }}</small>
+  </div>
+
+  <nav class="sidebar-nav">
+    @if ( userRole  === 'ADMIN') {
+      <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+        >Dashboard</a
+      >
+      <a routerLink="/admin/hotels/manage" routerLinkActive="active">Hotels</a>
+      <a routerLink="/admin/owners" routerLinkActive="active">Owners</a>
+      <a routerLink="/admin/customers" routerLinkActive="active">Customers</a>
+      <a routerLink="/admin/commissions" routerLinkActive="active">Commissions</a>
+    } @else if (userRole  ===  'HOTEL_OWNER') {
+      <a routerLink="/owner" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+        >Dashboard</a
+      >
+      <a routerLink="/owner/my-hotels" routerLinkActive="active">My Hotels</a>
+      <a routerLink="/owner/hotel-details" routerLinkActive="active">Hotel Details</a>
+      <a routerLink="/owner/rooms" routerLinkActive="active">Rooms</a>
+      <a routerLink="/owner/facilities" routerLinkActive="active">Facilities</a>
+      <a routerLink="/owner/gallery" routerLinkActive="active">Gallery</a>
+      <a routerLink="/owner/food-items" routerLinkActive="active">Food Items</a>
+      <a routerLink="/owner/bookings" routerLinkActive="active">Bookings</a>
+      <a routerLink="/owner/payments" routerLinkActive="active">Payments</a>
+    } @else if (userRole  === 'CUSTOMER') {
+      <a
+        routerLink="/customer"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        >Dashboard</a
+      >
+      <a routerLink="/customer/bookings" routerLinkActive="active">My Bookings</a>
+      <a routerLink="/customer/wishlist" routerLinkActive="active">Wishlist</a>
+      <a routerLink="/customer/profile" routerLinkActive="active">Profile</a>
+      <a routerLink="/customer/support" routerLinkActive="active">Support</a>
+    }
+  </nav>
+
+  <div class="sidebar-footer">
+    <a routerLink="/home">Back to Site</a>
+    @if (isLoggedIn()) {
+      <button (click)="logout()">Logout</button>
+    }
+  </div>
+</div>

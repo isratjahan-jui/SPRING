@@ -1,0 +1,176 @@
+<div class="container mt-4">
+  <h2>My Bookings</h2>
+
+  @if (loading) {
+    <p class="text-muted">Loading...</p>
+  } @else if (bookings.length === 0) {
+    <p class="text-muted">
+      No bookings yet. <a routerLink="/hotels">Browse hotels</a> to book your stay.
+    </p>
+  } @else {
+    <div class="row">
+      @for (b of bookings; track b.id) {
+        <div class="col-md-6 mb-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span class="fw-bold">Booking #{{ b.id }}</span>
+              <span
+                class="badge fs-6"
+                [class.bg-success]="b.status === 'CONFIRMED'"
+                [class.bg-warning]="b.status === 'PENDING'"
+                [class.bg-info]="b.status === 'CHECKED_IN'"
+                [class.bg-secondary]="b.status === 'CHECKED_OUT'"
+                [class.bg-danger]="b.status === 'CANCELLED'"
+              >
+                {{ b.status }}
+              </span>
+            </div>
+            <div class="card-body">
+              <div class="row mb-3">
+                <div class="col-8">
+                  <h5 class="card-title mb-1">{{ b.hotelName }}</h5>
+                  <p class="text-muted mb-0">{{ b.roomType }}</p>
+                </div>
+                <div class="col-4 text-end">
+                  <small class="text-muted d-block">{{ b.numberOfRooms }} room(s)</small>
+                  <small class="text-muted d-block">{{ b.totalGuests }} guest(s)</small>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-6">
+                  <small class="text-muted d-block">Check-in</small>
+                  <strong>{{ b.checkInDate | date: 'dd MMM yyyy' }}</strong>
+                  <small class="text-muted d-block">From 12:00 PM</small>
+                </div>
+                <div class="col-6">
+                  <small class="text-muted d-block">Check-out</small>
+                  <strong>{{ b.checkOutDate | date: 'dd MMM yyyy' }}</strong>
+                  <small class="text-muted d-block">Until 11:00 AM</small>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-12">
+                  <div class="d-flex justify-content-between border-bottom pb-1">
+                    <span>Total</span>
+                    <span class="fw-bold">BDT {{ b.totalAmount }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between border-bottom pb-1 text-success">
+                    <span>Paid</span>
+                    <span class="fw-bold">BDT {{ b.totalAmount - b.dueAmount }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between text-danger">
+                    <span>Due at Hotel</span>
+                    <span class="fw-bold">BDT {{ b.dueAmount }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex gap-2 flex-wrap">
+                <a [routerLink]="['/customer/booking', b.id]" class="btn btn-outline-primary btn-sm"
+                  >View Details</a
+                >
+
+                @if (b.status === 'CONFIRMED') {
+                  <button
+                    class="btn btn-primary btn-sm"
+                    (click)="requestCheckIn(b.id)"
+                    [disabled]="cancellingId === b.id"
+                  >
+                    @if (cancellingId === b.id) {
+                      <span class="spinner-border spinner-border-sm"></span>
+                    }
+                    Request Check-in
+                  </button>
+                  <button
+                    class="btn btn-danger btn-sm"
+                    (click)="openCancelModal(b.id)"
+                    [disabled]="cancellingId === b.id"
+                  >
+                    Cancel
+                  </button>
+                }
+                @if (b.status === 'CHECKED_IN') {
+                  <button
+                    class="btn btn-secondary btn-sm"
+                    (click)="requestCheckOut(b.id)"
+                    [disabled]="cancellingId === b.id"
+                  >
+                    @if (cancellingId === b.id) {
+                      <span class="spinner-border spinner-border-sm"></span>
+                    }
+                    Request Check-out
+                  </button>
+                }
+                @if (b.status === 'PENDING') {
+                  @if (b.dueAmount > 0) {
+                    <a [routerLink]="['/customer/pay', b.id]" class="btn btn-success btn-sm">
+                      Pay Now (BDT {{ b.dueAmount }})
+                    </a>
+                  }
+                  <button
+                    class="btn btn-danger btn-sm"
+                    (click)="openCancelModal(b.id)"
+                    [disabled]="cancellingId === b.id"
+                  >
+                    @if (cancellingId === b.id) {
+                      <span class="spinner-border spinner-border-sm"></span>
+                    }
+                    Cancel
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showCancelModal && cancelTargetId) {
+  <div class="modal-backdrop fade show" style="z-index: 1050"></div>
+  <div class="modal fade show d-block" tabindex="-1" style="z-index: 1055">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">Cancel Booking #{{ cancelTargetId }}</h5>
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            (click)="closeCancelModal()"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-warning">
+            <strong>Cancellation Policy:</strong>
+            <ul class="mb-0 mt-1 small">
+              <li>
+                Free cancellation is available up to <strong>24 hours before check-in</strong>.
+              </li>
+              <li>After that, a <strong>cancellation fee</strong> may apply.</li>
+              <li>Non-refundable bookings will not receive any refund.</li>
+            </ul>
+          </div>
+          <p class="mb-0">
+            Are you sure you want to cancel this booking? This action cannot be undone.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeCancelModal()">Keep Booking</button>
+          <button
+            class="btn btn-danger"
+            (click)="confirmCancel()"
+            [disabled]="cancellingId !== null"
+          >
+            @if (cancellingId !== null) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            Yes, Cancel Booking
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

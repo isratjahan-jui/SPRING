@@ -1,0 +1,38 @@
+<div class="container py-5" style="max-width: 700px">
+  <h2 class="text-center mb-2">Create Account</h2>
+  <p class="text-center text-muted mb-5">Choose how you want to register</p>
+
+  <div class="row g-4">
+    <div class="col-md-6">
+      <a routerLink="/register/customer" class="text-decoration-none">
+        <div class="card h-100 shadow-sm border-0 text-center p-4 hover-card">
+          <div class="card-body">
+            <i class="bi bi-person-fill fs-1 text-primary mb-3"></i>
+            <h4 class="card-title text-dark">Customer</h4>
+            <p class="card-text text-muted">
+              Book hotels, manage reservations, and enjoy travel perks.
+            </p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-6">
+      <a routerLink="/register/hotel-owner" class="text-decoration-none">
+        <div class="card h-100 shadow-sm border-0 text-center p-4 hover-card">
+          <div class="card-body">
+            <i class="bi bi-building fs-1 text-success mb-3"></i>
+            <h4 class="card-title text-dark">Hotel Owner</h4>
+            <p class="card-text text-muted">
+              List your hotel, manage rooms, and grow your business.
+            </p>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <p class="text-center mt-4">
+    Already have an account? <a routerLink="/login" class="text-decoration-none">Login</a>
+  </p>
+</div>
