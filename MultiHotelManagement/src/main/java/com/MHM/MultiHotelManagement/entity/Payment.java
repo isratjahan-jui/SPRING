@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,7 +21,7 @@ public class Payment {
     private Long id;
 
     private String method;
-    private Double amount;
+    private BigDecimal amount;
     private Long customerId;
     private LocalDateTime transactionDate;
 
@@ -45,8 +46,10 @@ public class Payment {
     @OneToOne(mappedBy = "payment", cascade = CascadeType.ALL)
     private Commission commission;
 
- 
-
+    // SSLCommerz fields
+    private String transactionId;
+    private String bankTransactionId;
+    private String validationId;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -62,4 +65,3 @@ public class Payment {
         updatedAt = LocalDateTime.now();
     }
 }
-

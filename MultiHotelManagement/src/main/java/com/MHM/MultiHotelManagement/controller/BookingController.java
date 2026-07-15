@@ -3,6 +3,7 @@ package com.MHM.MultiHotelManagement.controller;
 import com.MHM.MultiHotelManagement.dto.request.BookingRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.BookingResponseDTO;
 import com.MHM.MultiHotelManagement.service.BookingService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,13 +23,13 @@ public class BookingController {
     }
 
     @PostMapping
-    public ResponseEntity<BookingResponseDTO> create(@RequestBody BookingRequestDTO dto) {
+    public ResponseEntity<BookingResponseDTO> create(@Valid @RequestBody BookingRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.createBooking(dto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<BookingResponseDTO> update(@PathVariable Long id,
-                                                     @RequestBody BookingRequestDTO dto) {
+                                                     @Valid @RequestBody BookingRequestDTO dto) {
         return ResponseEntity.ok(bookingService.updateBooking(id, dto));
     }
 

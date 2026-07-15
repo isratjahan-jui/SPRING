@@ -43,13 +43,13 @@ public class HotelOwnerDashboardServiceImpl implements HotelOwnerDashboardServic
 
         double totalRevenue = allBookings.stream()
                 .filter(b -> b.getStatus() != null && !b.getStatus().name().equals("CANCELLED"))
-                .mapToDouble(Booking::getTotalAmount)
+                .mapToDouble(b -> b.getTotalAmount() != null ? b.getTotalAmount().doubleValue() : 0.0)
                 .sum();
         stats.setTotalRevenue(totalRevenue);
 
         double totalDue = allBookings.stream()
                 .filter(b -> b.getStatus() != null && !b.getStatus().name().equals("CANCELLED"))
-                .mapToDouble(Booking::getDueAmount)
+                .mapToDouble(b -> b.getDueAmount() != null ? b.getDueAmount().doubleValue() : 0.0)
                 .sum();
         stats.setTotalDue(totalDue);
 

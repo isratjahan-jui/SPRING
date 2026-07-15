@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -22,11 +23,14 @@ public class Wallet {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    private Double balance = 0.0;
+    private BigDecimal balance = BigDecimal.ZERO;
 
-    private Double totalEarned = 0.0;
+    private BigDecimal totalEarned = BigDecimal.ZERO;
 
-    private Double totalWithdrawn = 0.0;
+    private BigDecimal totalWithdrawn = BigDecimal.ZERO;
+
+    @Version
+    private Long version;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -16,6 +16,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -55,10 +56,10 @@ public class PaymentServiceImpl implements PaymentService {
 
         Payment saved = paymentRepository.save(payment);
 
-        // Auto-update booking due amount
-        double paid = saved.getAmount();
-        booking.setAdvanceAmount(booking.getAdvanceAmount() + paid);
-        booking.setDueAmount(Math.max(0, booking.getDueAmount() - paid));
+        // Auto-update booking due amount using BigDecimal
+        BigDecimal paid = saved.getAmount();
+        booking.setAdvanceAmount(booking.getAdvanceAmount().add(paid));
+        booking.setDueAmount(booking.getDueAmount().subtract(paid).max(BigDecimal.ZERO));
         bookingRepository.save(booking);
 
         return PaymentMapper.toResponseDTO(saved);

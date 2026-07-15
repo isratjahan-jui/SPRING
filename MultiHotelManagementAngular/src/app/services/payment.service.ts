@@ -3,11 +3,23 @@ import { HttpClient } from '@angular/common/http';
 import { PaymentRequest, PaymentResponse } from '../models/payment.model';
 import { environment } from '../../environments/environments';
 
+export interface SslCommerzInitResponse {
+  gatewayPageUrl: string;
+  transactionId: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
   private API_URL = environment.apiUrl + 'payments';
 
   constructor(private http: HttpClient) {}
+
+  initiateSslCommerz(bookingId: number) {
+    return this.http.post<SslCommerzInitResponse>(
+      `${this.API_URL}/sslcommerz/init/${bookingId}`,
+      {}
+    );
+  }
 
   create(data: PaymentRequest) {
     return this.http.post<PaymentResponse>(this.API_URL, data);

@@ -6,6 +6,7 @@ import com.MHM.MultiHotelManagement.dto.request.RegisterRequestDTO;
 import com.MHM.MultiHotelManagement.dto.request.ResetPasswordRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.LoginResponseDTO;
 import com.MHM.MultiHotelManagement.serviceimplement.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,12 +23,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO dto) {
+    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO dto) {
         return ResponseEntity.ok(authService.login(dto));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> register(@RequestBody RegisterRequestDTO dto) {
+    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequestDTO dto) {
         authService.register(dto);
         return ResponseEntity.ok(Map.of("message", "Registration successful. Please check your email to verify your account."));
     }
@@ -39,13 +40,13 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody ForgotPasswordRequestDTO dto) {
+    public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO dto) {
         authService.forgotPassword(dto);
         return ResponseEntity.ok(Map.of("message", "Password reset email sent successfully"));
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody ResetPasswordRequestDTO dto) {
+    public ResponseEntity<Map<String, String>> resetPassword(@Valid @RequestBody ResetPasswordRequestDTO dto) {
         authService.resetPassword(dto);
         return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
     }

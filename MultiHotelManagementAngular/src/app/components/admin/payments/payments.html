@@ -1,0 +1,118 @@
+<div class="container mt-4">
+  <h2>All Payments</h2>
+
+  @if (loading) {
+    <p class="text-muted">Loading...</p>
+  }
+
+  @if (summary.length > 0) {
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="card bg-primary text-white">
+          <div class="card-body">
+            <h6 class="card-title">Total Revenue</h6>
+            <p class="card-text fs-3 fw-bold">BDT {{ totalRevenue }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card bg-info text-white">
+          <div class="card-body">
+            <h6 class="card-title">Hotels with Payments</h6>
+            <p class="card-text fs-3 fw-bold">{{ summary.length }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card bg-secondary text-white">
+          <div class="card-body">
+            <h6 class="card-title">Total Transactions</h6>
+            <p class="card-text fs-3 fw-bold">{{ payments.length }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Revenue by Hotel</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped mb-0">
+          <thead>
+            <tr>
+              <th>Hotel</th>
+              <th>Payments</th>
+              <th>Total Revenue</th>
+              <th>Admin Commission</th>
+              <th>Owner Payout</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of summary; track s.hotelId) {
+              <tr>
+                <td>
+                  <strong>{{ s.hotelName }}</strong>
+                </td>
+                <td>{{ s.paymentCount }}</td>
+                <td>BDT {{ s.totalPaymentAmount }}</td>
+                <td class="text-primary fw-bold">BDT {{ s.totalAdminEarnings }}</td>
+                <td class="text-success fw-bold">BDT {{ s.totalOwnerEarnings }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  @if (payments.length > 0) {
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h5 class="mb-0">All Payment Transactions</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped mb-0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Booking</th>
+              <th>Customer</th>
+              <th>Hotel</th>
+              <th>Method</th>
+              <th>Amount</th>
+              <th>Admin Commission</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of payments; track p.id) {
+              <tr>
+                <td>{{ p.id }}</td>
+                <td>{{ p.bookingReference }}</td>
+                <td>{{ p.customerName }}</td>
+                <td>{{ p.hotelName }}</td>
+                <td>{{ p.method }}</td>
+                <td class="fw-bold">BDT {{ p.amount }}</td>
+                <td>BDT {{ p.adminEarnings || 0 }}</td>
+                <td>
+                  <span
+                    class="badge"
+                    [class.bg-success]="p.status === 'PAID'"
+                    [class.bg-danger]="p.status === 'REFUNDED'"
+                  >
+                    {{ p.status }}
+                  </span>
+                </td>
+                <td>{{ p.transactionDate | date: 'medium' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  } @else if (!loading) {
+    <p class="text-muted">No payments found.</p>
+  }
+</div>

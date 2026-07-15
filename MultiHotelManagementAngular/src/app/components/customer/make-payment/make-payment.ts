@@ -30,20 +30,6 @@ export class MakePayment implements OnInit {
   success = false;
   error = '';
 
-  methods = [
-    { id: 'CASH', label: 'Cash' },
-    { id: 'CARD', label: 'Card (Visa/MasterCard)' },
-    { id: 'BKASH', label: 'bKash' },
-    { id: 'NAGAD', label: 'Nagad' },
-    { id: 'ROCKET', label: 'Rocket' },
-    { id: 'SSLCOMMERZ', label: 'SSLCommerz' },
-    { id: 'STRIPE', label: 'Stripe' },
-    { id: 'PAYPAL', label: 'PayPal' },
-  ];
-
-  selectedMethod = 'CARD';
-  payAmount = 0;
-
   ngOnInit() {
     const bookingId = Number(this.route.snapshot.paramMap.get('bookingId'));
     if (!bookingId) {
@@ -65,7 +51,6 @@ export class MakePayment implements OnInit {
     this.bookingService.getById(bookingId).subscribe({
       next: (data) => {
         this.booking = data;
-        this.payAmount = data.dueAmount;
         this.loading = false;
         this.cdr.markForCheck();
       },
@@ -78,30 +63,23 @@ export class MakePayment implements OnInit {
   }
 
   submitPayment() {
-    if (!this.booking || this.payAmount <= 0) return;
+    if (!this.booking) return;
     this.submitting = true;
     this.error = '';
 
-    this.paymentService
-      .create({
-        method: this.selectedMethod,
-        amount: this.payAmount,
-        status: 'PAID',
-        bookingId: this.booking.id,
-        customerId: this.customerId ?? undefined,
-      })
-      .subscribe({
-        next: () => {
-          this.success = true;
-          this.submitting = false;
-          this.cdr.markForCheck();
-        },
-        error: (err) => {
-          this.error = err.error?.message || 'Payment failed. Please try again.';
-          this.submitting = false;
-          this.cdr.markForCheck();
-        },
-      });
+    this.paymentService.initiateSslCommerz(this.booking.id).subscribe({
+      next: (response) => {
+        this.submitting = false;
+        this.cdr.markForCheck();
+        // Redirect to SSLCommerz hosted payment page
+        window.location.href = response.gatewayPageUrl;
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Payment initialization failed. Please try again.';
+        this.submitting = false;
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   goToBookings() {

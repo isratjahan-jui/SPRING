@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -77,13 +79,15 @@ public class BookingServiceImple implements BookingService {
             throw new IllegalStateException("Room is already booked for the selected dates");
         }
 
-        // Calculate totalAmount and dueAmount
-        double roomTotal = room.getPricePerNight() * dto.getNumberOfRooms();
-        double discount = roomTotal * dto.getDiscountRate() / 100.0;
-        double totalAmount = roomTotal - discount;
+        // Calculate totalAmount and dueAmount using BigDecimal
+        BigDecimal roomTotal = BigDecimal.valueOf(room.getPricePerNight())
+                .multiply(BigDecimal.valueOf(dto.getNumberOfRooms()));
+        BigDecimal discount = roomTotal.multiply(dto.getDiscountRate())
+                .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
+        BigDecimal totalAmount = roomTotal.subtract(discount);
         booking.setTotalPrice(roomTotal);
         booking.setTotalAmount(totalAmount);
-        booking.setDueAmount(totalAmount - dto.getAdvanceAmount());
+        booking.setDueAmount(totalAmount.subtract(dto.getAdvanceAmount()));
 
         // Set cancellation deadline: 24 hours before check-in
         if (dto.getCheckInDate() != null) {
@@ -164,8 +168,6 @@ public class BookingServiceImple implements BookingService {
         }
         bookingRepository.deleteById(id);
     }
-
-    // ✅ নতুন অংশ: FoodItem integration methods
 
     @Override
     @Transactional
@@ -291,9 +293,10 @@ public class BookingServiceImple implements BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
 
-        booking.setExtraCharges(booking.getExtraCharges() + amount);
-        booking.setDueAmount(booking.getDueAmount() + amount);
-        booking.setTotalAmount(booking.getTotalAmount() + amount);
+        BigDecimal extraCharge = BigDecimal.valueOf(amount);
+        booking.setExtraCharges(booking.getExtraCharges().add(extraCharge));
+        booking.setDueAmount(booking.getDueAmount().add(extraCharge));
+        booking.setTotalAmount(booking.getTotalAmount().add(extraCharge));
         Booking updated = bookingRepository.save(booking);
         return BookingMapperDTO.toResponseDTO(updated);
     }

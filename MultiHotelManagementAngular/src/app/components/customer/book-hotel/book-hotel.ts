@@ -72,7 +72,11 @@ export class BookHotel implements OnInit {
         this.totalGuests = data.adults + data.children;
         this.cdr.markForCheck();
       },
-      error: () => {},
+      error: () => {
+        this.loading = false;
+        this.errorMessage = 'Failed to load room details.';
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -98,6 +102,10 @@ export class BookHotel implements OnInit {
     if (!this.customerId || !this.hotel || !this.room) return;
     if (!this.checkInDate || !this.checkOutDate) {
       this.errorMessage = 'Please select check-in and check-out dates.';
+      return;
+    }
+    if (this.numberOfRooms < 1 || !Number.isInteger(this.numberOfRooms)) {
+      this.errorMessage = 'Number of rooms must be a positive integer.';
       return;
     }
     if (this.numberOfRooms > (this.room.availableRooms || 1)) {

@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,15 +31,15 @@ public class Booking {
     private Date checkOutDate;
 
     private int totalGuests;
-    private Double totalPrice;
+    private BigDecimal totalPrice;
 
 
     private int numberOfRooms;
-    private double discountRate;
+    private BigDecimal discountRate;
 
-    private double totalAmount;
-    private double advanceAmount;
-    private double dueAmount;
+    private BigDecimal totalAmount;
+    private BigDecimal advanceAmount;
+    private BigDecimal dueAmount;
 
     // Food Cancel policy fields
     private Date foodCancellableUntil;
@@ -54,7 +55,7 @@ public class Booking {
     private String cancellationPolicyText;
 
     // Extra charges added by hotel (food, minibar, damages)
-    private double extraCharges = 0;
+    private BigDecimal extraCharges = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
@@ -111,4 +112,3 @@ public class Booking {
 
 
 }
-

@@ -20,7 +20,8 @@ public class CommissionMapper {
         if (commission.getBooking() != null) {
             dto.setBookingId(commission.getBooking().getId());
             dto.setBookingReference("BOOK-" + commission.getBooking().getId());
-            dto.setBookingTotalPrice(commission.getBooking().getTotalPrice() );
+            dto.setBookingTotalPrice(commission.getBooking().getTotalPrice() != null
+                    ? commission.getBooking().getTotalPrice().doubleValue() : null);
             dto.setBookingStatus( commission.getBooking().getStatus() != null
                             ? commission.getBooking().getStatus().name() : null );
 

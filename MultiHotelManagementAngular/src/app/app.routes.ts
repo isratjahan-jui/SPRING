@@ -14,6 +14,7 @@ import { CustomerWishlist } from './components/customer/wishlist/wishlist';
 import { BookHotel } from './components/customer/book-hotel/book-hotel';
 import { BookingDetails } from './components/customer/booking-details/booking-details';
 import { MakePayment } from './components/customer/make-payment/make-payment';
+import { PaymentResult } from './components/customer/payment-result/payment-result';
 import { CustomerInvoices } from './components/customer/invoices/invoices';
 
 import { HotelList } from './components/hotel/hotel-list/hotel-list';
@@ -39,7 +40,7 @@ import { OwnerBookings } from './components/hotelowner/bookings/bookings';
 import { Payments } from './components/hotelowner/payments/payments';
 import { RoleRedirect } from './components/auth/role-redirect/role-redirect';
 
-// import { authGuard, roleGuard } from './guards/auth.guards';
+import { authGuard, roleGuard } from './guards/auth.guards';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -53,37 +54,34 @@ export const routes: Routes = [
   { path: 'verify-email', component: VeryfyEmail },
 
   { path: 'hotels', component: HotelList },
-  { path: 'hotels/add', component: AddHotel },
-  { path: 'hotels/edit/:id', component: EditHotel },
+  { path: 'hotels/add', component: AddHotel, canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])] },
+  { path: 'hotels/edit/:id', component: EditHotel, canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])] },
   { path: 'hotels/:id', component: HotelDetails },
-  { path: 'book-hotel/:hotelId/:roomId', component: BookHotel },
+  { path: 'book-hotel/:hotelId/:roomId', component: BookHotel, canActivate: [authGuard, roleGuard(['CUSTOMER'])] },
 
-  { path: 'admin', component: AdminDashboard },
-  { path: 'admin/hotels/manage', component: DeleteHotel },
-  { path: 'admin/owners', component: AdminOwners },
-  { path: 'admin/customers', component: AdminCustomers },
-  { path: 'admin/commissions', component: AdminCommissions },
+  { path: 'admin', component: AdminDashboard, canActivate: [authGuard, roleGuard(['ADMIN'])] },
+  { path: 'admin/hotels/manage', component: DeleteHotel, canActivate: [authGuard, roleGuard(['ADMIN'])] },
+  { path: 'admin/owners', component: AdminOwners, canActivate: [authGuard, roleGuard(['ADMIN'])] },
+  { path: 'admin/customers', component: AdminCustomers, canActivate: [authGuard, roleGuard(['ADMIN'])] },
+  { path: 'admin/commissions', component: AdminCommissions, canActivate: [authGuard, roleGuard(['ADMIN'])] },
 
-  { path: 'owner', component: OwnerDashboard },
-  { path: 'owner/my-hotels', component: MyHotels },
-  { path: 'owner/rooms', component: OwnerRooms },
-  { path: 'owner/facilities', component: OwnerFacilities },
-  { path: 'owner/gallery', component: OwnerGallery },
-  { path: 'owner/food-items', component: OwnerFoodItems },
-  { path: 'owner/hotel-details', component: OwnerHotelDetails },
-  { path: 'owner/bookings', component: OwnerBookings },
-  { path: 'owner/payments', component: Payments },
+  { path: 'owner', component: OwnerDashboard, canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])] },
+  { path: 'owner/my-hotels', component: MyHotels, canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])] },
+  { path: 'owner/rooms', component: OwnerRooms, canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])] },
+  { path: 'owner/facilities', component: OwnerFacilities, canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])] },
+  { path: 'owner/gallery', component: OwnerGallery, canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])] },
+  { path: 'owner/food-items', component: OwnerFoodItems, canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])] },
+  { path: 'owner/hotel-details', component: OwnerHotelDetails, canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])] },
+  { path: 'owner/bookings', component: OwnerBookings, canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])] },
+  { path: 'owner/payments', component: Payments, canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])] },
 
-  { path: 'customer', component: CustomerDashboard },
-  { path: 'customer/bookings', component: CustomerBookings },
-  { path: 'customer/booking/:id', component: BookingDetails },
-  { path: 'customer/pay/:bookingId', component: MakePayment },
-  { path: 'customer/invoices', component: CustomerInvoices },
-  { path: 'customer/wishlist', component: CustomerWishlist },
+  { path: 'customer', component: CustomerDashboard, canActivate: [authGuard, roleGuard(['CUSTOMER'])] },
+  { path: 'customer/bookings', component: CustomerBookings, canActivate: [authGuard, roleGuard(['CUSTOMER'])] },
+  { path: 'customer/booking/:id', component: BookingDetails, canActivate: [authGuard, roleGuard(['CUSTOMER'])] },
+  { path: 'customer/pay/:bookingId', component: MakePayment, canActivate: [authGuard, roleGuard(['CUSTOMER'])] },
+  { path: 'customer/payment-result', component: PaymentResult, canActivate: [authGuard, roleGuard(['CUSTOMER'])] },
+  { path: 'customer/invoices', component: CustomerInvoices, canActivate: [authGuard, roleGuard(['CUSTOMER'])] },
+  { path: 'customer/wishlist', component: CustomerWishlist, canActivate: [authGuard, roleGuard(['CUSTOMER'])] },
 
   { path: 'dashboard', component: RoleRedirect },
-
-  // { path: 'admin', canActivate: [authGuard, roleGuard('ADMIN')], component: AdminDashboard },
-  // { path: 'owner', canActivate: [authGuard, roleGuard('HOTEL_OWNER')], component: OwnerDashboard },
-  // { path: 'customer', canActivate: [authGuard, roleGuard('CUSTOMER')], component: CustomerDashboard},
 ];

@@ -1,6 +1,8 @@
 package com.MHM.MultiHotelManagement.dto.response;
 
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -14,15 +16,15 @@ public class BookingResponseDTO {
     private Date checkOutDate;
     private int numberOfRooms;
     private int totalGuests;
-    private double totalAmount;
-    private double dueAmount;
+    private BigDecimal totalAmount;
+    private BigDecimal dueAmount;
     private String status;
     private boolean onlineCheckIn;
     private String idImagePath;
     private String digitalKey;
     private Date cancellationDeadline;
     private String cancellationPolicyText;
-    private double extraCharges;
+    private BigDecimal extraCharges;
     private String phone;
     private List<String> foodItems;
 }

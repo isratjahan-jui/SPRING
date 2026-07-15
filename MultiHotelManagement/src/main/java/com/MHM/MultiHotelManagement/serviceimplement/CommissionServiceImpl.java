@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,9 +46,11 @@ public class CommissionServiceImpl implements CommissionService {
         }
 
         Double rate = dto.getCommissionRate() != null ? dto.getCommissionRate() : DEFAULT_RATE;
-        Double totalPrice = booking.getTotalPrice();
-        Double adminEarnings = totalPrice * rate / 100;
-        Double ownerEarnings = totalPrice - adminEarnings;
+        BigDecimal totalPrice = booking.getTotalPrice();
+        BigDecimal adminEarningsBd = totalPrice.multiply(BigDecimal.valueOf(rate)).divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
+        BigDecimal ownerEarningsBd = totalPrice.subtract(adminEarningsBd);
+        Double adminEarnings = adminEarningsBd.doubleValue();
+        Double ownerEarnings = ownerEarningsBd.doubleValue();
 
         Commission commission = new Commission();
         commission.setBooking(booking);
