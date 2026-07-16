@@ -20,7 +20,25 @@
         />
       }
       <div class="card-body">
-        <h2 class="card-title">{{ hotel.hotelName }}</h2>
+        <div class="d-flex justify-content-between align-items-start">
+          <h2 class="card-title">{{ hotel.hotelName }}</h2>
+          @if (isCustomer && customerId) {
+            <button
+              class="btn btn-sm"
+              [class.btn-outline-danger]="isInWishlist"
+              [class.btn-outline-secondary]="!isInWishlist"
+              (click)="toggleWishlist()"
+              [disabled]="togglingWishlist"
+              [title]="isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'"
+            >
+              @if (togglingWishlist) {
+                <span class="spinner-border spinner-border-sm"></span>
+              } @else {
+                {{ isInWishlist ? '&#9829;' : '&#9825;' }}
+              }
+            </button>
+          }
+        </div>
         <p class="text-muted mb-1">{{ hotel.address }}</p>
         <div class="mb-2">
           @if (hotel.locationName) {
@@ -83,6 +101,41 @@
           <p class="text-muted">No detailed information available yet.</p>
         }
 
+        @if (deals.length > 0) {
+          <hr />
+          <h5>🔥 Deals & Offers</h5>
+          <div class="row">
+            @for (deal of deals; track deal.id) {
+              <div class="col-md-6 mb-3">
+                <div class="card border-danger h-100">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <h6 class="card-title mb-0">{{ deal.dealTitle }}</h6>
+                      <span class="badge bg-danger">
+                        @if (deal.discountPercent) {
+                          -{{ deal.discountPercent }}%
+                        } @else if (deal.discountAmount) {
+                          -BDT {{ deal.discountAmount }}
+                        }
+                      </span>
+                    </div>
+                    @if (deal.description) {
+                      <p class="card-text small text-muted mt-1">{{ deal.description }}</p>
+                    }
+                    @if (deal.roomType) {
+                      <p class="card-text small mb-0"><strong>Room:</strong> {{ deal.roomType }}</p>
+                    }
+                    <small class="text-muted">
+                      {{ deal.startDate | date: 'shortDate' }} -
+                      {{ deal.endDate | date: 'shortDate' }}
+                    </small>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
         @if (facilities.length > 0) {
           <hr />
           <h5>Facilities</h5>
@@ -129,13 +182,11 @@
                     @if (r.amenities) {
                       <p class="card-text small text-muted mb-0">{{ r.amenities }}</p>
                     }
-                    @if (isCustomer) {
-                      <a
-                        [routerLink]="['/book-hotel', hotel.id, r.id]"
-                        class="btn btn-sm btn-primary w-100 mt-2"
-                        >Book Now</a
-                      >
-                    }
+                    <a
+                      [routerLink]="['/book-hotel', hotel.id, r.id]"
+                      class="btn btn-sm btn-primary w-100 mt-2"
+                      >Book Now</a
+                    >
                   </div>
                 </div>
               </div>
@@ -152,7 +203,7 @@
                 <div class="card h-100">
                   @if (item.imageUrl) {
                     <img
-                      [src]="'http://localhost:8085/food/' + item.imageUrl"
+                      [src]="getFoodImageUrl(item.imageUrl)"
                       class="card-img-top"
                       alt="{{ item.itemName }}"
                       style="height: 120px; object-fit: cover"
@@ -164,6 +215,53 @@
                     <p class="mb-0">
                       <strong>&#2547;{{ item.foodPrice }}</strong>
                     </p>
+                    <span class="badge bg-secondary">{{ item.category }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (extraServices.length > 0) {
+          <hr />
+          <h5>Extra Services</h5>
+          <div class="row">
+            @for (s of extraServices; track s.id) {
+              <div class="col-md-4 col-6 mb-3">
+                <div class="card h-100 border-primary">
+                  <div class="card-body p-3">
+                    <h6 class="card-title mb-1">{{ s.serviceName }}</h6>
+                    @if (s.description) {
+                      <p class="card-text small text-muted mb-1">{{ s.description }}</p>
+                    }
+                    <p class="mb-0">
+                      <strong>&#2547;{{ s.price }}</strong>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (gallery.length > 0) {
+          <hr />
+          <h5>Gallery</h5>
+          <div class="row">
+            @for (item of gallery; track item.id) {
+              <div class="col-md-3 col-6 mb-3">
+                <div class="card h-100">
+                  <img
+                    [src]="getGalleryImageUrl(item.imageUrl)"
+                    class="card-img-top"
+                    alt="{{ item.caption }}"
+                    style="height: 150px; object-fit: cover"
+                  />
+                  <div class="card-body p-2">
+                    @if (item.caption) {
+                      <p class="card-text small mb-1">{{ item.caption }}</p>
+                    }
                     <span class="badge bg-secondary">{{ item.category }}</span>
                   </div>
                 </div>

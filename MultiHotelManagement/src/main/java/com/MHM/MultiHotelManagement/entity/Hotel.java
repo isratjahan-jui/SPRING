@@ -48,7 +48,7 @@ public class Hotel {
 
     // Owner ↔ Hotel (Many-to-One)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", nullable = false)
+    @JoinColumn(name = "owner_id")
     private HotelOwner owner;
 
     // Hotel ↔ Facility (One-to-Many)

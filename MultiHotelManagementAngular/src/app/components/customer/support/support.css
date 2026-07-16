@@ -1,0 +1,11 @@
+.empty-state {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 48px 24px;
+}
+.modal-backdrop {
+  z-index: 1040;
+}
+.modal {
+  z-index: 1050;
+}

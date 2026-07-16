@@ -31,6 +31,12 @@ export class WishlistService {
     });
   }
 
+  existsByUser(userId: number, hotelId: number) {
+    return this.http.get<boolean>(`${this.API_URL}/exists/user`, {
+      params: { userId, hotelId },
+    });
+  }
+
   create(data: WishlistRequest) {
     return this.http.post<WishlistResponse>(this.API_URL, data);
   }

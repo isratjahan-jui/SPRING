@@ -1,0 +1,173 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Payment Management</h2>
+    <button class="btn btn-primary" (click)="openCreate()">+ New Payment</button>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card bg-primary text-white">
+        <div class="card-body">
+          <h6>Total Payments</h6>
+          <p class="fs-4 fw-bold mb-0">{{ payments.length }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-success text-white">
+        <div class="card-body">
+          <h6>Paid</h6>
+          <p class="fs-4 fw-bold mb-0">{{ payments.filter((p) => p.status === 'PAID').length }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-warning text-dark">
+        <div class="card-body">
+          <h6>Pending</h6>
+          <p class="fs-4 fw-bold mb-0">
+            {{ payments.filter((p) => p.status === 'PENDING').length }}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-danger text-white">
+        <div class="card-body">
+          <h6>Refunded</h6>
+          <p class="fs-4 fw-bold mb-0">
+            {{ payments.filter((p) => p.status === 'REFUNDED').length }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <p class="text-muted">Loading payments...</p>
+  } @else if (payments.length === 0) {
+    <p class="text-muted">No payments found.</p>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Booking</th>
+            <th>Customer</th>
+            <th>Method</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of payments; track p.id) {
+            <tr>
+              <td>{{ p.id }}</td>
+              <td>{{ p.bookingReference }}</td>
+              <td>{{ p.customerName || 'N/A' }}</td>
+              <td>{{ p.method }}</td>
+              <td>
+                <strong>BDT {{ p.amount }}</strong>
+              </td>
+              <td>
+                <span class="badge {{ getStatusClass(p.status) }}">{{ p.status }}</span>
+              </td>
+              <td>{{ p.transactionDate | date: 'dd MMM yyyy, h:mm a' }}</td>
+              <td>
+                <button
+                  class="btn btn-sm btn-outline-primary me-1"
+                  (click)="openEdit(p)"
+                  [disabled]="p.status === 'REFUNDED'"
+                >
+                  Edit
+                </button>
+                <button
+                  class="btn btn-sm btn-outline-info me-1"
+                  (click)="confirmRefund(p)"
+                  [disabled]="p.status === 'REFUNDED'"
+                >
+                  Refund
+                </button>
+                <button
+                  class="btn btn-sm btn-outline-danger"
+                  (click)="confirmDelete(p.id)"
+                  [disabled]="p.status === 'REFUNDED'"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+@if (showForm) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal fade show d-block" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ editing ? 'Edit Payment' : 'New Payment' }}</h5>
+          <button type="button" class="btn-close" (click)="closeForm()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Booking ID</label>
+            <input type="number" class="form-control" [(ngModel)]="form.bookingId" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Payment Method</label>
+            <select class="form-select" [(ngModel)]="form.method">
+              <option value="SSLCommerz">SSLCommerz</option>
+              <option value="Cash">Cash</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="Card">Card</option>
+              <option value="Mobile Banking">Mobile Banking</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Amount (BDT)</label>
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="form.amount"
+              min="0.01"
+              step="0.01"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Status</label>
+            <select class="form-select" [(ngModel)]="form.status">
+              <option value="PAID">PAID</option>
+              <option value="PENDING">PENDING</option>
+              <option value="FAILED">FAILED</option>
+              <option value="UNPAID">UNPAID</option>
+              <option value="REFUNDED">REFUNDED</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Customer ID (optional)</label>
+            <input type="number" class="form-control" [(ngModel)]="form.customerId" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Extra Service ID (optional)</label>
+            <input type="number" class="form-control" [(ngModel)]="form.extraServiceId" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+          <button type="button" class="btn btn-primary" (click)="save()">
+            {{ editing ? 'Update Payment' : 'Create Payment' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

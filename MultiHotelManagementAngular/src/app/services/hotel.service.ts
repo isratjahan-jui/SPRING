@@ -26,6 +26,10 @@ export class HotelService {
     return this.http.get<Hotel[]>(`${this.API_URL}/city/${city}`);
   }
 
+  search(keyword: string) {
+    return this.http.get<Hotel[]>(`${this.API_URL}/search`, { params: { q: keyword } });
+  }
+
   create(data: HotelRequest, image?: File) {
     const formData = new FormData();
     formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));

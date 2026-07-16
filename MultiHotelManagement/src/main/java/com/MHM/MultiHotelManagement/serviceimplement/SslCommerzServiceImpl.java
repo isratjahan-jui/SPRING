@@ -1,12 +1,15 @@
 package com.MHM.MultiHotelManagement.serviceimplement;
 
 import com.MHM.MultiHotelManagement.entity.Booking;
+import com.MHM.MultiHotelManagement.entity.Invoice;
 import com.MHM.MultiHotelManagement.entity.Payment;
 import com.MHM.MultiHotelManagement.enums.BookingStatus;
+import com.MHM.MultiHotelManagement.enums.InvoiceStatus;
 import com.MHM.MultiHotelManagement.enums.PaymentStatus;
 import com.MHM.MultiHotelManagement.exception.BadRequestException;
 import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.repository.BookingRepository;
+import com.MHM.MultiHotelManagement.repository.InvoiceRepository;
 import com.MHM.MultiHotelManagement.repository.PaymentRepository;
 import com.MHM.MultiHotelManagement.service.SslCommerzService;
 import com.MHM.MultiHotelManagement.util.SslCommerzClient;
@@ -16,8 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -29,6 +34,7 @@ public class SslCommerzServiceImpl implements SslCommerzService {
     private final BookingRepository bookingRepository;
     private final PaymentRepository paymentRepository;
     private final SslCommerzClient sslCommerzClient;
+    private final InvoiceRepository invoiceRepository;
 
     @Override
     @Transactional
@@ -130,6 +136,9 @@ public class SslCommerzServiceImpl implements SslCommerzService {
             booking.setStatus(BookingStatus.CONFIRMED);
         }
         bookingRepository.save(booking);
+
+        // Auto-generate invoice
+        generateInvoice(booking, payment);
     }
 
     @Override
@@ -219,5 +228,42 @@ public class SslCommerzServiceImpl implements SslCommerzService {
             booking.setStatus(BookingStatus.CONFIRMED);
         }
         bookingRepository.save(booking);
+
+        // Auto-generate invoice
+        generateInvoice(booking, payment);
+    }
+
+    private void generateInvoice(Booking booking, Payment payment) {
+        List<Invoice> existing = invoiceRepository.findByBooking_Id(booking.getId());
+        boolean alreadyExists = existing.stream()
+                .anyMatch(inv -> inv.getPayment() != null && inv.getPayment().getId().equals(payment.getId()));
+        if (alreadyExists) return;
+
+        Invoice invoice = new Invoice();
+        invoice.setInvoiceNumber("INV-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        invoice.setBooking(booking);
+        invoice.setPayment(payment);
+        invoice.setCustomer(booking.getCustomer());
+
+        double total = booking.getTotalAmount() != null ? booking.getTotalAmount().doubleValue() : 0;
+        double discount = booking.getDiscountRate() != null
+                ? BigDecimal.valueOf(total)
+                    .multiply(booking.getDiscountRate())
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
+                    .doubleValue() : 0;
+        double tax = BigDecimal.valueOf(total - discount)
+                .multiply(BigDecimal.valueOf(0.15))
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
+
+        invoice.setTotalAmount(total);
+        invoice.setDiscountAmount(discount);
+        invoice.setTaxAmount(tax);
+        invoice.setNetAmount(BigDecimal.valueOf(total + tax - discount)
+                .setScale(2, RoundingMode.HALF_UP).doubleValue());
+        invoice.setStatus(InvoiceStatus.ISSUED);
+        invoice.setIssuedAt(LocalDateTime.now());
+
+        invoiceRepository.save(invoice);
     }
 }

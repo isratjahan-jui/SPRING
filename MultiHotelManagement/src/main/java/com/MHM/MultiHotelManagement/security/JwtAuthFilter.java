@@ -55,25 +55,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // Authorization: Bearer eyJhbGciOiJIUzI1NiJ9....
         // ============================================================
         String authHeader = request.getHeader("Authorization");
+        String token = null;
 
-        // ============================================================
-        // STEP 2: If Authorization header is missing
-        // or does not start with "Bearer ",
-        // skip JWT processing and continue request.
-        // ============================================================
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+        } else if (request.getParameter("token") != null) {
+            token = request.getParameter("token");
+        }
+
+        if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        // ============================================================
-        // STEP 3: Extract JWT token
-        //
-        // Example:
-        // Header = "Bearer abc.def.xyz"
-        // Token  = "abc.def.xyz"
-        // ============================================================
-        String token = authHeader.substring(7);
 
         // ============================================================
         // STEP 4: Validate token

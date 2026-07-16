@@ -11,6 +11,8 @@ public class WishlistResponseDTO {
     private String customerName;
     private Long hotelId;
     private String hotelName;
+    private String hotelImage;
+    private String hotelAddress;
     private String notes;
     private Boolean isActive;
 }

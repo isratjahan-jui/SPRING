@@ -63,7 +63,7 @@ public class CustomerController {
 
     // ── Update ───────────────────────────────────────────────────
     // PUT /api/customers/1
-    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    @PutMapping("/{id}")
     public ResponseEntity<CustomerResponseDTO> update(
             @PathVariable Long id,
             @RequestPart("data") CustomerRequestDTO dto,

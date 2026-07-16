@@ -1,28 +1,65 @@
-<div class="container mt-4">
-  <h2>All Hotels</h2>
+<div class="container py-4">
+  <h2 class="mb-4">All Hotels</h2>
   <div class="row">
     @for (hotel of hotels; track hotel.id) {
-      <div class="col-md-4 mb-3">
-        <div class="card h-100">
-          @if (hotel.image) {
-            <img
-              [src]="'http://localhost:8085/hotel/' + hotel.image"
-              class="card-img-top"
-              alt="{{ hotel.hotelName }}"
-              style="height: 180px; object-fit: cover"
-            />
-          }
-          <div class="card-body">
-            <h5 class="card-title">{{ hotel.hotelName }}</h5>
-            <p class="card-text text-muted">{{ hotel.address }}</p>
+      <div class="col-md-4 col-lg-3 mb-4">
+        <div class="card h-100 shadow-sm hotel-card">
+          <div class="position-relative">
+            @if (hotel.image) {
+              <img
+                [src]="imageBaseUrl + '/hotel/' + hotel.image"
+                class="card-img-top"
+                [alt]="hotel.hotelName"
+                style="height: 180px; object-fit: cover"
+              />
+            } @else {
+              <div
+                class="card-img-top d-flex align-items-center justify-content-center bg-light"
+                style="height: 180px"
+              >
+                <span class="text-muted" style="font-size: 2.5rem">&#127976;</span>
+              </div>
+            }
+            @if (isCustomer && customerId) {
+              <button
+                class="btn btn-sm wishlist-heart position-absolute top-0 end-0 m-2"
+                [class.text-danger]="isInWishlist(hotel.id)"
+                [class.text-white]="!isInWishlist(hotel.id)"
+                (click)="toggleWishlist(hotel.id); $event.stopPropagation()"
+                [disabled]="togglingHotelId === hotel.id"
+                [title]="isInWishlist(hotel.id) ? 'Remove from Wishlist' : 'Add to Wishlist'"
+              >
+                @if (togglingHotelId === hotel.id) {
+                  <span class="spinner-border spinner-border-sm"></span>
+                } @else {
+                  {{ isInWishlist(hotel.id) ? '&#9829;' : '&#9825;' }}
+                }
+              </button>
+            }
+          </div>
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title mb-1">{{ hotel.hotelName }}</h6>
+            <p class="card-text text-muted small mb-1">{{ hotel.address }}</p>
             @if (hotel.locationName) {
               <p class="card-text">
                 <small class="text-muted">{{ hotel.locationName }}</small>
               </p>
             }
-            <a [routerLink]="['/hotels', hotel.id]" class="btn btn-sm btn-outline-primary mt-2"
-              >View Details</a
-            >
+            @if (hotel.rating) {
+              <p class="card-text small mb-1">
+                <span class="text-warning">
+                  @for (s of [1, 2, 3, 4, 5]; track s) {
+                    <span [class.text-muted]="s > +hotel.rating">&#9733;</span>
+                  }
+                </span>
+                <span class="text-muted ms-1">{{ hotel.rating }}</span>
+              </p>
+            }
+            <div class="mt-auto pt-2">
+              <a [routerLink]="['/hotels', hotel.id]" class="btn btn-sm btn-outline-primary w-100">
+                View Details
+              </a>
+            </div>
           </div>
         </div>
       </div>

@@ -8,12 +8,16 @@ import com.MHM.MultiHotelManagement.entity.Customer;
 import com.MHM.MultiHotelManagement.entity.Hotel;
 import com.MHM.MultiHotelManagement.entity.Room;
 import com.MHM.MultiHotelManagement.entity.FoodItem;
+import com.MHM.MultiHotelManagement.entity.ExtraService;
+import com.MHM.MultiHotelManagement.entity.HotelExtraService;
 import com.MHM.MultiHotelManagement.enums.BookingStatus;
+import com.MHM.MultiHotelManagement.enums.ServiceStatus;
 import com.MHM.MultiHotelManagement.repository.BookingRepository;
 import com.MHM.MultiHotelManagement.repository.CustomerRepository;
 import com.MHM.MultiHotelManagement.repository.HotelRepository;
 import com.MHM.MultiHotelManagement.repository.RoomRepository;
 import com.MHM.MultiHotelManagement.repository.FoodItemRepository;
+import com.MHM.MultiHotelManagement.repository.HotelExtraServiceRepository;
 import com.MHM.MultiHotelManagement.service.BookingService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +43,7 @@ public class BookingServiceImple implements BookingService {
     private final HotelRepository hotelRepository;
     private final RoomRepository roomRepository;
     private final FoodItemRepository foodItemRepository;
+    private final HotelExtraServiceRepository hotelExtraServiceRepository;
 
     @Value("${image.upload.dir:uploads}")
     private String uploadDir;
@@ -47,12 +52,14 @@ public class BookingServiceImple implements BookingService {
                                CustomerRepository customerRepository,
                                HotelRepository hotelRepository,
                                RoomRepository roomRepository,
-                               FoodItemRepository foodItemRepository) {
+                               FoodItemRepository foodItemRepository,
+                               HotelExtraServiceRepository hotelExtraServiceRepository) {
         this.bookingRepository = bookingRepository;
         this.customerRepository = customerRepository;
         this.hotelRepository = hotelRepository;
         this.roomRepository = roomRepository;
         this.foodItemRepository = foodItemRepository;
+        this.hotelExtraServiceRepository = hotelExtraServiceRepository;
     }
 
     @Override
@@ -72,16 +79,22 @@ public class BookingServiceImple implements BookingService {
         booking.setRoom(room);
         booking.setStatus(BookingStatus.PENDING);
 
-        // Double booking check
-        List<Booking> conflicting = bookingRepository.findConflictingBookings(
+        // Check room availability for selected dates
+        int bookedForDates = bookingRepository.countBookedRoomsForDates(
                 room.getId(), dto.getCheckInDate(), dto.getCheckOutDate());
-        if (!conflicting.isEmpty()) {
-            throw new IllegalStateException("Room is already booked for the selected dates");
+        int availableForDates = room.getTotalRooms() - bookedForDates;
+        if (dto.getNumberOfRooms() > availableForDates) {
+            throw new IllegalStateException(
+                    "Not enough rooms available for the selected dates. Available: " + availableForDates + ", Requested: " + dto.getNumberOfRooms());
         }
 
-        // Calculate totalAmount and dueAmount using BigDecimal
+        // Calculate number of nights
+        long diffMs = dto.getCheckOutDate().getTime() - dto.getCheckInDate().getTime();
+        int numberOfNights = Math.max(1, (int) Math.ceil(diffMs / (1000.0 * 60 * 60 * 24)));
+
         BigDecimal roomTotal = BigDecimal.valueOf(room.getPricePerNight())
-                .multiply(BigDecimal.valueOf(dto.getNumberOfRooms()));
+                .multiply(BigDecimal.valueOf(dto.getNumberOfRooms()))
+                .multiply(BigDecimal.valueOf(numberOfNights));
         BigDecimal discount = roomTotal.multiply(dto.getDiscountRate())
                 .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
         BigDecimal totalAmount = roomTotal.subtract(discount);
@@ -104,7 +117,37 @@ public class BookingServiceImple implements BookingService {
             booking.setFoodItems(foodItems);
         }
 
+        // Extra Service integration
+        BigDecimal extraServicesTotal = BigDecimal.ZERO;
+        if (dto.getExtraServiceIds() != null && !dto.getExtraServiceIds().isEmpty()) {
+            List<HotelExtraService> definitions = hotelExtraServiceRepository.findAllById(dto.getExtraServiceIds());
+            for (HotelExtraService def : definitions) {
+                ExtraService es = new ExtraService();
+                es.setServiceType(def.getServiceName());
+                es.setPrice(def.getPrice());
+                es.setServiceStatus(ServiceStatus.PENDING);
+                es.setBooking(booking);
+                booking.addExtraService(es);
+                extraServicesTotal = extraServicesTotal.add(BigDecimal.valueOf(def.getPrice()));
+            }
+        }
+
+        // Add extra services cost to total
+        if (extraServicesTotal.compareTo(BigDecimal.ZERO) > 0) {
+            booking.setTotalAmount(totalAmount.add(extraServicesTotal));
+            booking.setDueAmount(totalAmount.subtract(dto.getAdvanceAmount()).add(extraServicesTotal));
+        }
+
         Booking saved = bookingRepository.save(booking);
+
+        // Update room availability counters
+        room.setAvailableRooms(room.getAvailableRooms() - dto.getNumberOfRooms());
+        room.setBookedRooms(room.getBookedRooms() + dto.getNumberOfRooms());
+        if (room.getAvailableRooms() <= 0) {
+            room.setIsAvailable(false);
+        }
+        roomRepository.save(room);
+
         return BookingMapperDTO.toResponseDTO(saved);
     }
 
@@ -114,9 +157,14 @@ public class BookingServiceImple implements BookingService {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
 
+        Room room = booking.getRoom();
+        int oldNumberOfRooms = booking.getNumberOfRooms();
+        int newNumberOfRooms = dto.getNumberOfRooms();
+        int roomDiff = newNumberOfRooms - oldNumberOfRooms;
+
         booking.setCheckInDate(dto.getCheckInDate());
         booking.setCheckOutDate(dto.getCheckOutDate());
-        booking.setNumberOfRooms(dto.getNumberOfRooms());
+        booking.setNumberOfRooms(newNumberOfRooms);
         booking.setTotalGuests(dto.getTotalGuests());
         booking.setDiscountRate(dto.getDiscountRate());
         booking.setAdvanceAmount(dto.getAdvanceAmount());
@@ -128,6 +176,19 @@ public class BookingServiceImple implements BookingService {
         }
 
         Booking updated = bookingRepository.save(booking);
+
+        // Adjust room availability counters if number of rooms changed
+        if (roomDiff != 0) {
+            int newAvailable = room.getAvailableRooms() - roomDiff;
+            if (newAvailable < 0) {
+                throw new IllegalStateException("Not enough rooms available. Requested: " + (-roomDiff) + ", Available: " + room.getAvailableRooms());
+            }
+            room.setAvailableRooms(newAvailable);
+            room.setBookedRooms(room.getBookedRooms() + roomDiff);
+            room.setIsAvailable(room.getAvailableRooms() > 0);
+            roomRepository.save(room);
+        }
+
         return BookingMapperDTO.toResponseDTO(updated);
     }
 
@@ -163,9 +224,16 @@ public class BookingServiceImple implements BookingService {
     @Override
     @Transactional
     public void deleteBooking(Long id) {
-        if (!bookingRepository.existsById(id)) {
-            throw new EntityNotFoundException("Booking not found");
-        }
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
+
+        // Restore room availability
+        Room room = booking.getRoom();
+        room.setAvailableRooms(room.getAvailableRooms() + booking.getNumberOfRooms());
+        room.setBookedRooms(Math.max(0, room.getBookedRooms() - booking.getNumberOfRooms()));
+        room.setIsAvailable(true);
+        roomRepository.save(room);
+
         bookingRepository.deleteById(id);
     }
 
@@ -212,6 +280,18 @@ public class BookingServiceImple implements BookingService {
                 .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
 
         BookingStatus newStatus = BookingStatus.valueOf(status);
+
+        // Restore room availability when cancelling
+        if (newStatus == BookingStatus.CANCELLED && booking.getStatus() != BookingStatus.CANCELLED) {
+            Room room = booking.getRoom();
+            room.setAvailableRooms(room.getAvailableRooms() + booking.getNumberOfRooms());
+            room.setBookedRooms(room.getBookedRooms() - booking.getNumberOfRooms());
+            if (room.getAvailableRooms() > 0) {
+                room.setIsAvailable(true);
+            }
+            roomRepository.save(room);
+        }
+
         booking.setStatus(newStatus);
         Booking updated = bookingRepository.save(booking);
         return BookingMapperDTO.toResponseDTO(updated);
@@ -254,6 +334,14 @@ public class BookingServiceImple implements BookingService {
         }
 
         booking.setStatus(BookingStatus.CHECKED_OUT);
+
+        // Restore room availability on checkout
+        Room room = booking.getRoom();
+        room.setAvailableRooms(room.getAvailableRooms() + booking.getNumberOfRooms());
+        room.setBookedRooms(Math.max(0, room.getBookedRooms() - booking.getNumberOfRooms()));
+        room.setIsAvailable(true);
+        roomRepository.save(room);
+
         Booking updated = bookingRepository.save(booking);
         return BookingMapperDTO.toResponseDTO(updated);
     }
@@ -283,6 +371,14 @@ public class BookingServiceImple implements BookingService {
         }
 
         booking.setStatus(BookingStatus.NO_SHOW);
+
+        // Restore room availability on no-show
+        Room room = booking.getRoom();
+        room.setAvailableRooms(room.getAvailableRooms() + booking.getNumberOfRooms());
+        room.setBookedRooms(Math.max(0, room.getBookedRooms() - booking.getNumberOfRooms()));
+        room.setIsAvailable(true);
+        roomRepository.save(room);
+
         Booking updated = bookingRepository.save(booking);
         return BookingMapperDTO.toResponseDTO(updated);
     }

@@ -9,7 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/rooms")
@@ -21,7 +23,7 @@ public class RoomController {
 
         //                   Create
     // POST /api/rooms
-    @PostMapping(consumes = {"multipart/form-data"})
+    @PostMapping
     public ResponseEntity<RoomResponseDTO> create(
             @RequestPart("data") RoomRequestDTO dto,
             @RequestPart(value = "image", required = false)
@@ -72,10 +74,7 @@ public class RoomController {
 
     //                            Update
     // PUT /api/rooms/1
-    @PutMapping(
-            value = "/{id}",
-            consumes = {"multipart/form-data"}
-    )
+    @PutMapping("/{id}")
     public ResponseEntity<RoomResponseDTO> update(
             @PathVariable Long id,
             @RequestPart("data") RoomRequestDTO dto,
@@ -104,5 +103,23 @@ public class RoomController {
     ) {
         roomService.updateAvailability(id, count);
         return ResponseEntity.ok().build();
+    }
+
+    //                   Date-Specific Availability
+    // GET /api/rooms/1/availability?checkIn=2026-07-20&checkOut=2026-07-25
+    @GetMapping("/{id}/availability")
+    public ResponseEntity<Map<String, Object>> getAvailabilityForDates(
+            @PathVariable Long id,
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) Date checkIn,
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) Date checkOut
+    ) {
+        RoomResponseDTO room = roomService.getById(id);
+        int available = roomService.getAvailableRoomsForDates(id, checkIn, checkOut);
+        return ResponseEntity.ok(Map.of(
+                "totalRooms", room.getTotalRooms(),
+                "availableForDates", available,
+                "roomType", room.getRoomType(),
+                "price", room.getPrice()
+        ));
     }
 }

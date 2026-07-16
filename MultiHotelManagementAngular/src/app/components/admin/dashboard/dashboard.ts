@@ -7,6 +7,8 @@ import { HotelService } from '../../../services/hotel.service';
 import { BookingService } from '../../../services/booking.service';
 import { CommissionService } from '../../../services/commission.service';
 import { RouterLink } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -37,40 +39,27 @@ export class AdminDashboard implements OnInit {
     const user = this.auth.getUser();
     this.userName = user?.name || user?.email || 'Admin';
 
-    this.ownerService.getAllOwners().subscribe({
-      next: (data) => {
-        this.ownerCount = data.length;
+    forkJoin({
+      owners: this.ownerService.getAllOwners().pipe(catchError(() => of([]))),
+      customers: this.customerService.getAllCustomers().pipe(catchError(() => of([]))),
+      hotels: this.hotelService.getAll().pipe(catchError(() => of([]))),
+      bookings: this.bookingService.getAll().pipe(catchError(() => of([]))),
+      commission: this.commissionService.getAdminTotal().pipe(catchError(() => of(0))),
+    }).subscribe({
+      next: (result) => {
+        this.ownerCount = result.owners.length;
+        this.customerCount = result.customers.length;
+        this.approvedHotelCount = result.hotels.filter((h) => h.status === 'APPROVED').length;
+        this.pendingHotelCount = result.hotels.filter(
+          (h) => h.status === 'PENDING_APPROVAL',
+        ).length;
+        this.rejectedHotelCount = result.hotels.filter((h) => h.status === 'REJECTED').length;
+        this.totalBookings = result.bookings.length;
+        this.totalCommission = result.commission;
+        this.loading = false;
         this.cdr.markForCheck();
       },
-    });
-    this.customerService.getAllCustomers().subscribe({
-      next: (data) => {
-        this.customerCount = data.length;
-        this.cdr.markForCheck();
-      },
-    });
-    this.hotelService.getAll().subscribe({
-      next: (data) => {
-        this.approvedHotelCount = data.filter((h) => h.status === 'APPROVED').length;
-        this.pendingHotelCount = data.filter((h) => h.status === 'PENDING_APPROVAL').length;
-        this.rejectedHotelCount = data.filter((h) => h.status === 'REJECTED').length;
-        this.cdr.markForCheck();
-      },
-    });
-    this.bookingService.getAll().subscribe({
-      next: (data) => {
-        this.totalBookings = data.length;
-        this.cdr.markForCheck();
-      },
-      error: () => {},
-    });
-    this.commissionService.getAdminTotal().subscribe({
-      next: (data) => {
-        this.totalCommission = data;
-        this.cdr.markForCheck();
-      },
-      error: () => {},
-      complete: () => {
+      error: () => {
         this.loading = false;
         this.cdr.markForCheck();
       },

@@ -1,29 +1,69 @@
 <div class="container py-4">
-  <h2>Make a Payment</h2>
+  <a routerLink="/customer/bookings" class="btn btn-outline-secondary btn-sm mb-3"
+    >&larr; Back to My Bookings</a
+  >
 
   @if (loading) {
-    <p class="text-muted">Loading...</p>
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted mt-2">Loading payment details...</p>
+    </div>
+  } @else if (success) {
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <div class="text-success mb-3" style="font-size: 4rem">&#10003;</div>
+        <h3>Payment Successful!</h3>
+        <p class="text-muted">
+          @if (selectedMethod === 'CASH') {
+            Your booking is confirmed. Please pay BDT {{ amount }} at the hotel during check-in.
+          } @else {
+            Your payment of BDT {{ amount }} has been recorded.
+          }
+        </p>
+        <div class="mt-4 d-flex gap-2 justify-content-center">
+          <button class="btn btn-primary" (click)="goToBookings()">View My Bookings</button>
+          <a routerLink="/customer/invoices" class="btn btn-outline-primary">View Invoices</a>
+        </div>
+      </div>
+    </div>
   } @else if (error && !booking) {
     <div class="alert alert-danger">{{ error }}</div>
     <a routerLink="/customer/bookings" class="btn btn-outline-primary">Back to Bookings</a>
   } @else if (booking) {
     <div class="card shadow-sm mb-4">
       <div class="card-body">
-        <h5>{{ booking.hotelName }}</h5>
-        <p class="text-muted mb-1">
-          {{ booking.roomType }} &middot; {{ booking.numberOfRooms }} room(s)
-        </p>
-        <p class="mb-1">
-          <strong>Check-in:</strong> {{ booking.checkInDate | date: 'dd MMM yyyy' }}
-        </p>
-        <p class="mb-1">
-          <strong>Check-out:</strong> {{ booking.checkOutDate | date: 'dd MMM yyyy' }}
-        </p>
-        <div class="d-flex justify-content-between border-bottom pb-1 mt-2">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <h4 class="mb-0">{{ booking.hotelName }}</h4>
+            <p class="text-muted mb-0">
+              {{ booking.roomType }} &middot; {{ booking.numberOfRooms }} room(s)
+            </p>
+          </div>
+          <span
+            class="badge fs-6"
+            [class.bg-success]="booking.status === 'CONFIRMED'"
+            [class.bg-warning]="booking.status === 'PENDING'"
+            >{{ booking.status }}</span
+          >
+        </div>
+        <div class="row mb-3">
+          <div class="col-6">
+            <small class="text-muted d-block">Check-in</small>
+            <strong>{{ booking.checkInDate | date: 'dd MMM yyyy' }}</strong>
+          </div>
+          <div class="col-6">
+            <small class="text-muted d-block">Check-out</small>
+            <strong>{{ booking.checkOutDate | date: 'dd MMM yyyy' }}</strong>
+          </div>
+        </div>
+        <hr />
+        <div class="d-flex justify-content-between mb-1">
           <span>Total Amount</span>
           <span class="fw-bold">BDT {{ booking.totalAmount }}</span>
         </div>
-        <div class="d-flex justify-content-between border-bottom pb-1 text-success">
+        <div class="d-flex justify-content-between mb-1 text-success">
           <span>Already Paid</span>
           <span class="fw-bold">BDT {{ booking.totalAmount - booking.dueAmount }}</span>
         </div>
@@ -34,31 +74,180 @@
       </div>
     </div>
 
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h5>Pay via SSLCommerz</h5>
-        <p class="text-muted">You will be redirected to the secure SSLCommerz payment gateway to complete your payment.</p>
+    @if (error) {
+      <div class="alert alert-danger">{{ error }}</div>
+    }
 
-        <div class="mb-3">
-          <label class="form-label"><strong>Amount to Pay (BDT)</strong></label>
-          <input type="text" class="form-control" [value]="booking.dueAmount" readonly />
+    @if (booking.dueAmount <= 0) {
+      <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+          <div class="text-success mb-3" style="font-size: 4rem">&#10003;</div>
+          <h4>Fully Paid</h4>
+          <p class="text-muted">This booking has been fully paid. No amount is due.</p>
+          <button class="btn btn-primary" (click)="goToBookings()">View My Bookings</button>
         </div>
-
-        @if (error) {
-          <div class="alert alert-danger">{{ error }}</div>
-        }
-
-        <button
-          class="btn btn-success btn-lg w-100"
-          (click)="submitPayment()"
-          [disabled]="submitting || booking.dueAmount <= 0"
-        >
-          @if (submitting) {
-            <span class="spinner-border spinner-border-sm me-1"></span>
-          }
-          Pay BDT {{ booking.dueAmount }} via SSLCommerz
-        </button>
       </div>
-    </div>
+    } @else {
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h5>Select Payment Method</h5>
+          <div class="row mt-3">
+            @for (m of methods; track m.id) {
+              <div class="col-md-4 col-6 mb-3">
+                <div
+                  class="card h-100 border-2"
+                  [class.border-primary]="selectedMethod === m.id"
+                  [class.shadow-sm]="selectedMethod !== m.id"
+                  (click)="selectMethod(m.id)"
+                  style="cursor: pointer"
+                >
+                  <div class="card-body text-center p-3">
+                    <div style="font-size: 2rem">{{ m.icon }}</div>
+                    <h6 class="mt-2 mb-1">{{ m.label }}</h6>
+                    <small class="text-muted">{{ m.description }}</small>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (selectedMethod) {
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5>Payment Details</h5>
+
+            @if (selectedMethod === 'BKASH') {
+              <div class="alert alert-info">
+                <strong>bKash Merchant Number:</strong> 01XXXXXXXXX<br />
+                <small
+                  >Send the exact amount to this bKash number. After sending, click Pay Now to
+                  confirm.</small
+                >
+              </div>
+            }
+            @if (selectedMethod === 'NAGAD') {
+              <div class="alert alert-info">
+                <strong>Nagad Merchant Number:</strong> 01XXXXXXXXX<br />
+                <small
+                  >Send the exact amount to this Nagad number. After sending, click Pay Now to
+                  confirm.</small
+                >
+              </div>
+            }
+            @if (selectedMethod === 'ROCKET') {
+              <div class="alert alert-info">
+                <strong>Rocket Merchant Number:</strong> 01XXXXXXXXX<br />
+                <small
+                  >Send the exact amount to this Rocket number. After sending, click Pay Now to
+                  confirm.</small
+                >
+              </div>
+            }
+            @if (selectedMethod === 'CARD') {
+              <div class="alert alert-info">
+                <small
+                  >Card payment is processed via SSLCommerz secure gateway. You will be redirected
+                  to complete the payment.</small
+                >
+              </div>
+            }
+            @if (selectedMethod === 'CASH') {
+              <div class="alert alert-warning">
+                <strong>Pay at Hotel:</strong> You can pay this amount when you check in at the
+                hotel. No online payment needed.
+              </div>
+            }
+
+            <div class="mb-3">
+              <div class="d-flex align-items-center gap-3 mb-2">
+                <div class="form-check">
+                  <input
+                    type="radio"
+                    class="form-check-input"
+                    id="payFull"
+                    [checked]="payFullAmount"
+                    (change)="payFullAmount = true; amount = booking!.dueAmount"
+                  />
+                  <label class="form-check-label" for="payFull">Pay Full Amount</label>
+                </div>
+                <div class="form-check">
+                  <input
+                    type="radio"
+                    class="form-check-input"
+                    id="payPartial"
+                    [checked]="!payFullAmount"
+                    (change)="payFullAmount = false"
+                  />
+                  <label class="form-check-label" for="payPartial">Pay Partial Amount</label>
+                </div>
+              </div>
+
+              @if (!payFullAmount) {
+                <div>
+                  <label class="form-label"><strong>Amount to Pay (BDT)</strong></label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    [(ngModel)]="amount"
+                    min="1"
+                    [max]="booking.dueAmount"
+                    step="0.01"
+                  />
+                  <small class="text-muted">Max: BDT {{ booking.dueAmount }}</small>
+                </div>
+              } @else {
+                <div>
+                  <label class="form-label"><strong>Amount to Pay</strong></label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    [value]="'BDT ' + booking.dueAmount"
+                    readonly
+                  />
+                </div>
+              }
+            </div>
+
+            @if (selectedMethod === 'SSLCOMMERZ' || selectedMethod === 'CARD') {
+              <button
+                class="btn btn-success btn-lg w-100"
+                (click)="submitPayment()"
+                [disabled]="submitting || amount <= 0"
+              >
+                @if (submitting) {
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                Pay BDT {{ amount }} via
+                {{ selectedMethod === 'SSLCOMMERZ' ? 'SSLCommerz' : 'Card' }}
+              </button>
+            } @else if (selectedMethod === 'CASH') {
+              <button
+                class="btn btn-warning btn-lg w-100"
+                (click)="submitPayment()"
+                [disabled]="submitting || amount <= 0"
+              >
+                @if (submitting) {
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                Confirm Pay at Hotel (BDT {{ amount }})
+              </button>
+            } @else {
+              <button
+                class="btn btn-primary btn-lg w-100"
+                (click)="submitPayment()"
+                [disabled]="submitting || amount <= 0"
+              >
+                @if (submitting) {
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                Confirm Payment of BDT {{ amount }} via {{ selectedMethod }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+    }
   }
 </div>

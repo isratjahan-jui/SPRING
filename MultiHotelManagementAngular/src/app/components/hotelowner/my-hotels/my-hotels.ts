@@ -17,6 +17,7 @@ import { RoomService } from '../../../services/room.service';
 import { GalleryService } from '../../../services/gallery.service';
 import { Location } from '../../../models/location.model';
 import { AuthService } from '../../../services/auth.service';
+import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-my-hotels',
@@ -29,6 +30,7 @@ export class MyHotels implements OnInit {
   locations: Location[] = [];
   showForm = false;
   editingId: number | null = null;
+  imageBaseUrl = environment.imageBaseUrl;
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
   form: HotelRequest = this.emptyForm();
@@ -68,6 +70,8 @@ export class MyHotels implements OnInit {
     });
   }
 
+  errorMessage = '';
+
   emptyForm(): HotelRequest {
     return {
       hotelName: '',
@@ -76,7 +80,6 @@ export class MyHotels implements OnInit {
       rating: '',
       status: 'PENDING_APPROVAL',
       locationId: 0,
-      // ownerId: Number(localStorage.getItem('ownerId')) || 0,
       ownerId: this.authService.getUser()?.ownerId || 0,
     };
   }
@@ -135,6 +138,25 @@ export class MyHotels implements OnInit {
   }
 
   save() {
+    this.errorMessage = '';
+
+    if (!this.form.hotelName?.trim()) {
+      this.errorMessage = 'Hotel name is required.';
+      return;
+    }
+    if (!this.form.address?.trim()) {
+      this.errorMessage = 'Address is required.';
+      return;
+    }
+    if (!this.form.locationId || this.form.locationId === 0) {
+      this.errorMessage = 'Please select a location.';
+      return;
+    }
+    if (!this.form.ownerId || this.form.ownerId === 0) {
+      this.errorMessage = 'Owner ID not found. Please log in again.';
+      return;
+    }
+
     this.loading = true;
     const request = this.editingId
       ? this.hotelService.update(this.editingId, this.form, this.selectedImage)
@@ -148,7 +170,8 @@ export class MyHotels implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        alert(err.error?.message || 'Failed to save hotel');
+        this.errorMessage =
+          err.error?.message || err.error?.error || 'Failed to save hotel. Please try again.';
       },
     });
   }

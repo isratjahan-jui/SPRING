@@ -2,7 +2,11 @@ package com.MHM.MultiHotelManagement.dto.mapper;
 
 import com.MHM.MultiHotelManagement.dto.request.BookingRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.BookingResponseDTO;
+import com.MHM.MultiHotelManagement.dto.response.ExtraServiceResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Booking;
+import com.MHM.MultiHotelManagement.entity.ExtraService;
+
+import java.util.List;
 
 public class BookingMapperDTO {
 
@@ -27,6 +31,7 @@ public class BookingMapperDTO {
         }
         if (booking.getHotel() != null) {
             response.setHotelName(booking.getHotel().getHotelName());
+            response.setHotelId(booking.getHotel().getId());
         }
         if (booking.getRoom() != null) {
             response.setRoomType(booking.getRoom().getRoomType());
@@ -51,6 +56,13 @@ public class BookingMapperDTO {
         response.setExtraCharges(booking.getExtraCharges());
         if (booking.getCustomer() != null) {
             response.setPhone(booking.getCustomer().getPhone());
+        }
+
+        if (booking.getExtraServices() != null && !booking.getExtraServices().isEmpty()) {
+            List<ExtraServiceResponseDTO> extraServiceDTOs = booking.getExtraServices().stream()
+                    .map(ExtraServiceMapper::toResponseDTO)
+                    .toList();
+            response.setExtraServices(extraServiceDTOs);
         }
 
         return response;

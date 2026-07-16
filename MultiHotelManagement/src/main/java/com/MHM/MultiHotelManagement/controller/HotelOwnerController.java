@@ -35,7 +35,7 @@ public class HotelOwnerController {
         return ResponseEntity.ok(ownerService.getOwnerByUserId(userId));
     }
 
-    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    @PutMapping("/{id}")
     public ResponseEntity<HotelOwnerResponseDTO> update(
             @PathVariable Long id,
             @RequestPart("data") HotelOwnerRequestDTO dto,

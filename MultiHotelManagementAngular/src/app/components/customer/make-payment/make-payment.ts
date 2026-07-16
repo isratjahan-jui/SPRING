@@ -8,6 +8,13 @@ import { AuthService } from '../../../services/auth.service';
 import { CustomerService } from '../../../services/customer.service';
 import { Booking } from '../../../models/booking.model';
 
+interface PaymentMethod {
+  id: string;
+  label: string;
+  icon: string;
+  description: string;
+}
+
 @Component({
   selector: 'app-make-payment',
   imports: [CommonModule, FormsModule, RouterLink],
@@ -30,6 +37,49 @@ export class MakePayment implements OnInit {
   success = false;
   error = '';
 
+  selectedMethod: string = '';
+  amount: number = 0;
+  payFullAmount: boolean = true;
+
+  methods: PaymentMethod[] = [
+    {
+      id: 'CASH',
+      label: 'Cash on Arrival',
+      icon: '💰',
+      description: 'Pay at the hotel during check-in',
+    },
+    {
+      id: 'BKASH',
+      label: 'bKash',
+      icon: '💳',
+      description: 'Send money to our bKash merchant number',
+    },
+    {
+      id: 'NAGAD',
+      label: 'Nagad',
+      icon: '💳',
+      description: 'Send money to our Nagad merchant number',
+    },
+    {
+      id: 'ROCKET',
+      label: 'Rocket',
+      icon: '🚀',
+      description: 'Send money to our Rocket merchant number',
+    },
+    {
+      id: 'CARD',
+      label: 'Card (Visa/Master)',
+      icon: '💳',
+      description: 'Pay securely with your debit/credit card',
+    },
+    {
+      id: 'SSLCOMMERZ',
+      label: 'SSLCommerz',
+      icon: '🔒',
+      description: 'Pay via SSLCommerz secure gateway (bKash, Nagad, Rocket, Cards)',
+    },
+  ];
+
   ngOnInit() {
     const bookingId = Number(this.route.snapshot.paramMap.get('bookingId'));
     if (!bookingId) {
@@ -51,6 +101,7 @@ export class MakePayment implements OnInit {
     this.bookingService.getById(bookingId).subscribe({
       next: (data) => {
         this.booking = data;
+        this.amount = data.dueAmount;
         this.loading = false;
         this.cdr.markForCheck();
       },
@@ -62,24 +113,70 @@ export class MakePayment implements OnInit {
     });
   }
 
-  submitPayment() {
+  selectMethod(methodId: string) {
+    this.selectedMethod = methodId;
+    this.error = '';
+  }
+
+  onAmountChange() {
     if (!this.booking) return;
+    if (this.payFullAmount) {
+      this.amount = this.booking.dueAmount;
+    }
+  }
+
+  submitPayment() {
+    if (!this.booking || !this.selectedMethod) {
+      this.error = 'Please select a payment method.';
+      return;
+    }
+    if (this.amount <= 0) {
+      this.error = 'Amount must be greater than zero.';
+      return;
+    }
+    if (this.amount > this.booking.dueAmount) {
+      this.error = `Amount cannot exceed due amount of BDT ${this.booking.dueAmount}.`;
+      return;
+    }
+
     this.submitting = true;
     this.error = '';
 
-    this.paymentService.initiateSslCommerz(this.booking.id).subscribe({
-      next: (response) => {
-        this.submitting = false;
-        this.cdr.markForCheck();
-        // Redirect to SSLCommerz hosted payment page
-        window.location.href = response.gatewayPageUrl;
-      },
-      error: (err) => {
-        this.error = err.error?.message || 'Payment initialization failed. Please try again.';
-        this.submitting = false;
-        this.cdr.markForCheck();
-      },
-    });
+    if (this.selectedMethod === 'SSLCOMMERZ' || this.selectedMethod === 'CARD') {
+      this.paymentService.initiateSslCommerz(this.booking.id).subscribe({
+        next: (response) => {
+          this.submitting = false;
+          this.cdr.markForCheck();
+          window.location.href = response.gatewayPageUrl;
+        },
+        error: (err) => {
+          this.error = err.error?.message || 'Payment initialization failed. Please try again.';
+          this.submitting = false;
+          this.cdr.markForCheck();
+        },
+      });
+    } else {
+      this.paymentService
+        .create({
+          method: this.selectedMethod,
+          amount: this.amount,
+          status: this.selectedMethod === 'CASH' ? 'PENDING' : 'PAID',
+          bookingId: this.booking.id,
+          customerId: this.customerId || undefined,
+        })
+        .subscribe({
+          next: () => {
+            this.success = true;
+            this.submitting = false;
+            this.cdr.markForCheck();
+          },
+          error: (err) => {
+            this.error = err.error?.message || 'Payment failed. Please try again.';
+            this.submitting = false;
+            this.cdr.markForCheck();
+          },
+        });
+    }
   }
 
   goToBookings() {

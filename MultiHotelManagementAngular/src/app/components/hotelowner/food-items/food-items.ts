@@ -6,6 +6,7 @@ import { Hotel } from '../../../models/hotel.model';
 import { FoodItemService } from '../../../services/food-item.service';
 import { HotelService } from '../../../services/hotel.service';
 import { AuthService } from '../../../services/auth.service';
+import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-owner-food-items',
@@ -80,7 +81,7 @@ export class OwnerFoodItems implements OnInit {
       hotelId: this.selectedHotelId,
     };
     this.selectedImage = undefined;
-    this.preview = item.imageUrl ? 'http://localhost:8085/food/' + item.imageUrl : null;
+    this.preview = item.imageUrl ? `${environment.imageBaseUrl}/food/${item.imageUrl}` : null;
     this.showForm = true;
   }
 
@@ -128,6 +129,6 @@ export class OwnerFoodItems implements OnInit {
   }
 
   getImageUrl(image: string): string {
-    return image ? 'http://localhost:8085/food/' + image : '';
+    return image ? `${environment.imageBaseUrl}/food/${image}` : '';
   }
 }

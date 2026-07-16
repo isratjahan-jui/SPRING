@@ -4,6 +4,7 @@ import com.MHM.MultiHotelManagement.dto.request.RoomRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.RoomResponseDTO;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Date;
 import java.util.List;
 
 public interface RoomService {
@@ -34,4 +35,7 @@ public interface RoomService {
             Long roomId,
             int bookedCount
     );
+
+    // Date-specific availability check
+    int getAvailableRoomsForDates(Long roomId, Date checkIn, Date checkOut);
 }

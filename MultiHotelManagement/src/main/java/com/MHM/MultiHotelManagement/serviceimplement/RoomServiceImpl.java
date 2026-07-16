@@ -7,6 +7,7 @@ import com.MHM.MultiHotelManagement.entity.Hotel;
 import com.MHM.MultiHotelManagement.entity.Room;
 import com.MHM.MultiHotelManagement.exception.BadRequestException;
 import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
+import com.MHM.MultiHotelManagement.repository.BookingRepository;
 import com.MHM.MultiHotelManagement.repository.HotelRepository;
 import com.MHM.MultiHotelManagement.repository.RoomRepository;
 import com.MHM.MultiHotelManagement.service.RoomService;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -29,6 +31,7 @@ public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepo;
     private final HotelRepository hotelRepo;
+    private final BookingRepository bookingRepo;
 
     @Value("${image.upload.dir:uploads}")
     private String uploadDir;
@@ -202,6 +205,20 @@ public class RoomServiceImpl implements RoomService {
         }
 
         roomRepo.save(room);
+    }
+
+    // ── Date-Specific Availability Check ─────────────────────────
+    @Override
+    @Transactional(readOnly = true)
+    public int getAvailableRoomsForDates(Long roomId, Date checkIn, Date checkOut) {
+        Room room = roomRepo.findById(roomId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Room not found with id: " + roomId
+                ));
+
+        int bookedForDates = bookingRepo.countBookedRoomsForDates(roomId, checkIn, checkOut);
+        int remaining = room.getTotalRooms() - bookedForDates;
+        return Math.max(0, remaining);
     }
 
     // ── Image Upload Helper ──────────────────────────────────────

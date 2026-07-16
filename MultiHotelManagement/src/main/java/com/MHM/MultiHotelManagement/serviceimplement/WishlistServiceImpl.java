@@ -8,6 +8,7 @@ import com.MHM.MultiHotelManagement.entity.Hotel;
 import com.MHM.MultiHotelManagement.entity.User;
 import com.MHM.MultiHotelManagement.entity.Wishlist;
 import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
+import com.MHM.MultiHotelManagement.exception.AlreadyExistsException;
 import com.MHM.MultiHotelManagement.repository.CustomerRepository;
 import com.MHM.MultiHotelManagement.repository.HotelRepository;
 import com.MHM.MultiHotelManagement.repository.UserRepository;
@@ -38,6 +39,10 @@ public class WishlistServiceImpl implements WishlistService {
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
         Hotel hotel = hotelRepo.findById(dto.getHotelId())
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
+
+        if (wishlistRepo.existsByUser_IdAndHotel_Id(dto.getUserId(), dto.getHotelId())) {
+            throw new AlreadyExistsException("Hotel already in wishlist");
+        }
 
         Wishlist wishlist = new Wishlist();
         wishlist.setUser(user);

@@ -1,7 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Room, RoomRequest } from '../models/room.model';
 import { environment } from '../../environments/environments';
+
+export interface RoomAvailabilityResponse {
+  totalRooms: number;
+  availableForDates: number;
+  roomType: string;
+  price: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class RoomService {
@@ -45,5 +53,15 @@ export class RoomService {
 
   updateAvailability(id: number, count: number) {
     return this.http.patch<void>(`${this.API_URL}/${id}/availability?count=${count}`, {});
+  }
+
+  getAvailabilityForDates(
+    roomId: number,
+    checkIn: string,
+    checkOut: string,
+  ): Observable<RoomAvailabilityResponse> {
+    return this.http.get<RoomAvailabilityResponse>(
+      `${this.API_URL}/${roomId}/availability?checkIn=${checkIn}&checkOut=${checkOut}`,
+    );
   }
 }

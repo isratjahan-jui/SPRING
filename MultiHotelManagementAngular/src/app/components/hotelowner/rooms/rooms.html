@@ -132,7 +132,31 @@
               <p class="mb-1"><strong>Price:</strong> {{ r.price | currency }}</p>
               <p class="mb-1">
                 <strong>Total:</strong> {{ r.totalRooms }} | <strong>Available:</strong>
-                {{ r.availableRooms }}
+                @if (editingAvail[r.id]) {
+                  <input
+                    [(ngModel)]="availInput[r.id]"
+                    name="avail{{ r.id }}"
+                    type="number"
+                    class="form-control form-control-sm d-inline-block"
+                    style="width: 70px"
+                    min="0"
+                  />
+                  <button class="btn btn-sm btn-success ms-1" (click)="saveAvailability(r.id)">
+                    Save
+                  </button>
+                  <button class="btn btn-sm btn-secondary ms-1" (click)="cancelAvailEdit(r.id)">
+                    Cancel
+                  </button>
+                } @else {
+                  {{ r.availableRooms }}
+                  <button
+                    class="btn btn-sm btn-outline-warning ms-1 py-0 px-1"
+                    (click)="toggleAvailEdit(r)"
+                    title="Update availability"
+                  >
+                    &#9998;
+                  </button>
+                }
               </p>
               <p class="mb-1">
                 <strong>Adults:</strong> {{ r.adults }} | <strong>Children:</strong>

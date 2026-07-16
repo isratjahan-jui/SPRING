@@ -2,6 +2,7 @@ import { Injectable, NgZone, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environments';
 import { AuthService } from './auth.service';
+import { StorageService } from './storage.service';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface NotificationItem {
@@ -19,6 +20,7 @@ export interface NotificationItem {
 export class NotificationService {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
+  private storage = inject(StorageService);
   private zone = inject(NgZone);
   private API_URL = environment.apiUrl + 'notifications';
 
@@ -32,14 +34,13 @@ export class NotificationService {
 
   connect() {
     const user = this.auth.getUser();
-    if (!user || this.eventSource) return;
+    const token = this.storage.getToken();
+    if (!user || !token || this.eventSource) return;
 
     this.disconnect();
     this.loadNotifications();
 
-    this.eventSource = new EventSource(`${this.API_URL}/subscribe/${user.userId}`, {
-      withCredentials: true,
-    });
+    this.eventSource = new EventSource(`${this.API_URL}/subscribe/${user.userId}?token=${token}`);
 
     this.eventSource.addEventListener('notification', (event: MessageEvent) => {
       this.zone.run(() => {

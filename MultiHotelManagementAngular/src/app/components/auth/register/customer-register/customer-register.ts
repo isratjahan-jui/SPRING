@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CustomerService } from '../../../../services/customer.service';
-import { Customer } from '../../../../models/customer.model';
+import { Router } from '@angular/router';
+import { AuthService } from '../../../../services/auth.service';
+import { RegisterRequest } from '../../../../models/auth.model';
 
 @Component({
   selector: 'app-customer-register',
@@ -11,67 +12,41 @@ import { Customer } from '../../../../models/customer.model';
   styleUrl: './customer-register.css',
 })
 export class CustomerRegisterComponent {
-  customer: Customer = {
+  dto: RegisterRequest = {
     name: '',
-    customerName: '',
     email: '',
-    phone: '',
     password: '',
-    address: '',
-    gender: '',
-    dateOfBirth: '',
-    image: '',
+    phone: '',
+    role: 'CUSTOMER',
   };
 
   confirmPassword = '';
-  selectedImage?: File;
-  preview: string | ArrayBuffer | null = null;
 
-  constructor(private customerService: CustomerService) {}
-
-  onFileSelected(event: any): void {
-    if (event.target.files && event.target.files.length > 0) {
-      this.selectedImage = event.target.files[0];
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.preview = reader.result;
-      };
-      reader.readAsDataURL(this.selectedImage!);
-    }
-  }
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+  ) {}
 
   register(): void {
-    if (this.customer.password !== this.confirmPassword) {
+    if (this.dto.password !== this.confirmPassword) {
       alert('Passwords do not match');
       return;
     }
 
-    this.customerService.register(this.customer, this.selectedImage).subscribe({
-      next: () => {
-        alert('Registration Successful');
-        this.reset();
+    this.authService.register(this.dto).subscribe({
+      next: (res) => {
+        alert(res.message || 'Registration Successful! Please check your email to verify your account.');
+        this.router.navigate(['/login']);
       },
       error: (err) => {
         console.error(err);
-        alert('Registration Failed');
+        alert(err.error?.message || 'Registration Failed');
       },
     });
   }
 
   reset(): void {
-    this.customer = {
-      name: '',
-      customerName: '',
-      email: '',
-      phone: '',
-      password: '',
-      address: '',
-      gender: '',
-      dateOfBirth: '',
-      image: '',
-    };
+    this.dto = { name: '', email: '', password: '', phone: '', role: 'CUSTOMER' };
     this.confirmPassword = '';
-    this.selectedImage = undefined;
-    this.preview = null;
   }
 }

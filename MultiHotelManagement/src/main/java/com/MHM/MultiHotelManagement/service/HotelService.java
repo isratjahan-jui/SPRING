@@ -12,6 +12,7 @@ public interface HotelService {
     List<HotelResponseDTO> getAllApprovedHotels();
     List<HotelResponseDTO> getHotelsByOwner(Long ownerId);
     List<HotelResponseDTO> getHotelsByCity(String city);
+    List<HotelResponseDTO> searchHotels(String keyword);
     HotelResponseDTO updateHotel(Long id, HotelRequestDTO dto, MultipartFile image);
     void deleteHotel(Long id);
     List<HotelResponseDTO> getPendingHotels();

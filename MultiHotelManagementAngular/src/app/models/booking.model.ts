@@ -1,5 +1,6 @@
 export interface Booking {
   id: number;
+  hotelId: number;
   customerName: string;
   hotelName: string;
   roomType: string;
@@ -18,6 +19,7 @@ export interface Booking {
   extraCharges: number;
   phone?: string;
   foodItems?: string[];
+  extraServices?: { id: number; serviceType: string; price: number; serviceStatus: string }[];
 }
 
 export interface BookingRequest {
@@ -31,4 +33,5 @@ export interface BookingRequest {
   discountRate: number;
   advanceAmount: number;
   foodItemIds?: number[];
+  extraServiceIds?: number[];
 }

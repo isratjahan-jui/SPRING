@@ -27,18 +27,21 @@ public class PaymentMapper {
             response.setStatus(payment.getStatus().name());
         }
         response.setCustomerId(payment.getCustomerId());
-        if (payment.getBooking() != null) {
-            response.setBookingId(payment.getBooking().getId());
-            response.setBookingReference("BOOK-" + payment.getBooking().getId());
-            if (payment.getBooking().getCustomer() != null) {
-                response.setCustomerName(payment.getBooking().getCustomer().getUser() != null
-                        ? payment.getBooking().getCustomer().getUser().getName()
-                        : null);
+        try {
+            if (payment.getBooking() != null) {
+                response.setBookingId(payment.getBooking().getId());
+                response.setBookingReference("BOOK-" + payment.getBooking().getId());
+                if (payment.getBooking().getCustomer() != null) {
+                    response.setCustomerName(payment.getBooking().getCustomer().getUser() != null
+                            ? payment.getBooking().getCustomer().getUser().getName()
+                            : null);
+                }
             }
-        }
-        if (payment.getExtraService() != null) {
-            response.setExtraServiceId(payment.getExtraService().getId());
-            response.setServiceType(payment.getExtraService().getServiceType());
+            if (payment.getExtraService() != null) {
+                response.setExtraServiceId(payment.getExtraService().getId());
+                response.setServiceType(payment.getExtraService().getServiceType());
+            }
+        } catch (Exception ignored) {
         }
         response.setTransactionDate(payment.getTransactionDate());
         return response;

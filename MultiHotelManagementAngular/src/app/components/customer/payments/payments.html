@@ -1,0 +1,63 @@
+<div class="container mt-4">
+  <h2>My Payment History</h2>
+
+  @if (loading) {
+    <p class="text-muted">Loading...</p>
+  } @else if (payments.length === 0) {
+    <p class="text-muted">No payments yet. Make a booking to get started.</p>
+    <a routerLink="/customer/bookings" class="btn btn-outline-primary">View My Bookings</a>
+  } @else {
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="card bg-success text-white">
+          <div class="card-body">
+            <h6>Total Paid</h6>
+            <p class="fs-4 fw-bold mb-0">
+              BDT
+              {{ payments.filter((p) => p.status === 'PAID').reduce((s, p) => s + p.amount, 0) }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card bg-primary text-white">
+          <div class="card-body">
+            <h6>Transactions</h6>
+            <p class="fs-4 fw-bold mb-0">{{ payments.length }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Booking</th>
+            <th>Method</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of payments; track p.id) {
+            <tr>
+              <td>{{ p.id }}</td>
+              <td>{{ p.bookingReference }}</td>
+              <td>{{ p.method }}</td>
+              <td>
+                <strong>BDT {{ p.amount }}</strong>
+              </td>
+              <td>
+                <span class="badge {{ getStatusClass(p.status) }}">{{ p.status }}</span>
+              </td>
+              <td>{{ p.transactionDate | date: 'dd MMM yyyy, h:mm a' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

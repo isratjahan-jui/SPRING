@@ -51,6 +51,11 @@ public class HotelController {
         return ResponseEntity.ok(hotelService.getHotelsByCity(city));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<HotelResponseDTO>> search(@RequestParam String q) {
+        return ResponseEntity.ok(hotelService.searchHotels(q));
+    }
+
     @GetMapping("/{id:[0-9]+}")
     public ResponseEntity<HotelResponseDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(hotelService.getHotelById(id));
@@ -66,7 +71,7 @@ public class HotelController {
         return ResponseEntity.ok(hotelService.rejectHotel(id, request.getReason()));
     }
 
-    @PutMapping(value = "/{id:[0-9]+}", consumes = {"multipart/form-data"})
+    @PutMapping("/{id:[0-9]+}")
     public ResponseEntity<HotelResponseDTO> update(
             @PathVariable Long id,
             @RequestPart("data") HotelRequestDTO dto,

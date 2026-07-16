@@ -1,0 +1,86 @@
+<div class="container py-4">
+  <h4 class="mb-4">Reports</h4>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+      <p class="text-muted mt-2">Loading...</p>
+    </div>
+  } @else {
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Generate Report</h5>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Select Hotel</label>
+            <select [(ngModel)]="selectedHotelId" class="form-select">
+              <option [ngValue]="0" disabled>-- Choose Hotel --</option>
+              @for (h of hotels; track h.id) {
+                <option [ngValue]="h.id">{{ h.hotelName }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Report Type</label>
+            <select [(ngModel)]="selectedType" class="form-select">
+              <option value="" disabled>-- Choose Type --</option>
+              @for (t of reportTypes; track t) {
+                <option [value]="t">{{ t }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+            <button
+              class="btn btn-primary"
+              [disabled]="!selectedHotelId || !selectedType || generating"
+              (click)="generateReport()"
+            >
+              @if (generating) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              Generate
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (reports.length > 0) {
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Generated Reports</h5>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-striped mb-0">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Hotel</th>
+                <th>Generated At</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of reports; track r.id) {
+                <tr>
+                  <td>
+                    <span class="badge bg-info">{{ r.reportType }}</span>
+                  </td>
+                  <td>{{ r.hotelName }}</td>
+                  <td>{{ r.generatedAt | date: 'medium' }}</td>
+                  <td>
+                    <pre class="mb-0 small">{{ r.reportData }}</pre>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    } @else if (selectedHotelId) {
+      <div class="text-center py-4 text-muted">
+        No reports generated yet. Select a hotel and type above to generate.
+      </div>
+    }
+  }
+</div>

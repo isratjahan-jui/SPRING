@@ -2,7 +2,9 @@ import { ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angula
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { BookingService } from '../../../services/booking.service';
+import { HotelDetailsService } from '../../../services/hotel-details.service';
 import { Booking } from '../../../models/booking.model';
+import { HotelDetails as HotelDetailsModel } from '../../../models/hotel-details.model';
 
 @Component({
   selector: 'app-booking-details',
@@ -13,9 +15,11 @@ import { Booking } from '../../../models/booking.model';
 export class BookingDetails implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private bookingService = inject(BookingService);
+  private hotelDetailsService = inject(HotelDetailsService);
   private cdr = inject(ChangeDetectorRef);
 
   booking?: Booking;
+  hotelDetails?: HotelDetailsModel;
   loading = true;
   error = '';
   processing = false;
@@ -52,6 +56,7 @@ export class BookingDetails implements OnInit, OnDestroy {
         this.loading = false;
         this.generateQrCodeUrl();
         this.startCountdown();
+        this.loadHotelDetails(data.hotelId);
         this.cdr.markForCheck();
       },
       error: () => {
@@ -59,6 +64,16 @@ export class BookingDetails implements OnInit, OnDestroy {
         this.loading = false;
         this.cdr.markForCheck();
       },
+    });
+  }
+
+  private loadHotelDetails(hotelId: number) {
+    this.hotelDetailsService.getByHotelId(hotelId).subscribe({
+      next: (data) => {
+        this.hotelDetails = data;
+        this.cdr.markForCheck();
+      },
+      error: () => {},
     });
   }
 

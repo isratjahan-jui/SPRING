@@ -13,6 +13,8 @@ export interface WishlistResponse {
   customerName: string;
   hotelId: number;
   hotelName: string;
+  hotelImage: string;
+  hotelAddress: string;
   notes: string;
   isActive: boolean;
 }

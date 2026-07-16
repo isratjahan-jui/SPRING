@@ -6,6 +6,7 @@ import { Hotel } from '../../../models/hotel.model';
 import { RoomService } from '../../../services/room.service';
 import { HotelService } from '../../../services/hotel.service';
 import { AuthService } from '../../../services/auth.service';
+import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-owner-rooms',
@@ -140,7 +141,38 @@ export class OwnerRooms implements OnInit {
     }
   }
 
+  editingAvail: { [roomId: number]: boolean } = {};
+  availInput: { [roomId: number]: number } = {};
+
+  toggleAvailEdit(room: Room) {
+    const id = room.id;
+    if (this.editingAvail[id]) {
+      this.cancelAvailEdit(id);
+    } else {
+      this.editingAvail[id] = true;
+      this.availInput[id] = room.availableRooms;
+    }
+  }
+
+  saveAvailability(roomId: number) {
+    const count = this.availInput[roomId];
+    if (count < 0) return alert('Count cannot be negative');
+    this.roomService.updateAvailability(roomId, count).subscribe({
+      next: () => {
+        this.editingAvail[roomId] = false;
+        delete this.availInput[roomId];
+        this.onHotelChange();
+      },
+      error: (err) => alert(err.error?.message || 'Failed to update availability'),
+    });
+  }
+
+  cancelAvailEdit(roomId: number) {
+    this.editingAvail[roomId] = false;
+    delete this.availInput[roomId];
+  }
+
   getImageUrl(image: string): string {
-    return image ? 'http://localhost:8085/room/' + image : '';
+    return image ? `${environment.imageBaseUrl}/room/${image}` : '';
   }
 }

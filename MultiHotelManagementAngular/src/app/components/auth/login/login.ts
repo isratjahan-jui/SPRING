@@ -13,15 +13,16 @@ import { LoginRequest } from '../../../models/auth.model';
   styleUrls: ['./login.css'],
 })
 export class Login {
-
   dto: LoginRequest = { email: '', password: '' };
 
   showPassword = false;
   loading = false;
   errorMessage: string | null = null;
 
-  constructor(private auth: AuthService, private router: Router) { }
-
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+  ) {}
 
   login(): void {
     this.loading = true;
@@ -30,7 +31,7 @@ export class Login {
     this.auth.login(this.dto).subscribe({
       next: () => {
         this.loading = false;
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/home']);
       },
       error: (err) => {
         this.loading = false;
@@ -40,10 +41,7 @@ export class Login {
             : err.status === 403
               ? 'Your account is not verified or has been disabled.'
               : 'Something went wrong. Please try again.';
-      }
+      },
     });
   }
-
-
-
 }

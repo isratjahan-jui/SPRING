@@ -7,7 +7,11 @@ export interface HotelOwner {
   address: string;
   gender: string;
   dateOfBirth: string;
-  image?: string; 
+  image?: string;
   password?: string;
-  
+  userId?: number;
+  role?: string;
+  createdAt?: string;
+  updatedAt?: string;
+
 }

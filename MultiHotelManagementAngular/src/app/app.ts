@@ -13,7 +13,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   styleUrl: './app.css',
 })
 export class App {
-  protected readonly title = signal('MultiHotelManagementAngular');
+  protected readonly title = signal('TripNest');
   private router = inject(Router);
 
   private publicPaths = [
@@ -31,6 +31,17 @@ export class App {
       map((e: NavigationEnd) => {
         const url = e.urlAfterRedirects || e.url;
         return this.publicPaths.includes(url) || url.startsWith('/hotels');
+      }),
+    ),
+    { initialValue: true },
+  );
+
+  showFooter = toSignal(
+    this.router.events.pipe(
+      filter((e) => e instanceof NavigationEnd),
+      map((e: NavigationEnd) => {
+        const url = e.urlAfterRedirects || e.url;
+        return url === '/' || url === '/home';
       }),
     ),
     { initialValue: true },

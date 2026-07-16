@@ -4,6 +4,7 @@ import com.MHM.MultiHotelManagement.dto.request.ForgotPasswordRequestDTO;
 import com.MHM.MultiHotelManagement.dto.request.LoginRequestDTO;
 import com.MHM.MultiHotelManagement.dto.request.RegisterRequestDTO;
 import com.MHM.MultiHotelManagement.dto.request.ResetPasswordRequestDTO;
+import com.MHM.MultiHotelManagement.dto.request.ChangePasswordRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.LoginResponseDTO;
 import com.MHM.MultiHotelManagement.serviceimplement.AuthService;
 import jakarta.validation.Valid;
@@ -49,5 +50,11 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> resetPassword(@Valid @RequestBody ResetPasswordRequestDTO dto) {
         authService.resetPassword(dto);
         return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<Map<String, String>> changePassword(@Valid @RequestBody ChangePasswordRequestDTO dto) {
+        authService.changePassword(dto);
+        return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
     }
 }

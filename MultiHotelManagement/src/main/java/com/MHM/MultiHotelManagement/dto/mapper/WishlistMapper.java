@@ -24,6 +24,8 @@ public class WishlistMapper {
         if (wishlist.getHotel() != null) {
             dto.setHotelId(wishlist.getHotel().getId());
             dto.setHotelName(wishlist.getHotel().getHotelName());
+            dto.setHotelImage(wishlist.getHotel().getImage());
+            dto.setHotelAddress(wishlist.getHotel().getAddress());
         }
 
         return dto;

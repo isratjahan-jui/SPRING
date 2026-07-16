@@ -7,15 +7,23 @@ import { HotelDetails as HotelDetailsModel } from '../../../models/hotel-details
 import { Facility } from '../../../models/facility.model';
 import { FoodItem } from '../../../models/food-item.model';
 import { Room } from '../../../models/room.model';
+import { Gallery } from '../../../models/gallery.model';
 import { HotelService } from '../../../services/hotel.service';
 import { HotelDetailsService } from '../../../services/hotel-details.service';
 import { FacilityService } from '../../../services/facility.service';
 import { FoodItemService } from '../../../services/food-item.service';
 import { RoomService } from '../../../services/room.service';
+import { GalleryService } from '../../../services/gallery.service';
 import { ReviewService } from '../../../services/review.service';
 import { AuthService } from '../../../services/auth.service';
 import { CustomerService } from '../../../services/customer.service';
+import { WishlistService } from '../../../services/wishlist.service';
+import { DealService } from '../../../services/deal.service';
+import { DealResponse } from '../../../models/deal.model';
 import { ReviewResponse } from '../../../models/review.model';
+import { HotelExtraService } from '../../../models/hotel-extra-service.model';
+import { HotelExtraServiceService } from '../../../services/hotel-extra-service.service';
+import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-hotel-details',
@@ -29,7 +37,10 @@ export class HotelDetails implements OnInit {
   facilities: Facility[] = [];
   foodItems: FoodItem[] = [];
   rooms: Room[] = [];
+  gallery: Gallery[] = [];
   reviews: ReviewResponse[] = [];
+  deals: DealResponse[] = [];
+  extraServices: HotelExtraService[] = [];
   detailsError = false;
   loading = true;
   errorMsg = '';
@@ -41,9 +52,16 @@ export class HotelDetails implements OnInit {
   isCustomer = false;
   customerId: number | null = null;
 
+  isInWishlist = false;
+  wishlistId: number | null = null;
+  togglingWishlist = false;
+  currentHotelId = 0;
+
   private auth = inject(AuthService);
   private customerService = inject(CustomerService);
   private reviewService = inject(ReviewService);
+  private wishlistService = inject(WishlistService);
+  private dealService = inject(DealService);
 
   backRoute = '/hotels';
   backLabel = 'Back to Hotels';
@@ -55,11 +73,14 @@ export class HotelDetails implements OnInit {
     private facilityService: FacilityService,
     private foodItemService: FoodItemService,
     private roomService: RoomService,
+    private galleryService: GalleryService,
+    private hotelExtraServiceService: HotelExtraServiceService,
     private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.currentHotelId = id;
 
     const role = this.auth.getRole();
     this.isCustomer = role === 'CUSTOMER';
@@ -75,6 +96,9 @@ export class HotelDetails implements OnInit {
       this.customerService.getCustomerByUserId(userId).subscribe({
         next: (c) => {
           this.customerId = c.id ?? null;
+          if (this.customerId) {
+            this.checkWishlist();
+          }
           this.cdr.markForCheck();
         },
         error: () => {},
@@ -130,9 +154,33 @@ export class HotelDetails implements OnInit {
       error: () => {},
     });
 
+    this.galleryService.getByHotel(id).subscribe({
+      next: (data) => {
+        this.gallery = data;
+        this.cdr.markForCheck();
+      },
+      error: () => {},
+    });
+
     this.reviewService.getByHotel(id).subscribe({
       next: (data) => {
         this.reviews = data;
+        this.cdr.markForCheck();
+      },
+      error: () => {},
+    });
+
+    this.dealService.getByHotel(id).subscribe({
+      next: (data) => {
+        this.deals = data;
+        this.cdr.markForCheck();
+      },
+      error: () => {},
+    });
+
+    this.hotelExtraServiceService.getActiveByHotel(id).subscribe({
+      next: (data) => {
+        this.extraServices = data;
         this.cdr.markForCheck();
       },
       error: () => {},
@@ -165,11 +213,84 @@ export class HotelDetails implements OnInit {
       });
   }
 
+  checkWishlist() {
+    if (!this.customerId) return;
+    this.wishlistService.exists(this.customerId, this.currentHotelId).subscribe({
+      next: (exists) => {
+        if (exists) {
+          this.wishlistService.getByCustomer(this.customerId!).subscribe({
+            next: (items) => {
+              const match = items.find((i) => i.hotelId === this.currentHotelId);
+              this.isInWishlist = !!match;
+              this.wishlistId = match?.id ?? null;
+              this.cdr.markForCheck();
+            },
+          });
+        } else {
+          this.isInWishlist = false;
+          this.wishlistId = null;
+          this.cdr.markForCheck();
+        }
+      },
+      error: () => {},
+    });
+  }
+
+  toggleWishlist() {
+    if (!this.customerId || !this.hotel || this.togglingWishlist) return;
+    const userId = this.auth.getUser()?.userId;
+    if (!userId) return;
+
+    this.togglingWishlist = true;
+
+    if (this.isInWishlist && this.wishlistId) {
+      this.wishlistService.delete(this.wishlistId).subscribe({
+        next: () => {
+          this.isInWishlist = false;
+          this.wishlistId = null;
+          this.togglingWishlist = false;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.togglingWishlist = false;
+          this.cdr.markForCheck();
+        },
+      });
+    } else {
+      this.wishlistService
+        .create({
+          userId,
+          customerId: this.customerId,
+          hotelId: this.currentHotelId,
+        })
+        .subscribe({
+          next: (res) => {
+            this.isInWishlist = true;
+            this.wishlistId = res.id;
+            this.togglingWishlist = false;
+            this.cdr.markForCheck();
+          },
+          error: () => {
+            this.togglingWishlist = false;
+            this.cdr.markForCheck();
+          },
+        });
+    }
+  }
+
   getImageUrl(image: string): string {
-    return image ? `http://localhost:8085/hotel/${image}` : '';
+    return image ? `${environment.imageBaseUrl}/hotel/${image}` : '';
   }
 
   getRoomImageUrl(image: string): string {
-    return image ? `http://localhost:8085/room/${image}` : '';
+    return image ? `${environment.imageBaseUrl}/room/${image}` : '';
+  }
+
+  getFoodImageUrl(image: string): string {
+    return image ? `${environment.imageBaseUrl}/food/${image}` : '';
+  }
+
+  getGalleryImageUrl(image: string): string {
+    return image ? `${environment.imageBaseUrl}/${image}` : '';
   }
 }

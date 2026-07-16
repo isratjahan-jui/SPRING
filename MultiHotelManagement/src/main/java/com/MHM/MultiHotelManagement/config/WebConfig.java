@@ -11,25 +11,28 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/hotel/**")
-                .addResourceLocations("file:uploads/hotel/");
+                .addResourceLocations("file:F:/GitHub/SPRING/assets/hotel/");
 
         registry.addResourceHandler("/room/**")
-                .addResourceLocations("file:uploads/room/");
+                .addResourceLocations("file:F:/GitHub/SPRING/assets/room/");
 
         registry.addResourceHandler("/food/**")
-                .addResourceLocations("file:uploads/food/");
+                .addResourceLocations("file:F:/GitHub/SPRING/assets/food/");
 
         registry.addResourceHandler("/owners/**")
-                .addResourceLocations("file:uploads/owners/");
+                .addResourceLocations("file:F:/GitHub/SPRING/assets/owners/");
 
         registry.addResourceHandler("/gallery/**")
-                .addResourceLocations("file:uploads/gallery/");
+                .addResourceLocations("file:F:/GitHub/SPRING/assets/gallery/");
 
         registry.addResourceHandler("/customer/**")
-                .addResourceLocations("file:uploads/customer/");
+                .addResourceLocations("file:F:/GitHub/SPRING/assets/customer/");
 
         registry.addResourceHandler("/checkin-id/**")
-                .addResourceLocations("file:uploads/checkin-id/");
+                .addResourceLocations("file:F:/GitHub/SPRING/assets/checkin-id/");
+
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("file:F:/GitHub/SPRING/assets/");
     }
 
     @Override

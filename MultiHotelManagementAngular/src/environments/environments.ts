@@ -1,7 +1,6 @@
 export const environment = {
   production: false,
   apiUrl: 'http://localhost:8085/api/',
-  imageurl: 'http://localhost:8085/images/',
-  
-}; 
+  imageBaseUrl: 'http://localhost:8085',
+};
 export const SECRET = 'CM$3curEK3y!2026';

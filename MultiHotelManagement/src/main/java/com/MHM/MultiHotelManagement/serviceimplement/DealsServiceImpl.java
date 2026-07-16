@@ -56,6 +56,35 @@ public class DealsServiceImpl implements DealsService {
 
     @Override
     @Transactional
+    public DealsResponseDTO updateDeal(Long id, DealsRequestDTO dto) {
+        Deals deals = dealsRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Deal not found"));
+
+        Hotel hotel = hotelRepository.findById(dto.getHotelId())
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
+
+        Room room = null;
+        if (dto.getRoomId() != null) {
+            room = roomRepository.findById(dto.getRoomId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
+        }
+
+        deals.setDealTitle(dto.getDealTitle());
+        deals.setDescription(dto.getDescription());
+        deals.setDiscountPercent(dto.getDiscountPercent());
+        deals.setDiscountAmount(dto.getDiscountAmount());
+        deals.setStartDate(dto.getStartDate());
+        deals.setEndDate(dto.getEndDate());
+        deals.setDealType(dto.getDealType());
+        deals.setHotel(hotel);
+        deals.setRoom(room);
+
+        Deals saved = dealsRepository.save(deals);
+        return DealsMapper.toDTO(saved);
+    }
+
+    @Override
+    @Transactional
     public void deleteDeal(Long id) {
         dealsRepository.deleteById(id);
     }
@@ -82,6 +111,15 @@ public class DealsServiceImpl implements DealsService {
     @Transactional(readOnly = true)
     public List<DealsResponseDTO> searchDeals(String keyword) {
         return dealsRepository.findByDealTitleContainingIgnoreCase(keyword)
+                .stream()
+                .map(DealsMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DealsResponseDTO> getAllActiveDeals() {
+        return dealsRepository.findByIsActive(true)
                 .stream()
                 .map(DealsMapper::toDTO)
                 .collect(Collectors.toList());

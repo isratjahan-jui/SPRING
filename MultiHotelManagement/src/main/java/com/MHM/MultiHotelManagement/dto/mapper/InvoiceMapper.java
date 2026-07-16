@@ -18,10 +18,13 @@ public class InvoiceMapper {
         dto.setDiscountAmount(invoice.getDiscountAmount());
         dto.setNetAmount(invoice.getNetAmount());
         dto.setStatus(invoice.getStatus());
-        dto.setBookingId(invoice.getBooking().getId());
-        dto.setPaymentId(invoice.getPayment().getId());
-        dto.setCustomerId(invoice.getCustomer().getId());
-        dto.setCommissionId(invoice.getCommission() != null ? invoice.getCommission().getId() : null);
+        try {
+            dto.setBookingId(invoice.getBooking() != null ? invoice.getBooking().getId() : null);
+            dto.setPaymentId(invoice.getPayment() != null ? invoice.getPayment().getId() : null);
+            dto.setCustomerId(invoice.getCustomer() != null ? invoice.getCustomer().getId() : null);
+            dto.setCommissionId(invoice.getCommission() != null ? invoice.getCommission().getId() : null);
+        } catch (Exception ignored) {
+        }
         dto.setIssuedAt(invoice.getIssuedAt());
         dto.setCreatedAt(invoice.getCreatedAt());
         dto.setUpdatedAt(invoice.getUpdatedAt());

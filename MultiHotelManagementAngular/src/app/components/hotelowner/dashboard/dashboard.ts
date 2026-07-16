@@ -19,7 +19,7 @@ import { RouterLink } from '@angular/router';
   styleUrl: './dashboard.css',
 })
 export class OwnerDashboard implements OnInit {
-  imageUrl = environment.imageurl + 'owner/';
+  imageUrl = environment.imageBaseUrl + '/owners/';
 
   user: LoginResponse | null = null;
   userId!: number;

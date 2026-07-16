@@ -39,4 +39,5 @@ public class BookingRequestDTO {
     private BigDecimal advanceAmount;
 
     private List<Long> foodItemIds;
+    private List<Long> extraServiceIds;
 }

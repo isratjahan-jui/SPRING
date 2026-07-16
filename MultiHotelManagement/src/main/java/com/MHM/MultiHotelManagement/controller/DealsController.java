@@ -23,6 +23,16 @@ public class DealsController {
         return ResponseEntity.status(HttpStatus.CREATED).body(dealsService.createDeal(dto));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<DealsResponseDTO> update(@PathVariable Long id, @RequestBody DealsRequestDTO dto) {
+        return ResponseEntity.ok(dealsService.updateDeal(id, dto));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<DealsResponseDTO>> getAll() {
+        return ResponseEntity.ok(dealsService.getAllActiveDeals());
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         dealsService.deleteDeal(id);

@@ -63,4 +63,12 @@ export class BookingService {
   addExtraCharges(id: number, amount: number) {
     return this.http.patch<Booking>(`${this.API_URL}/${id}/extra-charges?amount=${amount}`, {});
   }
+
+  addFoodItems(id: number, foodItemIds: number[]) {
+    return this.http.post<Booking>(`${this.API_URL}/${id}/food-items`, foodItemIds);
+  }
+
+  cancelFoodItems(id: number) {
+    return this.http.put<Booking>(`${this.API_URL}/${id}/food-items/cancel`, {});
+  }
 }

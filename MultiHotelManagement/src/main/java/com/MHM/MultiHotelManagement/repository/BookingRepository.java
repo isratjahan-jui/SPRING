@@ -87,6 +87,19 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     """)
     List<Booking> findAllBookingsByOwnerId(@Param("ownerId") Long ownerId);
 
+    @Query("""
+        SELECT COALESCE(SUM(b.numberOfRooms), 0) FROM Booking b
+        WHERE b.room.id = :roomId
+        AND b.status != 'CANCELLED'
+        AND b.checkInDate < :checkOut
+        AND b.checkOutDate > :checkIn
+    """)
+    int countBookedRoomsForDates(
+            @Param("roomId") Long roomId,
+            @Param("checkIn") Date checkIn,
+            @Param("checkOut") Date checkOut
+    );
+
     List<Booking> findByStatus(BookingStatus status);
 
     @Query("""

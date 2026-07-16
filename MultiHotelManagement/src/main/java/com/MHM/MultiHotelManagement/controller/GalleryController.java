@@ -20,10 +20,7 @@ public class GalleryController {
 
     // ── Single Image Upload ──────────────────────────────────────
     // POST /api/gallery/upload
-    @PostMapping(
-            value = "/upload",
-            consumes = {"multipart/form-data"}
-    )
+    @PostMapping("/upload")
     public ResponseEntity<GalleryResponseDTO> upload(
             @RequestPart("data") GalleryRequestDTO dto,
             @RequestPart("image") MultipartFile image
@@ -35,10 +32,7 @@ public class GalleryController {
 
     // ── Multiple Images Upload ───────────────────────────────────
     // POST /api/gallery/upload/multiple/1?category=INTERIOR
-    @PostMapping(
-            value = "/upload/multiple/{hotelId}",
-            consumes = {"multipart/form-data"}
-    )
+    @PostMapping("/upload/multiple/{hotelId}")
     public ResponseEntity<List<GalleryResponseDTO>> uploadMultiple(
             @PathVariable Long hotelId,
             @RequestParam(defaultValue = "GENERAL") String category,

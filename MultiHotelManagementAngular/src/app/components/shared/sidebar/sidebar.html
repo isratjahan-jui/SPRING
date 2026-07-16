@@ -1,53 +1,126 @@
 <div class="sidebar">
-  <div class="sidebar-header">
-    <div class="sidebar-header-top">
-      <h5 class="mb-0">MultiHotel</h5>
-      @if (isLoggedIn()) {
-        <app-notification-dropdown />
-      }
-    </div>
-    <small>{{ isLoggedIn() ? userName : 'Guest' }}</small>
+  <div class="sidebar-brand">
+    <span class="brand-icon">&#127976;</span>
+    <span class="brand-text">TripNest</span>
   </div>
 
   <nav class="sidebar-nav">
-    @if ( userRole  === 'ADMIN') {
-      <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
-        >Dashboard</a
-      >
-      <a routerLink="/admin/hotels/manage" routerLinkActive="active">Hotels</a>
-      <a routerLink="/admin/owners" routerLinkActive="active">Owners</a>
-      <a routerLink="/admin/customers" routerLinkActive="active">Customers</a>
-      <a routerLink="/admin/commissions" routerLinkActive="active">Commissions</a>
-    } @else if (userRole  ===  'HOTEL_OWNER') {
-      <a routerLink="/owner" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
-        >Dashboard</a
-      >
-      <a routerLink="/owner/my-hotels" routerLinkActive="active">My Hotels</a>
-      <a routerLink="/owner/hotel-details" routerLinkActive="active">Hotel Details</a>
-      <a routerLink="/owner/rooms" routerLinkActive="active">Rooms</a>
-      <a routerLink="/owner/facilities" routerLinkActive="active">Facilities</a>
-      <a routerLink="/owner/gallery" routerLinkActive="active">Gallery</a>
-      <a routerLink="/owner/food-items" routerLinkActive="active">Food Items</a>
-      <a routerLink="/owner/bookings" routerLinkActive="active">Bookings</a>
-      <a routerLink="/owner/payments" routerLinkActive="active">Payments</a>
-    } @else if (userRole  === 'CUSTOMER') {
+    @if (userRole === 'ADMIN') {
+      <div class="nav-section">Main</div>
+      <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <span class="nav-icon">&#9632;</span> Dashboard
+      </a>
+      <div class="nav-section">Management</div>
+      <a routerLink="/admin/hotels/manage" routerLinkActive="active">
+        <span class="nav-icon">&#127976;</span> Hotels
+      </a>
+      <a routerLink="/admin/owners" routerLinkActive="active">
+        <span class="nav-icon">&#128100;</span> Owners
+      </a>
+      <a routerLink="/admin/customers" routerLinkActive="active">
+        <span class="nav-icon">&#128101;</span> Customers
+      </a>
+      <div class="nav-section">Finance</div>
+      <a routerLink="/admin/commissions" routerLinkActive="active">
+        <span class="nav-icon">&#128176;</span> Commissions
+      </a>
+      <a routerLink="/admin/payments" routerLinkActive="active">
+        <span class="nav-icon">&#128179;</span> Payments
+      </a>
+    } @else if (userRole === 'HOTEL_OWNER') {
+      <div class="nav-section">Main</div>
+      <a routerLink="/owner" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <span class="nav-icon">&#9632;</span> Dashboard
+      </a>
+      <div class="nav-section">Hotel Management</div>
+      <a routerLink="/owner/my-hotels" routerLinkActive="active">
+        <span class="nav-icon">&#127976;</span> My Hotels
+      </a>
+      <a routerLink="/owner/hotel-details" routerLinkActive="active">
+        <span class="nav-icon">&#128196;</span> Hotel Details
+      </a>
+      <a routerLink="/owner/rooms" routerLinkActive="active">
+        <span class="nav-icon">&#128716;</span> Rooms
+      </a>
+      <a routerLink="/owner/facilities" routerLinkActive="active">
+        <span class="nav-icon">&#9881;</span> Facilities
+      </a>
+      <a routerLink="/owner/gallery" routerLinkActive="active">
+        <span class="nav-icon">&#127748;</span> Gallery
+      </a>
+      <a routerLink="/owner/food-items" routerLinkActive="active">
+        <span class="nav-icon">&#127828;</span> Food Items
+      </a>
+      <div class="nav-section">Operations</div>
+      <a routerLink="/owner/bookings" routerLinkActive="active">
+        <span class="nav-icon">&#128197;</span> Bookings
+      </a>
+      <a routerLink="/owner/deals" routerLinkActive="active">
+        <span class="nav-icon">&#127381;</span> Deals & Offers
+      </a>
+      <a routerLink="/owner/extra-services" routerLinkActive="active">
+        <span class="nav-icon">&#10024;</span> Extra Services
+      </a>
+      <a routerLink="/owner/coupons" routerLinkActive="active">
+        <span class="nav-icon">&#127915;</span> Coupons
+      </a>
+      <div class="nav-section">Finance</div>
+      <a routerLink="/owner/wallet" routerLinkActive="active">
+        <span class="nav-icon">&#128176;</span> Wallet
+      </a>
+      <a routerLink="/owner/payments" routerLinkActive="active">
+        <span class="nav-icon">&#128179;</span> Payments
+      </a>
+      <div class="nav-section">Reports</div>
+      <a routerLink="/owner/reports" routerLinkActive="active">
+        <span class="nav-icon">&#128202;</span> Reports
+      </a>
+      <div class="nav-section">Account</div>
+      <a routerLink="/owner/notifications" routerLinkActive="active">
+        <span class="nav-icon">&#128276;</span> Notifications
+      </a>
+      <a routerLink="/owner/profile" routerLinkActive="active">
+        <span class="nav-icon">&#128100;</span> Profile
+      </a>
+    } @else if (userRole === 'CUSTOMER') {
+      <div class="nav-section">Main</div>
       <a
         routerLink="/customer"
         routerLinkActive="active"
         [routerLinkActiveOptions]="{ exact: true }"
-        >Dashboard</a
       >
-      <a routerLink="/customer/bookings" routerLinkActive="active">My Bookings</a>
-      <a routerLink="/customer/wishlist" routerLinkActive="active">Wishlist</a>
-      <a routerLink="/customer/profile" routerLinkActive="active">Profile</a>
-      <a routerLink="/customer/support" routerLinkActive="active">Support</a>
+        <span class="nav-icon">&#9632;</span> Dashboard
+      </a>
+      <div class="nav-section">Booking</div>
+      <a routerLink="/customer/bookings" routerLinkActive="active">
+        <span class="nav-icon">&#128197;</span> My Bookings
+      </a>
+      <a routerLink="/customer/wishlist" routerLinkActive="active">
+        <span class="nav-icon">&#9829;</span> Wishlist
+      </a>
+      <a routerLink="/customer/deals" routerLinkActive="active">
+        <span class="nav-icon">&#127381;</span> Deals & Offers
+      </a>
+      <div class="nav-section">Finance</div>
+      <a routerLink="/customer/payments" routerLinkActive="active">
+        <span class="nav-icon">&#128179;</span> Payments
+      </a>
+      <a routerLink="/customer/invoices" routerLinkActive="active">
+        <span class="nav-icon">&#128196;</span> Invoices
+      </a>
+      <div class="nav-section">Account</div>
+      <a routerLink="/customer/profile" routerLinkActive="active">
+        <span class="nav-icon">&#128100;</span> Profile
+      </a>
+      <a routerLink="/customer/support" routerLinkActive="active">
+        <span class="nav-icon">&#128222;</span> Support
+      </a>
     }
   </nav>
 
   <div class="sidebar-footer">
-    <a routerLink="/home">Back to Site</a>
-    @if (isLoggedIn()) {
-      <button (click)="logout()">Logout</button>
-    }
+    <a routerLink="/home" class="sidebar-footer-link">
+      <span class="nav-icon">&#8592;</span> Back to Site
+    </a>
   </div>
 </div>

@@ -13,12 +13,12 @@
           />
 
           <ng-template #defaultImage>
-            <img
-              src="assets/images/user.png"
-              class="rounded-circle border shadow mb-3"
-              width="150"
-              height="150"
-            />
+            <div
+              class="rounded-circle border shadow mb-3 d-flex align-items-center justify-content-center bg-primary text-white"
+              style="width: 150px; height: 150px; font-size: 3rem"
+            >
+              {{ owner?.name?.charAt(0)?.toUpperCase() || 'O' }}
+            </div>
           </ng-template>
 
           <h3>{{ owner?.name }}</h3>

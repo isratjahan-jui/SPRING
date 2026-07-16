@@ -67,9 +67,12 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
         LEFT JOIN FETCH h.location l
         LEFT JOIN FETCH h.hotelDetails hd
         LEFT JOIN FETCH h.owner o
-        WHERE h.location.locationName = :locationName
+        WHERE h.status = 'APPROVED'
+        AND (LOWER(l.city) LIKE LOWER(CONCAT('%', :keyword, '%'))
+             OR LOWER(l.locationName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+             OR LOWER(h.hotelName) LIKE LOWER(CONCAT('%', :keyword, '%')))
     """)
-    List<Hotel> findHotelByLocationName(@Param("locationName") String locationName);
+    List<Hotel> searchApprovedHotels(@Param("keyword") String keyword);
 
     @Query("""
         SELECT h FROM Hotel h

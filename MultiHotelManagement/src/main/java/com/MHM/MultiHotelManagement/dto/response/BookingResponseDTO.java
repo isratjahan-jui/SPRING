@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 public class BookingResponseDTO {
     private Long id;
+    private Long hotelId;
     private String customerName;
     private String hotelName;
     private String roomType;
@@ -27,4 +28,5 @@ public class BookingResponseDTO {
     private BigDecimal extraCharges;
     private String phone;
     private List<String> foodItems;
+    private List<ExtraServiceResponseDTO> extraServices;
 }

@@ -1,23 +1,62 @@
-<div class="container mt-4">
-  <h2>My Wishlist</h2>
+<div class="container py-4">
+  <h2 class="mb-4">My Wishlist</h2>
+
   @if (loading) {
-    <p class="text-muted">Loading...</p>
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted mt-2">Loading your wishlist...</p>
+    </div>
   } @else if (items.length === 0) {
-    <p class="text-muted">
-      Your wishlist is empty. <a routerLink="/hotels">Browse hotels</a> to add your favorites.
-    </p>
+    <div class="text-center py-5">
+      <div class="mb-3" style="font-size: 3rem; color: #ccc">&#9825;</div>
+      <h5 class="text-muted">Your wishlist is empty</h5>
+      <p class="text-muted">Browse hotels and tap the heart icon to save your favorites.</p>
+      <a routerLink="/hotels" class="btn btn-primary">Browse Hotels</a>
+    </div>
   } @else {
     <div class="row">
       @for (item of items; track item.id) {
-        <div class="col-md-4 mb-3">
-          <div class="card h-100">
-            <div class="card-body">
-              <h5 class="card-title">{{ item.hotelName }}</h5>
-              <p class="text-muted">{{ item.notes }}</p>
-              <a [routerLink]="['/hotels', item.hotelId]" class="btn btn-sm btn-primary"
-                >View Hotel</a
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="card h-100 wishlist-card shadow-sm">
+            @if (item.hotelImage) {
+              <img
+                [src]="imageBaseUrl + '/hotel/' + item.hotelImage"
+                class="card-img-top"
+                [alt]="item.hotelName"
+                style="height: 180px; object-fit: cover"
+              />
+            } @else {
+              <div
+                class="card-img-top d-flex align-items-center justify-content-center bg-light"
+                style="height: 180px"
               >
-              <button (click)="remove(item.id)" class="btn btn-sm btn-danger ms-1">Remove</button>
+                <span class="text-muted" style="font-size: 2.5rem">&#127976;</span>
+              </div>
+            }
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start mb-1">
+                <h5 class="card-title mb-0">{{ item.hotelName }}</h5>
+                <button
+                  class="btn btn-sm btn-outline-danger flex-shrink-0 ms-2"
+                  (click)="confirmRemove(item)"
+                  title="Remove from wishlist"
+                >
+                  &#10005;
+                </button>
+              </div>
+              @if (item.hotelAddress) {
+                <p class="card-text text-muted small mb-2">&#128205; {{ item.hotelAddress }}</p>
+              }
+              @if (item.notes) {
+                <p class="card-text small text-secondary fst-italic mb-2">"{{ item.notes }}"</p>
+              }
+              <div class="mt-auto">
+                <a [routerLink]="['/hotels', item.hotelId]" class="btn btn-sm btn-primary w-100">
+                  View Hotel
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -25,3 +64,39 @@
     </div>
   }
 </div>
+
+@if (showConfirmDialog) {
+  <div class="modal-backdrop fade show" style="z-index: 1040"></div>
+  <div class="modal fade show d-block" tabindex="-1" style="z-index: 1050">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Remove from Wishlist</h5>
+          <button type="button" class="btn-close" (click)="cancelRemove()"></button>
+        </div>
+        <div class="modal-body">
+          @if (itemToRemove) {
+            <p>
+              Are you sure you want to remove
+              <strong>{{ itemToRemove.hotelName }}</strong> from your wishlist?
+            </p>
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cancelRemove()">Cancel</button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="removeConfirmed()"
+            [disabled]="removing"
+          >
+            @if (removing) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            Remove
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

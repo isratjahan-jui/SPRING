@@ -1,10 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-payment-result',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   template: `
     <div class="container mt-5">
       <div class="row justify-content-center">
@@ -14,7 +14,9 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
               <div *ngIf="status === 'success'" class="text-success">
                 <i class="bi bi-check-circle-fill" style="font-size: 4rem;"></i>
                 <h2 class="mt-3">Payment Successful!</h2>
-                <p class="text-muted">Your booking has been confirmed. A confirmation email will be sent shortly.</p>
+                <p class="text-muted">
+                  Your booking has been confirmed. A confirmation email will be sent shortly.
+                </p>
               </div>
               <div *ngIf="status === 'fail'" class="text-danger">
                 <i class="bi bi-x-circle-fill" style="font-size: 4rem;"></i>
@@ -34,7 +36,9 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
                 <p>Please wait while we confirm your payment.</p>
               </div>
               <div class="mt-4">
-                <button class="btn btn-primary me-2" (click)="goToBookings()">View My Bookings</button>
+                <button class="btn btn-primary me-2" (click)="goToBookings()">
+                  View My Bookings
+                </button>
                 <button class="btn btn-outline-secondary" (click)="goToHome()">Go to Home</button>
               </div>
             </div>
@@ -51,7 +55,7 @@ export class PaymentResult implements OnInit {
   status: string = 'loading';
 
   ngOnInit() {
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       this.status = params['status'] || 'loading';
     });
   }

@@ -49,12 +49,12 @@
           <div class="col-md-6">
             <h5>Check-in</h5>
             <p class="mb-1 fw-bold">{{ booking.checkInDate | date: 'fullDate' }}</p>
-            <p class="text-muted">From 12:00 PM</p>
+            <p class="text-muted">From {{ hotelDetails?.checkInTime || '12:00 PM' }}</p>
           </div>
           <div class="col-md-6">
             <h5>Check-out</h5>
             <p class="mb-1 fw-bold">{{ booking.checkOutDate | date: 'fullDate' }}</p>
-            <p class="text-muted">Until 11:00 AM</p>
+            <p class="text-muted">Until {{ hotelDetails?.checkOutTime || '11:00 AM' }}</p>
           </div>
         </div>
 
@@ -239,6 +239,11 @@
                   Cancel Booking
                 </button>
               }
+              @if (booking.status === 'PENDING' && booking.dueAmount > 0) {
+                <a [routerLink]="['/customer/pay', booking.id]" class="btn btn-success">
+                  Pay Now (BDT {{ booking.dueAmount }})
+                </a>
+              }
               @if (booking.status === 'CONFIRMED') {
                 <button class="btn btn-primary" (click)="requestCheckIn()" [disabled]="processing">
                   @if (processing) {
@@ -281,8 +286,14 @@
           <div class="col-md-12">
             <h5>Important Information</h5>
             <ul class="small text-muted">
-              <li>Check-in time starts from 12:00 PM. Early check-in subject to availability.</li>
-              <li>Check-out time is 11:00 AM. Late check-out may incur additional charges.</li>
+              <li>
+                Check-in time starts from {{ hotelDetails?.checkInTime || '12:00 PM' }}. Early
+                check-in subject to availability.
+              </li>
+              <li>
+                Check-out time is {{ hotelDetails?.checkOutTime || '11:00 AM' }}. Late check-out may
+                incur additional charges.
+              </li>
               <li>
                 Please carry a valid government ID (NID/Passport/Driving License) for check-in.
               </li>

@@ -1,6 +1,7 @@
 package com.MHM.MultiHotelManagement.serviceimplement;
 
 
+import com.MHM.MultiHotelManagement.dto.request.ChangePasswordRequestDTO;
 import com.MHM.MultiHotelManagement.dto.request.ForgotPasswordRequestDTO;
 import com.MHM.MultiHotelManagement.dto.request.LoginRequestDTO;
 import com.MHM.MultiHotelManagement.dto.request.RegisterRequestDTO;
@@ -229,6 +230,23 @@ public class AuthService {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        user.setPassword(encoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequestDTO dto) {
+        if (dto.getNewPassword() == null || dto.getNewPassword().length() < MIN_PASSWORD_LENGTH) {
+            throw new BadRequestException("Password must be at least " + MIN_PASSWORD_LENGTH + " characters");
+        }
+
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!encoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+            throw new BadRequestException("Current password is incorrect");
+        }
 
         user.setPassword(encoder.encode(dto.getNewPassword()));
         userRepository.save(user);

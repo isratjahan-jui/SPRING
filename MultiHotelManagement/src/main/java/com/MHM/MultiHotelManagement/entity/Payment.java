@@ -30,8 +30,8 @@ public class Payment {
     private PaymentStatus status; // PENDING, SUCCESS, FAILED
 
 
-    // Payment ↔ Booking (One-to-One)
-    @OneToOne
+    // Payment ↔ Booking (Many-to-One)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 

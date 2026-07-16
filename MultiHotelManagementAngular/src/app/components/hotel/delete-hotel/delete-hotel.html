@@ -9,7 +9,7 @@
         <div class="card h-100">
           @if (hotel.image) {
             <img
-              [src]="'http://localhost:8085/hotel/' + hotel.image"
+              [src]="imageBaseUrl + '/hotel/' + hotel.image"
               class="card-img-top"
               alt="{{ hotel.hotelName }}"
               style="height: 180px; object-fit: cover"
@@ -54,7 +54,7 @@
         <div class="card h-100">
           @if (hotel.image) {
             <img
-              [src]="'http://localhost:8085/hotel/' + hotel.image"
+              [src]="imageBaseUrl + '/hotel/' + hotel.image"
               class="card-img-top"
               alt="{{ hotel.hotelName }}"
               style="height: 180px; object-fit: cover"
@@ -93,7 +93,7 @@
         <div class="card h-100">
           @if (hotel.image) {
             <img
-              [src]="'http://localhost:8085/hotel/' + hotel.image"
+              [src]="imageBaseUrl + '/hotel/' + hotel.image"
               class="card-img-top"
               alt="{{ hotel.hotelName }}"
               style="height: 180px; object-fit: cover"

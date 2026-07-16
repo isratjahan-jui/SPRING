@@ -1,43 +1,129 @@
 <div class="container-fluid p-0">
-  <header class="bg-primary text-white text-center py-5">
-    <h1>Welcome to MultiHotel</h1>
-    <p class="lead">Find and book the best hotels at the best prices</p>
-    <div class="container mt-3" style="max-width: 500px">
-      <div class="input-group">
-        <input
-          type="text"
-          class="form-control"
-          placeholder="Search by city..."
-          [(ngModel)]="searchCity"
-        />
-        <button class="btn btn-light" (click)="search()">Search</button>
+  <header class="hero-section text-white text-center py-5">
+    <div class="container">
+      <h1 class="fw-bold">Welcome to TripNest</h1>
+      <p class="lead mb-4">Find and book the best hotels at the best prices</p>
+      <div class="container" style="max-width: 560px">
+        <div class="input-group search-group">
+          <span class="input-group-text bg-white border-end-0"> &#128269; </span>
+          <input
+            type="text"
+            class="form-control border-start-0"
+            placeholder="Search by location, city, or hotel name..."
+            [(ngModel)]="searchKeyword"
+            (keyup.enter)="search()"
+          />
+          @if (searchKeyword) {
+            <button
+              class="btn btn-outline-secondary border-start-0"
+              (click)="clearSearch()"
+              title="Clear search"
+            >
+              &#10005;
+            </button>
+          }
+          <button class="btn btn-primary px-4" (click)="search()">Search</button>
+        </div>
       </div>
+      @if (searchActive) {
+        <div class="mt-3">
+          <small class="text-white-50">
+            Found {{ hotels.length }} result{{ hotels.length !== 1 ? 's' : '' }} for "{{
+              searchKeyword
+            }}"
+            <button class="btn btn-link btn-sm text-white p-0 ms-2" (click)="clearSearch()">
+              Show all
+            </button>
+          </small>
+        </div>
+      }
     </div>
   </header>
 
   <div class="container my-5">
-    <h2 class="mb-4">Featured Hotels</h2>
+    @if (deals.length > 0) {
+      <h2 class="mb-4">Active Offers</h2>
+      <div class="row mb-5">
+        @for (deal of deals; track deal.id) {
+          <div class="col-md-4 mb-3">
+            <div class="card border-danger h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <h5 class="card-title">{{ deal.dealTitle }}</h5>
+                  <span class="badge bg-danger fs-6">
+                    @if (deal.discountPercent) {
+                      -{{ deal.discountPercent }}%
+                    } @else if (deal.discountAmount) {
+                      -BDT {{ deal.discountAmount }}
+                    }
+                  </span>
+                </div>
+                @if (deal.description) {
+                  <p class="card-text small text-muted">{{ deal.description }}</p>
+                }
+                <p class="card-text small">
+                  <strong>{{ deal.hotelName }}</strong>
+                </p>
+                <a [routerLink]="['/hotels']" class="btn btn-sm btn-outline-danger"
+                  >Browse Hotels</a
+                >
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <h2 class="mb-4">
+      @if (searchActive) {
+        Search Results
+      } @else {
+        Featured Hotels
+      }
+    </h2>
     <div class="row">
       @for (hotel of hotels; track hotel.id) {
         <div class="col-md-4 mb-4">
-          <div class="card h-100 shadow-sm">
-            <img
-              [src]="'http://localhost:8085/hotel/' + hotel.image"
-              class="card-img-top"
-              style="height: 200px; object-fit: cover"
-              alt=""
-            />
-            <div class="card-body">
-              <h5 class="card-title">{{ hotel.hotelName }}</h5>
-              <p class="card-text text-muted">{{ hotel.address }}</p>
-              <a [routerLink]="['/hotels', hotel.id]" class="btn btn-outline-primary w-100"
-                >View Details</a
+          <div class="card h-100 shadow-sm hotel-card">
+            @if (hotel.image) {
+              <img
+                [src]="imageBaseUrl + '/hotel/' + hotel.image"
+                class="card-img-top"
+                style="height: 200px; object-fit: cover"
+                [alt]="hotel.hotelName"
+              />
+            } @else {
+              <div
+                class="card-img-top d-flex align-items-center justify-content-center bg-light"
+                style="height: 200px"
               >
+                <span class="text-muted" style="font-size: 2.5rem">&#127976;</span>
+              </div>
+            }
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{ hotel.hotelName }}</h5>
+              <p class="card-text text-muted small mb-1">&#128205; {{ hotel.address }}</p>
+              @if (hotel.locationName) {
+                <p class="card-text">
+                  <small class="text-muted">{{ hotel.locationName }}</small>
+                </p>
+              }
+              <div class="mt-auto">
+                <a [routerLink]="['/hotels', hotel.id]" class="btn btn-outline-primary w-100"
+                  >View Details</a
+                >
+              </div>
             </div>
           </div>
         </div>
       } @empty {
-        <p class="text-muted">No hotels available.</p>
+        <div class="col-12 text-center py-5">
+          <p class="text-muted mb-2" style="font-size: 2rem">&#128269;</p>
+          <p class="text-muted">No hotels found.</p>
+          @if (searchActive) {
+            <button class="btn btn-primary btn-sm" (click)="clearSearch()">Show all hotels</button>
+          }
+        </div>
       }
     </div>
   </div>

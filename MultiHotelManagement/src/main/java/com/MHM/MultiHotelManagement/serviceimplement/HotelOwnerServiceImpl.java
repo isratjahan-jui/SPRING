@@ -6,6 +6,7 @@ import com.MHM.MultiHotelManagement.dto.response.HotelOwnerResponseDTO;
 import com.MHM.MultiHotelManagement.entity.HotelOwner;
 import com.MHM.MultiHotelManagement.entity.User;
 import com.MHM.MultiHotelManagement.enums.Role;
+import com.MHM.MultiHotelManagement.exception.AlreadyExistsException;
 import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.repository.HotelOwnerRepository;
 import com.MHM.MultiHotelManagement.repository.UserRepository;
@@ -38,6 +39,15 @@ public class HotelOwnerServiceImpl implements HotelOwnerService {
     @Transactional
     public HotelOwnerResponseDTO createOwner(HotelOwnerRequestDTO dto, MultipartFile image) {
 
+        if (userRepo.existsByEmail(dto.getEmail())) {
+            throw new AlreadyExistsException("Email already registered: " + dto.getEmail());
+        }
+
+        if (dto.getPhone() != null && !dto.getPhone().isBlank()
+                && userRepo.existsByPhone(dto.getPhone())) {
+            throw new AlreadyExistsException("Phone number already registered: " + dto.getPhone());
+        }
+
         User user = new User();
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
@@ -45,7 +55,7 @@ public class HotelOwnerServiceImpl implements HotelOwnerService {
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setImage(dto.getImage());
         user.setRole(Role.HOTEL_OWNER);
-        user.setActive(false);
+        user.setActive(true);
 
         User savedUser = userRepo.save(user);
 
@@ -110,7 +120,7 @@ public class HotelOwnerServiceImpl implements HotelOwnerService {
     @Override
     @Transactional(readOnly = true)
     public List<HotelOwnerResponseDTO> getAllOwners() {
-        return ownerRepo.findAll()
+        return ownerRepo.findAllWithUser()
                 .stream()
                 .map(HotelOwnerMapper::toDTO)
                 .toList();

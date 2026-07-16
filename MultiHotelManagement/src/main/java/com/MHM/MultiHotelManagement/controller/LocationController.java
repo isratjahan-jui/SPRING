@@ -21,7 +21,7 @@ public class LocationController {
 
     // ── Create ───────────────────────────────────────────────────
     // POST /api/locations
-    @PostMapping(consumes = {"multipart/form-data"})
+    @PostMapping
     public ResponseEntity<LocationResponseDTO> create(
             @RequestPart("data") LocationRequestDTO dto,
             @RequestPart(value = "image", required = false)
@@ -92,10 +92,7 @@ public class LocationController {
 
     // ── Update ───────────────────────────────────────────────────
     // PUT /api/locations/1
-    @PutMapping(
-            value = "/{id}",
-            consumes = {"multipart/form-data"}
-    )
+    @PutMapping("/{id}")
     public ResponseEntity<LocationResponseDTO> update(
             @PathVariable Long id,
             @RequestPart("data") LocationRequestDTO dto,

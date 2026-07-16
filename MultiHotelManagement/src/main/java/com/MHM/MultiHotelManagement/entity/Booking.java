@@ -80,9 +80,9 @@ public class Booking {
     // Future: Payment entity er sathe relation
     @JsonIgnore
 
-    // Booking ↔ Payment (One-to-One)
-    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Payment payment;
+    // Booking ↔ Payment (One-to-Many)
+    @OneToMany(mappedBy = "booking")
+    private List<Payment> payments = new ArrayList<>();
 
 
     // Booking ↔ FoodItem (Many-to-Many)
@@ -98,6 +98,11 @@ public class Booking {
 
 
 
+    // Booking ↔ ExtraService (One-to-Many)
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<ExtraService> extraServices = new ArrayList<>();
+
     // Convenience methods
     public void addFoodItem(FoodItem foodItem) {
         foodItems.add(foodItem);
@@ -109,6 +114,9 @@ public class Booking {
         foodItem.getBookings().remove(this);
     }
 
-
+    public void addExtraService(ExtraService extraService) {
+        extraServices.add(extraService);
+        extraService.setBooking(this);
+    }
 
 }

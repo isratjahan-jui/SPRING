@@ -1,0 +1,111 @@
+<div class="container py-4">
+  <h4 class="mb-4">Edit Profile</h4>
+
+  @if (successMsg) {
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ successMsg }}
+      <button type="button" class="btn-close" (click)="successMsg = ''"></button>
+    </div>
+  }
+  @if (errorMsg) {
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ errorMsg }}
+      <button type="button" class="btn-close" (click)="errorMsg = ''"></button>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+    </div>
+  } @else {
+    <div class="row">
+      <!-- Profile Form -->
+      <div class="col-lg-7 mb-4">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Personal Information</h5>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Full Name</label>
+                <input type="text" class="form-control" [(ngModel)]="profileForm.name" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" [(ngModel)]="profileForm.email" disabled />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Phone</label>
+                <input type="text" class="form-control" [(ngModel)]="profileForm.phone" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Gender</label>
+                <select class="form-select" [(ngModel)]="profileForm.gender">
+                  <option value="">Select</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Date of Birth</label>
+                <input type="date" class="form-control" [(ngModel)]="profileForm.dateOfBirth" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Address</label>
+                <input type="text" class="form-control" [(ngModel)]="profileForm.address" />
+              </div>
+              <div class="col-12">
+                <button class="btn btn-primary" (click)="saveProfile()" [disabled]="saving">
+                  @if (saving) {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                  }
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change Password -->
+      <div class="col-lg-5 mb-4">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Change Password</h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">Current Password</label>
+              <input
+                type="password"
+                class="form-control"
+                [(ngModel)]="passwordForm.currentPassword"
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">New Password</label>
+              <input type="password" class="form-control" [(ngModel)]="passwordForm.newPassword" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Confirm New Password</label>
+              <input
+                type="password"
+                class="form-control"
+                [(ngModel)]="passwordForm.confirmPassword"
+              />
+            </div>
+            <button class="btn btn-warning" (click)="changePassword()" [disabled]="saving">
+              @if (saving) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              Change Password
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

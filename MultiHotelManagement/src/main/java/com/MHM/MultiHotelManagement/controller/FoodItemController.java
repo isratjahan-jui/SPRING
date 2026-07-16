@@ -20,14 +20,14 @@ public class FoodItemController {
         this.foodItemService = foodItemService;
     }
 
-    @PostMapping(consumes = {"multipart/form-data"})
+    @PostMapping
     public ResponseEntity<FoodItemResponseDTO> createFoodItem(
             @RequestPart("data") FoodItemRequestDTO dto,
             @RequestPart(value = "image", required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED).body(foodItemService.createFoodItem(dto, image));
     }
 
-    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    @PutMapping("/{id}")
     public ResponseEntity<FoodItemResponseDTO> updateFoodItem(
             @PathVariable Long id,
             @RequestPart("data") FoodItemRequestDTO dto,

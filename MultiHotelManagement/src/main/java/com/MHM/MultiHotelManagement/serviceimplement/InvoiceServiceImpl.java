@@ -70,7 +70,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     @Transactional(readOnly = true)
     public List<InvoiceResponseDTO> getByCustomer(Long customerId) {
-        return invoiceRepository.findByCustomer_Id(customerId)
+        return invoiceRepository.findByCustomerIdWithDetails(customerId)
                 .stream().map(mapper::toDTO).collect(Collectors.toList());
     }
 

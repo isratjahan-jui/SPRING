@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { HotelService } from '../../../services/hotel.service';
 import { Hotel } from '../../../models/hotel.model';
+import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-delete-hotel',
@@ -15,6 +16,7 @@ export class DeleteHotel implements OnInit {
   pendingHotels: Hotel[] = [];
   approvedHotels: Hotel[] = [];
   rejectedHotels: Hotel[] = [];
+  imageBaseUrl = environment.imageBaseUrl;
 
   showRejectModal = false;
   rejectHotelId: number | null = null;

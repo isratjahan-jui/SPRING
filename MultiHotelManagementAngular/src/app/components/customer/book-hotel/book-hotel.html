@@ -10,9 +10,14 @@
     </div>
   } @else if (successMessage) {
     <div class="alert alert-success text-center py-5">
-      <i class="bi bi-check-circle-fill fs-1 d-block mb-3"></i>
       <h4>{{ successMessage }}</h4>
-      <p class="mb-0">Redirecting to your bookings...</p>
+      <p class="mb-0">
+        {{
+          selectedPaymentMethod === 'pay_at_hotel'
+            ? 'Redirecting to your bookings...'
+            : 'Redirecting to payment...'
+        }}
+      </p>
     </div>
   } @else {
     <div class="row">
@@ -20,7 +25,7 @@
         <div class="card shadow-sm">
           @if (hotel?.image) {
             <img
-              [src]="'http://localhost:8085/hotel/' + hotel!.image"
+              [src]="imageBaseUrl + '/hotel/' + hotel!.image"
               class="card-img-top"
               alt="{{ hotel!.hotelName }}"
               style="height: 200px; object-fit: cover"
@@ -37,10 +42,83 @@
                 <strong>Adults:</strong> {{ room.adults }} | <strong>Children:</strong>
                 {{ room.children }}
               </p>
-              <p class="mb-0"><strong>Available:</strong> {{ room.availableRooms }} rooms</p>
+              <hr />
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-secondary fs-6">Total: {{ room.totalRooms }}</span>
+                @if (checkingAvailability) {
+                  <span class="badge bg-info fs-6"
+                    ><span class="spinner-border spinner-border-sm me-1"></span>Checking...</span
+                  >
+                } @else if (availability) {
+                  <span class="badge bg-success fs-6"
+                    >Available: {{ availability.availableForDates }}</span
+                  >
+                } @else {
+                  <span class="badge bg-success fs-6">Available: {{ room.availableRooms }}</span>
+                }
+              </div>
+              @if (availability) {
+                <small class="text-muted d-block">
+                  {{ room.totalRooms - availability.availableForDates }} room(s) already booked for
+                  selected dates
+                </small>
+              }
             }
           </div>
         </div>
+
+        @if (checkInDate && checkOutDate && room) {
+          <div class="card shadow-sm mt-3">
+            <div class="card-body">
+              <h5>Price Breakdown</h5>
+              <table class="table table-sm table-borderless mb-0">
+                <tbody>
+                  <tr>
+                    <td>
+                      Room ({{ calculateNights() }} night(s) &times; {{ numberOfRooms }} room(s)
+                      &times; BDT {{ room?.price }}/night)
+                    </td>
+                    <td class="text-end">BDT {{ roomSubtotal }}</td>
+                  </tr>
+                  @if (effectiveDiscountRate > 0) {
+                    <tr class="text-success">
+                      <td>
+                        Discount ({{ effectiveDiscountRate }}%)
+                        @if (appliedDeal) {
+                          <span class="badge bg-warning text-dark ms-1">Deal</span>
+                        }
+                        @if (couponApplied) {
+                          <span class="badge bg-info ms-1">Coupon</span>
+                        }
+                      </td>
+                      <td class="text-end">-BDT {{ discountAmount }}</td>
+                    </tr>
+                  }
+                  @if (extraServicesTotal > 0) {
+                    <tr class="text-primary">
+                      <td>Extra Services</td>
+                      <td class="text-end">+BDT {{ extraServicesTotal }}</td>
+                    </tr>
+                  }
+                  <tr class="fw-bold">
+                    <td>Estimated Total</td>
+                    <td class="text-end">BDT {{ estimatedTotal }}</td>
+                  </tr>
+                  @if (advanceAmount > 0) {
+                    <tr class="text-info">
+                      <td>Advance Payment</td>
+                      <td class="text-end">-BDT {{ advanceAmount }}</td>
+                    </tr>
+                    <tr class="text-danger fw-bold">
+                      <td>Due at Hotel / Remaining</td>
+                      <td class="text-end">BDT {{ dueAfterAdvance }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
       </div>
 
       <div class="col-md-7">
@@ -52,10 +130,23 @@
               <div class="alert alert-danger">{{ errorMessage }}</div>
             }
 
+            @if (availability && availability.availableForDates === 0) {
+              <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i> No rooms available for the selected
+                dates. Please choose different dates.
+              </div>
+            }
+
             <div class="row mb-3">
               <div class="col-md-6">
                 <label class="form-label">Check-in Date</label>
-                <input type="date" class="form-control" [(ngModel)]="checkInDate" [min]="today" />
+                <input
+                  type="date"
+                  class="form-control"
+                  [(ngModel)]="checkInDate"
+                  [min]="today"
+                  (ngModelChange)="onDateChange()"
+                />
               </div>
               <div class="col-md-6">
                 <label class="form-label">Check-out Date</label>
@@ -64,35 +155,222 @@
                   class="form-control"
                   [(ngModel)]="checkOutDate"
                   [min]="minCheckOut"
+                  (ngModelChange)="onDateChange()"
                 />
               </div>
             </div>
 
             <div class="row mb-3">
               <div class="col-md-6">
-                <label class="form-label">Number of Rooms</label>
+                <label class="form-label fw-bold">Number of Rooms to Book</label>
                 <input
                   type="number"
-                  class="form-control"
+                  class="form-control form-control-lg"
                   [(ngModel)]="numberOfRooms"
                   min="1"
-                  [max]="room?.availableRooms || 1"
+                  [max]="maxRooms"
+                  [disabled]="checkingAvailability"
                 />
+                @if (checkingAvailability) {
+                  <small class="text-info">Checking availability...</small>
+                } @else if (availability) {
+                  <small class="text-success fw-bold">
+                    <i class="bi bi-check-circle"></i> {{ availability.availableForDates }} room(s)
+                    available for these dates
+                  </small>
+                } @else if (room) {
+                  <small class="text-muted"
+                    >{{ room.availableRooms }} room(s) currently available</small
+                  >
+                }
               </div>
               <div class="col-md-6">
-                <label class="form-label">Total Guests</label>
+                <label class="form-label fw-bold">Total Guests</label>
                 <input type="number" class="form-control" [(ngModel)]="totalGuests" min="1" />
               </div>
             </div>
 
-            @if (checkInDate && checkOutDate && room) {
-              <div class="alert alert-info">
-                <strong>Estimated Total:</strong> BDT
-                {{ calculateNights() * room.price * numberOfRooms }} <br /><small
-                  >{{ calculateNights() }} night(s) &times; {{ numberOfRooms }} room(s)</small
-                >
+            @if (extraServices.length > 0) {
+              <div class="card bg-light p-3 mb-3">
+                <h6>Extra Services</h6>
+                @for (s of extraServices; track s.id) {
+                  <div class="form-check">
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      [id]="'es-' + s.id"
+                      (change)="toggleExtraService(s.id)"
+                      [checked]="selectedExtraServiceIds.has(s.id)"
+                    />
+                    <label class="form-check-label" [for]="'es-' + s.id">
+                      {{ s.serviceName }} - <strong>BDT {{ s.price }}</strong>
+                      @if (s.description) {
+                        <br /><small class="text-muted">{{ s.description }}</small>
+                      }
+                    </label>
+                  </div>
+                }
               </div>
             }
+
+            @if (appliedDeal) {
+              <div class="alert alert-success py-2 mb-3">
+                <small
+                  ><strong>Deal Applied:</strong> {{ appliedDeal.dealTitle }}
+                  @if (appliedDeal.discountPercent) {
+                    - {{ appliedDeal.discountPercent }}% OFF
+                  } @else if (appliedDeal.discountAmount) {
+                    - BDT {{ appliedDeal.discountAmount }} OFF
+                  }
+                </small>
+              </div>
+            }
+
+            @if (deals.length > 0 && !appliedDeal) {
+              <div class="alert alert-warning py-2 mb-3">
+                <small><strong>Active Deals:</strong></small>
+                @for (deal of deals; track deal.id) {
+                  <div class="small">
+                    {{ deal.dealTitle }} -
+                    @if (deal.discountPercent) {
+                      {{ deal.discountPercent }}% OFF
+                    } @else if (deal.discountAmount) {
+                      BDT {{ deal.discountAmount }} OFF
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+            <div class="card bg-light p-3 mb-3">
+              <h6>Apply Coupon Code</h6>
+              @if (couponApplied) {
+                <div class="alert alert-success py-1 small">
+                  Coupon applied! +{{ couponDiscount }}% discount
+                  <button class="btn btn-sm btn-link p-0 ms-2" (click)="removeCoupon()">
+                    Remove
+                  </button>
+                </div>
+              }
+              @if (couponError) {
+                <div class="alert alert-danger py-1 small">{{ couponError }}</div>
+              }
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter coupon code"
+                  [(ngModel)]="couponCode"
+                  [disabled]="couponApplied"
+                />
+                <button
+                  class="btn btn-outline-success"
+                  (click)="applyCouponCode()"
+                  [disabled]="!couponCode.trim() || applyingCoupon || couponApplied"
+                >
+                  @if (applyingCoupon) {
+                    <span class="spinner-border spinner-border-sm"></span>
+                  } @else {
+                    Apply
+                  }
+                </button>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Discount Rate (%)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="discountRate"
+                  min="0"
+                  max="100"
+                  step="0.5"
+                />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Advance Payment (BDT)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="advanceAmount"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+
+            <div class="card bg-light p-3 mb-3">
+              <h6>Payment Method</h6>
+              <div class="d-flex flex-wrap gap-3">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="pm-hotel"
+                    value="pay_at_hotel"
+                    [(ngModel)]="selectedPaymentMethod"
+                  />
+                  <label class="form-check-label" for="pm-hotel">Pay at Hotel</label>
+                </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="pm-bkash"
+                    value="bkash"
+                    [(ngModel)]="selectedPaymentMethod"
+                  />
+                  <label class="form-check-label" for="pm-bkash">bKash</label>
+                </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="pm-nagad"
+                    value="nagad"
+                    [(ngModel)]="selectedPaymentMethod"
+                  />
+                  <label class="form-check-label" for="pm-nagad">Nagad</label>
+                </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="pm-rocket"
+                    value="rocket"
+                    [(ngModel)]="selectedPaymentMethod"
+                  />
+                  <label class="form-check-label" for="pm-rocket">Rocket</label>
+                </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="pm-card"
+                    value="card"
+                    [(ngModel)]="selectedPaymentMethod"
+                  />
+                  <label class="form-check-label" for="pm-card">Card</label>
+                </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="pm-sslcommerz"
+                    value="sslcommerz"
+                    [(ngModel)]="selectedPaymentMethod"
+                  />
+                  <label class="form-check-label" for="pm-sslcommerz">SSLCommerz</label>
+                </div>
+              </div>
+              @if (selectedPaymentMethod !== 'pay_at_hotel') {
+                <p class="text-muted small mt-2 mb-0">
+                  You will be redirected to payment after booking confirmation.
+                </p>
+              }
+            </div>
 
             <button
               class="btn btn-primary w-100"

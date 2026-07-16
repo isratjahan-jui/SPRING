@@ -1,0 +1,126 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">Customer Support</h4>
+    <button class="btn btn-primary" (click)="openForm()">+ New Ticket</button>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else {
+    @if (successMsg) {
+      <div class="alert alert-success">{{ successMsg }}</div>
+    }
+    @if (errorMsg) {
+      <div class="alert alert-danger">{{ errorMsg }}</div>
+    }
+
+    @if (tickets.length === 0) {
+      <div class="empty-state text-center py-5">
+        <h5>No support tickets</h5>
+        <p class="text-muted">Need help? Create a support ticket and we'll get back to you.</p>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Subject</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ticket of tickets; track ticket.id) {
+              <tr>
+                <td>#{{ ticket.id }}</td>
+                <td>
+                  <strong>{{ ticket.subject }}</strong>
+                </td>
+                <td>
+                  <span class="badge {{ priorityClass(ticket.priority) }}">{{
+                    ticket.priority
+                  }}</span>
+                </td>
+                <td>
+                  <span class="badge {{ statusClass(ticket.status) }}">{{ ticket.status }}</span>
+                </td>
+                <td>{{ ticket.createdAt | date: 'dd MMM yyyy, h:mm a' }}</td>
+                <td>
+                  @if (ticket.status !== 'CLOSED' && ticket.status !== 'RESOLVED') {
+                    <button class="btn btn-sm btn-outline-danger" (click)="closeTicket(ticket.id)">
+                      Close
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>
+
+@if (showForm) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal fade show d-block" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">New Support Ticket</h5>
+          <button type="button" class="btn-close" (click)="closeForm()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Subject</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="form.subject"
+              placeholder="Brief description of your issue"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Priority</label>
+            <select class="form-select" [(ngModel)]="form.priority">
+              <option value="LOW">Low</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HIGH">High</option>
+              <option value="URGENT">Urgent</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea
+              class="form-control"
+              rows="4"
+              [(ngModel)]="form.description"
+              placeholder="Describe your issue in detail..."
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="submitTicket()"
+            [disabled]="submitting || !form.subject.trim() || !form.description.trim()"
+          >
+            @if (submitting) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            Submit Ticket
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

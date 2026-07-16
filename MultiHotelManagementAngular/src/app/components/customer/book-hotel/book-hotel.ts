@@ -3,12 +3,18 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HotelService } from '../../../services/hotel.service';
-import { RoomService } from '../../../services/room.service';
+import { RoomService, RoomAvailabilityResponse } from '../../../services/room.service';
 import { BookingService } from '../../../services/booking.service';
 import { AuthService } from '../../../services/auth.service';
 import { CustomerService } from '../../../services/customer.service';
+import { CouponService } from '../../../services/coupon.service';
+import { DealService } from '../../../services/deal.service';
+import { HotelExtraServiceService } from '../../../services/hotel-extra-service.service';
 import { Hotel } from '../../../models/hotel.model';
 import { Room } from '../../../models/room.model';
+import { DealResponse } from '../../../models/deal.model';
+import { HotelExtraService } from '../../../models/hotel-extra-service.model';
+import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-book-hotel',
@@ -24,20 +30,42 @@ export class BookHotel implements OnInit {
   private bookingService = inject(BookingService);
   private auth = inject(AuthService);
   private customerService = inject(CustomerService);
+  private couponService = inject(CouponService);
+  private dealService = inject(DealService);
+  private extraServiceService = inject(HotelExtraServiceService);
   private cdr = inject(ChangeDetectorRef);
 
   hotel?: Hotel;
   room?: Room;
   customerId: number | null = null;
+  imageBaseUrl = environment.imageBaseUrl;
 
   checkInDate = '';
   checkOutDate = '';
   numberOfRooms = 1;
   totalGuests = 1;
+  discountRate = 0;
+  advanceAmount = 0;
   loading = true;
   submitting = false;
   successMessage = '';
   errorMessage = '';
+
+  deals: DealResponse[] = [];
+  appliedDeal: DealResponse | null = null;
+  couponCode = '';
+  couponApplied = false;
+  couponDiscount = 0;
+  couponError = '';
+  applyingCoupon = false;
+
+  extraServices: HotelExtraService[] = [];
+  selectedExtraServiceIds: Set<number> = new Set();
+
+  availability: RoomAvailabilityResponse | null = null;
+  checkingAvailability = false;
+
+  selectedPaymentMethod = 'pay_at_hotel';
 
   ngOnInit() {
     const hotelId = Number(this.route.snapshot.paramMap.get('hotelId'));
@@ -78,6 +106,21 @@ export class BookHotel implements OnInit {
         this.cdr.markForCheck();
       },
     });
+
+    this.dealService.getByHotel(hotelId).subscribe({
+      next: (data) => {
+        this.deals = data;
+        this.autoApplyBestDeal();
+        this.cdr.markForCheck();
+      },
+    });
+
+    this.extraServiceService.getActiveByHotel(hotelId).subscribe({
+      next: (data) => {
+        this.extraServices = data;
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   get today(): string {
@@ -98,48 +141,201 @@ export class BookHotel implements OnInit {
     return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   }
 
+  get roomSubtotal(): number {
+    if (!this.checkInDate || !this.checkOutDate || !this.room) return 0;
+    return this.calculateNights() * this.room.price * this.numberOfRooms;
+  }
+
+  get effectiveDiscountRate(): number {
+    let rate = this.discountRate;
+    if (this.couponApplied) {
+      rate += this.couponDiscount;
+    }
+    return rate;
+  }
+
+  get discountAmount(): number {
+    return (this.roomSubtotal * this.effectiveDiscountRate) / 100;
+  }
+
+  get extraServicesTotal(): number {
+    let total = 0;
+    this.extraServices.forEach((s) => {
+      if (this.selectedExtraServiceIds.has(s.id)) {
+        total += s.price;
+      }
+    });
+    return total;
+  }
+
+  get estimatedTotal(): number {
+    return this.roomSubtotal - this.discountAmount + this.extraServicesTotal;
+  }
+
+  get dueAfterAdvance(): number {
+    return Math.max(0, this.estimatedTotal - this.advanceAmount);
+  }
+
+  private autoApplyBestDeal() {
+    if (!this.deals.length || !this.room) return;
+    const now = new Date();
+    const applicable = this.deals.filter((d) => {
+      const start = new Date(d.startDate);
+      const end = new Date(d.endDate);
+      if (d.roomType && d.roomType !== this.room!.roomType) return false;
+      return d.isActive && now >= start && now <= end;
+    });
+    if (!applicable.length) return;
+    const best = applicable.reduce((a, b) => {
+      const aVal = a.discountPercent || (a.discountAmount ? 1 : 0);
+      const bVal = b.discountPercent || (b.discountAmount ? 1 : 0);
+      return bVal > aVal ? b : a;
+    });
+    this.appliedDeal = best;
+    if (best.discountPercent) {
+      this.discountRate = best.discountPercent;
+    }
+  }
+
   submit() {
     if (!this.customerId || !this.hotel || !this.room) return;
     if (!this.checkInDate || !this.checkOutDate) {
       this.errorMessage = 'Please select check-in and check-out dates.';
       return;
     }
+    if (new Date(this.checkOutDate) <= new Date(this.checkInDate)) {
+      this.errorMessage = 'Check-out date must be after check-in date.';
+      return;
+    }
     if (this.numberOfRooms < 1 || !Number.isInteger(this.numberOfRooms)) {
       this.errorMessage = 'Number of rooms must be a positive integer.';
       return;
     }
-    if (this.numberOfRooms > (this.room.availableRooms || 1)) {
+    if (this.availability && this.numberOfRooms > this.availability.availableForDates) {
+      this.errorMessage = `Only ${this.availability.availableForDates} room(s) available for the selected dates.`;
+      return;
+    }
+    if (!this.availability && this.numberOfRooms > (this.room.availableRooms || 1)) {
       this.errorMessage = `Only ${this.room.availableRooms} room(s) available.`;
+      return;
+    }
+    if (this.totalGuests < 1) {
+      this.errorMessage = 'At least 1 guest is required.';
       return;
     }
 
     this.submitting = true;
     this.errorMessage = '';
 
-    this.bookingService
-      .create({
-        customerId: this.customerId,
-        hotelId: this.hotel.id,
-        roomId: this.room.id,
-        checkInDate: this.checkInDate,
-        checkOutDate: this.checkOutDate,
-        numberOfRooms: this.numberOfRooms,
-        totalGuests: this.totalGuests,
-        discountRate: 0,
-        advanceAmount: 0,
-      })
-      .subscribe({
-        next: () => {
-          this.successMessage = 'Booking confirmed successfully!';
-          this.submitting = false;
-          this.cdr.markForCheck();
-          setTimeout(() => this.router.navigate(['/customer/bookings']), 2000);
-        },
-        error: (err) => {
-          this.submitting = false;
-          this.errorMessage = err.error?.message || 'Booking failed. Please try again.';
-          this.cdr.markForCheck();
-        },
-      });
+    const finalDiscountRate = this.effectiveDiscountRate;
+
+    const request: any = {
+      customerId: this.customerId,
+      hotelId: this.hotel.id,
+      roomId: this.room.id,
+      checkInDate: this.checkInDate,
+      checkOutDate: this.checkOutDate,
+      numberOfRooms: this.numberOfRooms,
+      totalGuests: this.totalGuests,
+      discountRate: finalDiscountRate,
+      advanceAmount: this.advanceAmount,
+    };
+    if (this.selectedExtraServiceIds.size > 0) {
+      request.extraServiceIds = Array.from(this.selectedExtraServiceIds);
+    }
+
+    this.bookingService.create(request).subscribe({
+      next: (createdBooking) => {
+        this.submitting = false;
+        this.successMessage = 'Booking confirmed successfully!';
+        this.cdr.markForCheck();
+
+        if (this.selectedPaymentMethod === 'pay_at_hotel') {
+          setTimeout(() => this.router.navigate(['/customer/bookings']), 1500);
+        } else {
+          setTimeout(() => this.router.navigate(['/customer/pay', createdBooking.id]), 1000);
+        }
+      },
+      error: (err) => {
+        this.submitting = false;
+        this.errorMessage = err.error?.message || 'Booking failed. Please try again.';
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  applyCouponCode() {
+    if (!this.couponCode.trim()) return;
+    this.applyingCoupon = true;
+    this.couponError = '';
+    this.couponService.getByCode(this.couponCode.trim()).subscribe({
+      next: (coupon) => {
+        const now = new Date();
+        const validFrom = new Date(coupon.validFrom);
+        const validUntil = new Date(coupon.validUntil);
+        if (now < validFrom || now > validUntil) {
+          this.couponError = 'This coupon has expired or is not yet valid.';
+          this.applyingCoupon = false;
+          return;
+        }
+        if (!coupon.active) {
+          this.couponError = 'This coupon is no longer active.';
+          this.applyingCoupon = false;
+          return;
+        }
+        this.couponApplied = true;
+        this.couponDiscount = coupon.discountPercent || 0;
+        this.applyingCoupon = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.couponError = 'Invalid coupon code.';
+        this.applyingCoupon = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  removeCoupon() {
+    this.couponApplied = false;
+    this.couponCode = '';
+    this.couponDiscount = 0;
+    this.couponError = '';
+  }
+
+  toggleExtraService(id: number) {
+    if (this.selectedExtraServiceIds.has(id)) {
+      this.selectedExtraServiceIds.delete(id);
+    } else {
+      this.selectedExtraServiceIds.add(id);
+    }
+  }
+
+  onDateChange() {
+    this.availability = null;
+    this.numberOfRooms = 1;
+    if (this.checkInDate && this.checkOutDate && this.room) {
+      this.checkingAvailability = true;
+      this.roomService
+        .getAvailabilityForDates(this.room.id, this.checkInDate, this.checkOutDate)
+        .subscribe({
+          next: (res) => {
+            this.availability = res;
+            this.checkingAvailability = false;
+            this.cdr.markForCheck();
+          },
+          error: () => {
+            this.checkingAvailability = false;
+            this.cdr.markForCheck();
+          },
+        });
+    }
+  }
+
+  get maxRooms(): number {
+    if (this.availability) {
+      return this.availability.availableForDates;
+    }
+    return this.room?.totalRooms || 1;
   }
 }
