@@ -30,7 +30,12 @@ export class App {
       filter((e) => e instanceof NavigationEnd),
       map((e: NavigationEnd) => {
         const url = e.urlAfterRedirects || e.url;
-        return this.publicPaths.includes(url) || url.startsWith('/hotels');
+        return (
+          this.publicPaths.includes(url) ||
+          (url.startsWith('/hotels') &&
+            !url.startsWith('/hotels/add') &&
+            !url.startsWith('/hotels/edit'))
+        );
       }),
     ),
     { initialValue: true },

@@ -69,9 +69,12 @@ export class NotificationService {
     const user = this.auth.getUser();
     if (!user) return;
 
-    this.http.get<NotificationItem[]>(`${this.API_URL}/user/${user.userId}`).subscribe((data) => {
-      this.notificationsSubject.next(data);
-      this.unreadCountSubject.next(data.filter((n) => !n.readStatus).length);
+    this.http.get<NotificationItem[]>(`${this.API_URL}/user/${user.userId}`).subscribe({
+      next: (data) => {
+        this.notificationsSubject.next(data);
+        this.unreadCountSubject.next(data.filter((n) => !n.readStatus).length);
+      },
+      error: () => {},
     });
   }
 
@@ -85,14 +88,16 @@ export class NotificationService {
     );
     this.notificationsSubject.next(current);
     this.unreadCountSubject.next(current.filter((n) => !n.readStatus).length);
-    this.http.put(`${this.API_URL}/${id}/read`, {}).subscribe();
+    this.http.put(`${this.API_URL}/${id}/read`, {}).subscribe({ error: () => {} });
   }
 
   markAllAsRead() {
     const current = this.notificationsSubject.value.map((n) => ({ ...n, readStatus: true }));
     this.notificationsSubject.next(current);
     this.unreadCountSubject.next(0);
-    current.forEach((n) => this.http.put(`${this.API_URL}/${n.id}/read`, {}).subscribe());
+    current.forEach((n) =>
+      this.http.put(`${this.API_URL}/${n.id}/read`, {}).subscribe({ error: () => {} }),
+    );
   }
 
   delete(id: number) {

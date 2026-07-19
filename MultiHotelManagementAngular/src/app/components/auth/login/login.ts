@@ -31,7 +31,7 @@ export class Login {
     this.auth.login(this.dto).subscribe({
       next: () => {
         this.loading = false;
-        this.router.navigate(['/home']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.loading = false;

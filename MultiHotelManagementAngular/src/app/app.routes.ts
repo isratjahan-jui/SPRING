@@ -66,6 +66,7 @@ export const routes: Routes = [
   { path: 'verify-email', component: VeryfyEmail },
 
   { path: 'hotels', component: HotelList },
+  { path: 'deals', component: CustomerDeals },
   { path: 'hotels/add', component: AddHotel, canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])] },
   {
     path: 'hotels/edit/:id',

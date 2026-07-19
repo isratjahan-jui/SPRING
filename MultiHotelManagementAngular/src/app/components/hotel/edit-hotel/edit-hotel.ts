@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HotelService } from '../../../services/hotel.service';
 import { LocationService } from '../../../services/location.service';
+import { AuthService } from '../../../services/auth.service';
 import { Hotel, HotelRequest } from '../../../models/hotel.model';
 import { Location } from '../../../models/location.model';
 import { CommonModule } from '@angular/common';
@@ -34,6 +35,7 @@ export class EditHotel implements OnInit {
     private route: ActivatedRoute,
     private hotelService: HotelService,
     private locationService: LocationService,
+    private authService: AuthService,
     private router: Router,
   ) {}
 
@@ -67,7 +69,7 @@ export class EditHotel implements OnInit {
     this.hotelService.update(this.id, this.hotel, this.selectedImage).subscribe({
       next: () => {
         this.loading = false;
-        const ownerId = localStorage.getItem('ownerId');
+        const ownerId = this.authService.getUser()?.ownerId;
         this.router.navigate([ownerId ? '/owner/my-hotels' : '/hotels']);
       },
       error: (err) => {

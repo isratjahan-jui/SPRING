@@ -84,14 +84,6 @@ export class MyHotels implements OnInit {
     };
   }
 
-  // loadHotels() {
-  //   const ownerId = localStorage.getItem('ownerId');
-  //   if (!ownerId) return;
-  //   this.hotelService.getByOwner(Number(ownerId)).subscribe({
-  //     next: (data) => (this.hotels = data),
-  //     error: () => alert('Failed to load hotels'),
-  //   });
-  // }
   loadHotels() {
     const ownerId = this.authService.getUser()?.ownerId;
     console.log('loadHotels called, ownerId:', ownerId);
