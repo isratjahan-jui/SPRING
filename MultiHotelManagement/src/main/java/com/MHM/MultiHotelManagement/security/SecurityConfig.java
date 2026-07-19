@@ -33,6 +33,8 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final CustomUserDetailsService userDetailsService;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
 
     @Bean
@@ -102,7 +104,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/hotels/**").hasRole("HOTEL_OWNER")
                         .requestMatchers(HttpMethod.POST, "/api/hotel-owners").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/hotel-owners").hasAnyRole("ADMIN", "HOTEL_OWNER")
-                        .requestMatchers("/api/hotel-owners/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers("/api/hotel-owners/**").hasAnyRole("HOTEL_OWNER", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/hotel-details/**").hasRole("HOTEL_OWNER")
                         .requestMatchers(HttpMethod.PUT, "/api/hotel-details/**").hasRole("HOTEL_OWNER")
                         .requestMatchers(HttpMethod.DELETE, "/api/hotel-details/**").hasRole("HOTEL_OWNER")
@@ -149,6 +151,10 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
 
                 ).authenticationProvider(authenticationProvider())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

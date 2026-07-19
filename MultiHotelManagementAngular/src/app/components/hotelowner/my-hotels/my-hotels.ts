@@ -170,8 +170,9 @@ export class MyHotels implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.errorMessage =
-          err.error?.message || err.error?.error || 'Failed to save hotel. Please try again.';
+        console.error('Hotel save error:', err.status, err.error);
+        const msg = err.error?.message || err.error?.error || 'Failed to save hotel.';
+        this.errorMessage = `[${err.status}] ${msg}`;
       },
     });
   }

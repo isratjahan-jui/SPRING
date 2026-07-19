@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,6 +28,8 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
+
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthFilter.class);
 
     /**
      * Utility class used for JWT operations
@@ -49,11 +53,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
-        // ============================================================
-        // STEP 1: Read the Authorization header
-        // Example:
-        // Authorization: Bearer eyJhbGciOiJIUzI1NiJ9....
-        // ============================================================
         String authHeader = request.getHeader("Authorization");
         String token = null;
 
@@ -68,85 +67,49 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        // ============================================================
-        // STEP 4: Validate token
-        //
-        // Checks:
-        // - Token signature
-        // - Expiration date
-        // - Token structure
-        // ============================================================
+        log.debug("JWT Filter - Method: {}, URI: {}, Token length: {}",
+                request.getMethod(), request.getRequestURI(), token.length());
+
         if (jwtUtil.isValid(token)) {
-
-            // ========================================================
-            // STEP 5: Extract user email from JWT payload
-            // ========================================================
             String email = jwtUtil.extractEmail(token);
+            log.debug("JWT Filter - Token valid, email: {}", email);
 
-            // ========================================================
-            // STEP 6: Authenticate user only if:
-            // 1. Email exists in token
-            // 2. User is not already authenticated
-            // ========================================================
             if (
                     email != null &&
                             SecurityContextHolder.getContext()
                                     .getAuthentication() == null
             ) {
+                try {
+                    UserDetails userDetails =
+                            userDetailsService.loadUserByUsername(email);
 
-                // ====================================================
-                // STEP 7: Load user details from database
-                // using email extracted from token.
-                // ====================================================
-                UserDetails userDetails =
-                        userDetailsService.loadUserByUsername(email);
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
 
-                // ====================================================
-                // STEP 8: Create Authentication object
-                //
-                // Principal   -> UserDetails
-                // Credentials -> null (password not needed)
-                // Authorities -> Roles/Permissions
-                // ====================================================
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource()
+                                    .buildDetails(request)
+                    );
 
-                // ====================================================
-                // STEP 9: Attach request-specific details
-                //
-                // Includes:
-                // - Remote IP Address
-                // - Session ID (if available)
-                // ====================================================
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource()
-                                .buildDetails(request)
-                );
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(authToken);
 
-                // ====================================================
-                // STEP 10: Store authentication object in
-                // Spring Security Context.
-                //
-                // After this step:
-                // SecurityContextHolder.getContext()
-                //         .getAuthentication()
-                //
-                // will return the authenticated user.
-                // ====================================================
-                SecurityContextHolder.getContext()
-                        .setAuthentication(authToken);
+                    log.debug("JWT Filter - Authenticated user: {}, roles: {}",
+                            email, userDetails.getAuthorities());
+                } catch (Exception e) {
+                    log.error("JWT Filter - Failed to load user for email: {}", email, e);
+                }
             }
+        } else {
+            log.warn("JWT Filter - Invalid token for URI: {}, token starts with: {}",
+                    request.getRequestURI(),
+                    token.length() > 10 ? token.substring(0, 10) + "..." : token);
         }
 
-        // ============================================================
-        // STEP 11: Continue filter chain
-        //
-        // Request moves to next filter or controller.
-        // ============================================================
         filterChain.doFilter(request, response);
     }
 }
