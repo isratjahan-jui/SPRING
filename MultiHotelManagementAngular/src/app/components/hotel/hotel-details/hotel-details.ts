@@ -20,6 +20,8 @@ import { CustomerService } from '../../../services/customer.service';
 import { WishlistService } from '../../../services/wishlist.service';
 import { DealService } from '../../../services/deal.service';
 import { DealResponse } from '../../../models/deal.model';
+import { CouponService } from '../../../services/coupon.service';
+import { CouponResponse } from '../../../models/coupon.model';
 import { ReviewResponse } from '../../../models/review.model';
 import { HotelExtraService } from '../../../models/hotel-extra-service.model';
 import { HotelExtraServiceService } from '../../../services/hotel-extra-service.service';
@@ -40,6 +42,7 @@ export class HotelDetails implements OnInit {
   gallery: Gallery[] = [];
   reviews: ReviewResponse[] = [];
   deals: DealResponse[] = [];
+  coupons: CouponResponse[] = [];
   extraServices: HotelExtraService[] = [];
   detailsError = false;
   loading = true;
@@ -62,6 +65,7 @@ export class HotelDetails implements OnInit {
   private reviewService = inject(ReviewService);
   private wishlistService = inject(WishlistService);
   private dealService = inject(DealService);
+  private couponService = inject(CouponService);
 
   backRoute = '/hotels';
   backLabel = 'Back to Hotels';
@@ -181,6 +185,14 @@ export class HotelDetails implements OnInit {
     this.hotelExtraServiceService.getActiveByHotel(id).subscribe({
       next: (data) => {
         this.extraServices = data;
+        this.cdr.markForCheck();
+      },
+      error: () => {},
+    });
+
+    this.couponService.getByHotel(id).subscribe({
+      next: (data) => {
+        this.coupons = data;
         this.cdr.markForCheck();
       },
       error: () => {},

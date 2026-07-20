@@ -24,7 +24,21 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
     @Query("""
         SELECT c FROM Coupon c
         LEFT JOIN FETCH c.hotel h
+        WHERE c.active = true
+    """)
+    List<Coupon> findAllActiveWithHotel();
+
+    @Query("""
+        SELECT c FROM Coupon c
+        LEFT JOIN FETCH c.hotel h
         WHERE c.code = :code AND c.active = true
     """)
     Coupon findByCodeAndActiveTrue(@Param("code") String code);
+
+    @Query("""
+        SELECT c FROM Coupon c
+        LEFT JOIN FETCH c.hotel h
+        WHERE c.code = :code AND h.id = :hotelId AND c.active = true
+    """)
+    Coupon findByCodeAndHotel_IdAndActiveTrue(@Param("code") String code, @Param("hotelId") Long hotelId);
 }

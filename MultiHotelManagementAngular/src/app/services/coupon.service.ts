@@ -9,6 +9,10 @@ export class CouponService {
 
   constructor(private http: HttpClient) {}
 
+  getAllActive() {
+    return this.http.get<CouponResponse[]>(`${this.API_URL}/active`);
+  }
+
   getByHotel(hotelId: number) {
     return this.http.get<CouponResponse[]>(`${this.API_URL}/hotel/${hotelId}`);
   }
@@ -23,5 +27,9 @@ export class CouponService {
 
   getByCode(code: string) {
     return this.http.get<CouponResponse>(`${this.API_URL}/code/${code}`);
+  }
+
+  getByCodeAndHotel(code: string, hotelId: number) {
+    return this.http.get<CouponResponse>(`${this.API_URL}/code/${code}/hotel/${hotelId}`);
   }
 }

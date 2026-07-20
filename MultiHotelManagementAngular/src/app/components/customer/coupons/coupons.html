@@ -1,0 +1,43 @@
+<div class="container mt-4">
+  <h2 class="mb-4">Available Coupons</h2>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+      <p class="text-muted mt-2">Loading coupons...</p>
+    </div>
+  } @else if (coupons.length === 0) {
+    <p class="text-muted">No active coupons available right now. Check back later!</p>
+  } @else {
+    <div class="row">
+      @for (coupon of coupons; track coupon.id) {
+        <div class="col-md-4 mb-3">
+          <div class="card h-100 border-success">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="card-title mb-0 text-success fw-bold">{{ coupon.code }}</h5>
+                <span class="badge" [class]="isValid(coupon) ? 'bg-success' : 'bg-secondary'">
+                  {{ isValid(coupon) ? 'Valid' : 'Expired' }}
+                </span>
+              </div>
+              <div class="discount-badge mb-2">
+                @if (coupon.discountPercent) {
+                  <span class="badge bg-danger fs-5">{{ coupon.discountPercent }}% OFF</span>
+                }
+                @if (coupon.discountAmount) {
+                  <span class="badge bg-danger fs-5">BDT {{ coupon.discountAmount }} OFF</span>
+                }
+              </div>
+              <p class="card-text small mb-1"><strong>Hotel:</strong> {{ coupon.hotelName }}</p>
+              <p class="card-text small text-muted">
+                Valid: {{ coupon.validFrom | date: 'mediumDate' }} -
+                {{ coupon.validUntil | date: 'mediumDate' }}
+              </p>
+              <a [routerLink]="['/hotels']" class="btn btn-sm btn-outline-success mt-2">Browse Hotels</a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

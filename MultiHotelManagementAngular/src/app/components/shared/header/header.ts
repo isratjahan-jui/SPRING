@@ -52,6 +52,7 @@ export class Header implements OnInit {
     '/customer/invoices': 'Invoices',
     '/customer/wishlist': 'Wishlist',
     '/customer/deals': 'Deals & Offers',
+    '/customer/coupons': 'Coupons',
     '/customer/profile': 'Profile',
     '/customer/support': 'Support',
   };

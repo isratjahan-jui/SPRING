@@ -33,6 +33,16 @@ public class CouponController {
         return ResponseEntity.ok(couponService.getCouponByCode(code));
     }
 
+    @GetMapping("/code/{code}/hotel/{hotelId}")
+    public ResponseEntity<CouponResponseDTO> getByCodeAndHotel(@PathVariable String code, @PathVariable Long hotelId) {
+        return ResponseEntity.ok(couponService.getCouponByCodeAndHotel(code, hotelId));
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<CouponResponseDTO>> getAllActive() {
+        return ResponseEntity.ok(couponService.getAllActiveCoupons());
+    }
+
     @GetMapping("/hotel/{hotelId}")
     public ResponseEntity<List<CouponResponseDTO>> getByHotel(@PathVariable Long hotelId) {
         return ResponseEntity.ok(couponService.getCouponsByHotel(hotelId));

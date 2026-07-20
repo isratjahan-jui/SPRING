@@ -297,10 +297,10 @@ export class BookHotel implements OnInit {
   }
 
   applyCouponCode() {
-    if (!this.couponCode.trim()) return;
+    if (!this.couponCode.trim() || !this.hotel) return;
     this.applyingCoupon = true;
     this.couponError = '';
-    this.couponService.getByCode(this.couponCode.trim()).subscribe({
+    this.couponService.getByCodeAndHotel(this.couponCode.trim(), this.hotel.id).subscribe({
       next: (coupon) => {
         const now = new Date();
         const validFrom = new Date(coupon.validFrom);

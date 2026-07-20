@@ -61,6 +61,23 @@ public class CouponServiceImpl implements CouponService {
 
     @Override
     @Transactional(readOnly = true)
+    public CouponResponseDTO getCouponByCodeAndHotel(String code, Long hotelId) {
+        Coupon coupon = couponRepository.findByCodeAndHotel_IdAndActiveTrue(code, hotelId);
+        if (coupon == null) throw new ResourceNotFoundException("Coupon not found, inactive, or not valid for this hotel");
+        return CouponMapper.toDTO(coupon);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CouponResponseDTO> getAllActiveCoupons() {
+        return couponRepository.findAllActiveWithHotel()
+                .stream()
+                .map(CouponMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<CouponResponseDTO> getCouponsByHotel(Long hotelId) {
         return couponRepository.findByHotel_Id(hotelId)
                 .stream()
