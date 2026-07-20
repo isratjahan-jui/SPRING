@@ -11,30 +11,64 @@ import { ActivatedRoute, Router } from '@angular/router';
         <div class="col-md-6">
           <div class="card shadow-sm">
             <div class="card-body text-center p-5">
-              <div *ngIf="status === 'success'" class="text-success">
-                <i class="bi bi-check-circle-fill" style="font-size: 4rem;"></i>
-                <h2 class="mt-3">Payment Successful!</h2>
-                <p class="text-muted">
-                  Your booking has been confirmed. A confirmation email will be sent shortly.
-                </p>
-              </div>
-              <div *ngIf="status === 'fail'" class="text-danger">
-                <i class="bi bi-x-circle-fill" style="font-size: 4rem;"></i>
-                <h2 class="mt-3">Payment Failed</h2>
-                <p class="text-muted">Your payment could not be processed. Please try again.</p>
-              </div>
-              <div *ngIf="status === 'cancel'" class="text-warning">
-                <i class="bi bi-exclamation-circle-fill" style="font-size: 4rem;"></i>
-                <h2 class="mt-3">Payment Cancelled</h2>
-                <p class="text-muted">You have cancelled the payment. No charges were made.</p>
-              </div>
-              <div *ngIf="status === 'loading'" class="text-muted">
-                <div class="spinner-border text-primary" role="status">
-                  <span class="visually-hidden">Loading...</span>
+              @if (status === 'success') {
+                <div class="text-success">
+                  <div style="font-size: 5rem;">&#10003;</div>
+                  <h2 class="mt-3">Payment Successful!</h2>
+                  <p class="text-muted mb-1">Your payment has been confirmed and processed.</p>
+                  @if (tranId) {
+                    <p class="small text-muted">
+                      Transaction ID: <strong>{{ tranId }}</strong>
+                    </p>
+                  }
                 </div>
-                <h2 class="mt-3">Processing...</h2>
-                <p>Please wait while we confirm your payment.</p>
-              </div>
+                <div class="alert alert-success mt-3">
+                  <small>
+                    Your booking is now confirmed. The hotel has been notified.<br />
+                    You will receive a confirmation shortly. Please save your transaction ID for
+                    reference.
+                  </small>
+                </div>
+              } @else if (status === 'fail') {
+                <div class="text-danger">
+                  <div style="font-size: 5rem;">&#10007;</div>
+                  <h2 class="mt-3">Payment Failed</h2>
+                  <p class="text-muted">
+                    Your payment could not be processed. This may be due to insufficient balance or
+                    a network issue.
+                  </p>
+                </div>
+                <div class="alert alert-warning mt-3">
+                  <small
+                    >No money has been deducted from your account. Please try again or use a
+                    different payment method.</small
+                  >
+                </div>
+              } @else if (status === 'cancel') {
+                <div class="text-warning">
+                  <div style="font-size: 5rem;">&#9888;</div>
+                  <h2 class="mt-3">Payment Cancelled</h2>
+                  <p class="text-muted">You have cancelled the payment. No charges were made.</p>
+                </div>
+                <div class="alert alert-info mt-3">
+                  <small
+                    >You can retry payment anytime from your bookings page. Your reservation is
+                    still held.</small
+                  >
+                </div>
+              } @else {
+                <div class="text-muted">
+                  <div
+                    class="spinner-border text-primary"
+                    role="status"
+                    style="width: 4rem; height: 4rem;"
+                  >
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <h2 class="mt-3">Processing Payment...</h2>
+                  <p>Please wait while we confirm your payment. Do not close this page.</p>
+                </div>
+              }
               <div class="mt-4">
                 <button class="btn btn-primary me-2" (click)="goToBookings()">
                   View My Bookings
@@ -53,10 +87,12 @@ export class PaymentResult implements OnInit {
   private router = inject(Router);
 
   status: string = 'loading';
+  tranId: string = '';
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
       this.status = params['status'] || 'loading';
+      this.tranId = params['tran_id'] || '';
     });
   }
 

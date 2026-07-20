@@ -84,25 +84,34 @@ public class PaymentController {
     }
 
     @PostMapping("/sslcommerz/success")
-    public ResponseEntity<String> sslCommerzSuccess(@RequestBody Map<String, String> params) {
+    public ResponseEntity<Void> sslCommerzSuccess(@RequestParam Map<String, String> params,
+                                                   jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
         sslCommerzService.handleSuccess(params);
-        return ResponseEntity.ok("OK");
+        String tranId = params.getOrDefault("tran_id", "");
+        response.sendRedirect("http://localhost:4200/customer/payment-result?status=success&tran_id=" + tranId);
+        return ResponseEntity.status(HttpStatus.FOUND).build();
     }
 
     @PostMapping("/sslcommerz/fail")
-    public ResponseEntity<String> sslCommerzFail(@RequestBody Map<String, String> params) {
+    public ResponseEntity<Void> sslCommerzFail(@RequestParam Map<String, String> params,
+                                                jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
         sslCommerzService.handleFail(params);
-        return ResponseEntity.ok("OK");
+        String tranId = params.getOrDefault("tran_id", "");
+        response.sendRedirect("http://localhost:4200/customer/payment-result?status=fail&tran_id=" + tranId);
+        return ResponseEntity.status(HttpStatus.FOUND).build();
     }
 
     @PostMapping("/sslcommerz/cancel")
-    public ResponseEntity<String> sslCommerzCancel(@RequestBody Map<String, String> params) {
+    public ResponseEntity<Void> sslCommerzCancel(@RequestParam Map<String, String> params,
+                                                  jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
         sslCommerzService.handleCancel(params);
-        return ResponseEntity.ok("OK");
+        String tranId = params.getOrDefault("tran_id", "");
+        response.sendRedirect("http://localhost:4200/customer/payment-result?status=cancel&tran_id=" + tranId);
+        return ResponseEntity.status(HttpStatus.FOUND).build();
     }
 
     @PostMapping("/sslcommerz/ipn")
-    public ResponseEntity<String> sslCommerzIpn(@RequestBody Map<String, String> params) {
+    public ResponseEntity<String> sslCommerzIpn(@RequestParam Map<String, String> params) {
         sslCommerzService.handleIpn(params);
         return ResponseEntity.ok("OK");
     }

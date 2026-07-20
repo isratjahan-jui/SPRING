@@ -98,6 +98,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/hotels/all").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/hotels/pending").hasRole("ADMIN")
 
+                        // ── SSLCommerz callbacks (public - no auth) ─────
+                        .requestMatchers("/api/payments/sslcommerz/success").permitAll()
+                        .requestMatchers("/api/payments/sslcommerz/fail").permitAll()
+                        .requestMatchers("/api/payments/sslcommerz/cancel").permitAll()
+                        .requestMatchers("/api/payments/sslcommerz/ipn").permitAll()
+
                         // ── Hotel Owner endpoints ─────────────────────────
                         .requestMatchers(HttpMethod.POST, "/api/hotels").hasRole("HOTEL_OWNER")
                         .requestMatchers(HttpMethod.PUT, "/api/hotels/**").hasRole("HOTEL_OWNER")

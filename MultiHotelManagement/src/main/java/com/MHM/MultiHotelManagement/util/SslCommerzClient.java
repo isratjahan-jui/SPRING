@@ -32,16 +32,19 @@ public class SslCommerzClient {
     @Value("${app.frontend-url:http://localhost:4200}")
     private String frontendUrl;
 
+    @Value("${app.backend-url:http://localhost:8085}")
+    private String backendUrl;
+
     private final RestTemplate restTemplate = new RestTemplate();
 
     public Map<String, Object> initiateSession(String transactionId, BigDecimal amount,
                                                 String currency, String customerName,
                                                 String customerEmail, String customerPhone,
                                                 String productName, Long bookingId) {
-        String successUrl = frontendUrl + "/customer/payment-result?status=success";
-        String failUrl = frontendUrl + "/customer/payment-result?status=fail";
-        String cancelUrl = frontendUrl + "/customer/payment-result?status=cancel";
-        String ipnUrl = "http://localhost:8085/api/payments/sslcommerz/ipn";
+        String successUrl = backendUrl + "/api/payments/sslcommerz/success";
+        String failUrl = backendUrl + "/api/payments/sslcommerz/fail";
+        String cancelUrl = backendUrl + "/api/payments/sslcommerz/cancel";
+        String ipnUrl = backendUrl + "/api/payments/sslcommerz/ipn";
 
         Map<String, String> body = new HashMap<>();
         body.put("store_id", storeId);
