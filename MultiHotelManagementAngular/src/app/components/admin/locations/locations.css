@@ -1,0 +1,16 @@
+.modal-backdrop {
+  z-index: 1040;
+}
+.modal {
+  z-index: 1050;
+}
+.location-thumb {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.image-preview {
+  max-width: 200px;
+  max-height: 150px;
+}

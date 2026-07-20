@@ -1,0 +1,13 @@
+.summary-card {
+  border: none;
+  border-radius: 12px;
+  transition: transform 0.2s;
+}
+
+.summary-card:hover {
+  transform: translateY(-3px);
+}
+
+.card-header h5 {
+  font-weight: 600;
+}

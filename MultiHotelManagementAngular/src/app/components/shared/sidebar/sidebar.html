@@ -27,6 +27,17 @@
       <a routerLink="/admin/payments" routerLinkActive="active">
         <span class="nav-icon">&#128179;</span> Payments
       </a>
+      <div class="nav-section">Content</div>
+      <a routerLink="/admin/locations" routerLinkActive="active">
+        <span class="nav-icon">&#128205;</span> Locations
+      </a>
+      <div class="nav-section">Communication</div>
+      <a routerLink="/admin/notifications" routerLinkActive="active">
+        <span class="nav-icon">&#128276;</span> Notifications
+      </a>
+      <a routerLink="/admin/support" routerLinkActive="active">
+        <span class="nav-icon">&#128222;</span> Support Tickets
+      </a>
     } @else if (userRole === 'HOTEL_OWNER') {
       <div class="nav-section">Main</div>
       <a routerLink="/owner" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
@@ -55,11 +66,17 @@
       <a routerLink="/owner/bookings" routerLinkActive="active">
         <span class="nav-icon">&#128197;</span> Bookings
       </a>
+      <a routerLink="/owner/booking-rooms" routerLinkActive="active">
+        <span class="nav-icon">&#128196;</span> Booking Rooms
+      </a>
       <a routerLink="/owner/deals" routerLinkActive="active">
         <span class="nav-icon">&#127381;</span> Deals & Offers
       </a>
       <a routerLink="/owner/extra-services" routerLinkActive="active">
         <span class="nav-icon">&#10024;</span> Extra Services
+      </a>
+      <a routerLink="/owner/extra-services-booking" routerLinkActive="active">
+        <span class="nav-icon">&#128196;</span> Booking Services
       </a>
       <a routerLink="/owner/coupons" routerLinkActive="active">
         <span class="nav-icon">&#127915;</span> Coupons
@@ -108,9 +125,15 @@
       <a routerLink="/customer/invoices" routerLinkActive="active">
         <span class="nav-icon">&#128196;</span> Invoices
       </a>
+      <a routerLink="/customer/wallet" routerLinkActive="active">
+        <span class="nav-icon">&#128176;</span> Wallet
+      </a>
       <div class="nav-section">Account</div>
       <a routerLink="/customer/profile" routerLinkActive="active">
         <span class="nav-icon">&#128100;</span> Profile
+      </a>
+      <a routerLink="/customer/notifications" routerLinkActive="active">
+        <span class="nav-icon">&#128276;</span> Notifications
       </a>
       <a routerLink="/customer/support" routerLinkActive="active">
         <span class="nav-icon">&#128222;</span> Support

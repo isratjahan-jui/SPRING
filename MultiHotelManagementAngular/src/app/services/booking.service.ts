@@ -71,4 +71,8 @@ export class BookingService {
   cancelFoodItems(id: number) {
     return this.http.put<Booking>(`${this.API_URL}/${id}/food-items/cancel`, {});
   }
+
+  cancelBooking(id: number) {
+    return this.http.post<Booking>(`${this.API_URL}/${id}/cancel`, {});
+  }
 }

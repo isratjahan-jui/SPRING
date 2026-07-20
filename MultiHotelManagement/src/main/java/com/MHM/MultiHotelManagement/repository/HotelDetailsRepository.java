@@ -13,6 +13,8 @@ public interface HotelDetailsRepository extends JpaRepository<HotelDetails, Long
 
     Boolean existsByHotel_Id(Long hotelId);
 
+    Optional<HotelDetails> findByHotel_Id(Long hotelId);
+
     @Query("""
         SELECT hd FROM HotelDetails hd
         LEFT JOIN FETCH hd.hotel h

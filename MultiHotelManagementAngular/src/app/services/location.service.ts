@@ -12,4 +12,16 @@ export class LocationService {
   getAll() {
     return this.http.get<Location[]>(this.apiUrl);
   }
+
+  create(data: FormData) {
+    return this.http.post<Location>(this.apiUrl, data);
+  }
+
+  update(id: number, data: FormData) {
+    return this.http.put<Location>(`${this.apiUrl}/${id}`, data);
+  }
+
+  delete(id: number) {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }

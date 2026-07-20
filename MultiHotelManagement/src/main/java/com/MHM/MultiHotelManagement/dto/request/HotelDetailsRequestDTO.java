@@ -21,4 +21,10 @@ public class HotelDetailsRequestDTO {
     private String childPolicy;
     private String languages;
     private String nearbyAttractions;
+
+    // Payment Options
+    private String paymentOption;           // ADVANCE, DEPOSIT, PAY_AT_HOTEL
+    private Double depositPercentage;       // 10-20%
+    private Boolean preAuthRequired;
+    private String cancellationDepositRefundable;  // FULL_REFUND, PARTIAL_REFUND, CONDITIONAL_REFUND, NON_REFUNDABLE
 }

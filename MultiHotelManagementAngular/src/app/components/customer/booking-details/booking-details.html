@@ -195,7 +195,52 @@
           <hr />
           <div class="row mb-4">
             <div class="col-md-12">
-              <h5>Cancellation Policy</h5>
+              <h5>Cancellation & Refund Policy</h5>
+
+              @if (hotelDetails?.cancellationDepositRefundable) {
+                <div
+                  class="card border-{{
+                    hotelDetails!.cancellationDepositRefundable === 'FULL_REFUND'
+                      ? 'success'
+                      : hotelDetails!.cancellationDepositRefundable === 'PARTIAL_REFUND'
+                        ? 'warning'
+                        : hotelDetails!.cancellationDepositRefundable === 'CONDITIONAL_REFUND'
+                          ? 'info'
+                          : 'danger'
+                  }} mb-2"
+                >
+                  <div class="card-body py-2">
+                    <div class="d-flex align-items-center gap-2">
+                      <strong>Refund Policy:</strong>
+                      @switch (hotelDetails!.cancellationDepositRefundable) {
+                        @case ('FULL_REFUND') {
+                          <span class="badge bg-success">Full Refund</span>
+                          <span class="small">100% of deposit refunded on cancellation.</span>
+                        }
+                        @case ('PARTIAL_REFUND') {
+                          <span class="badge bg-warning text-dark">Partial Refund</span>
+                          <span class="small">50% refund, 50% retained as commission.</span>
+                        }
+                        @case ('CONDITIONAL_REFUND') {
+                          <span class="badge bg-info text-dark">Conditional Refund</span>
+                          <span class="small">
+                            @if (isDeadlinePassed) {
+                              Late cancellation: only 30% refund.
+                            } @else {
+                              Early cancellation: full refund available.
+                            }
+                          </span>
+                        }
+                        @case ('NON_REFUNDABLE') {
+                          <span class="badge bg-danger">Non-Refundable</span>
+                          <span class="small">No deposit refund on cancellation.</span>
+                        }
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+
               <p class="mb-1">
                 {{
                   booking.cancellationPolicyText ||

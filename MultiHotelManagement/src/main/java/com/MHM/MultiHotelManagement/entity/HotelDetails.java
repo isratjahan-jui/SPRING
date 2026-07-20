@@ -60,6 +60,17 @@ public class HotelDetails {
     @Column(length = 1000)
     private String nearbyAttractions;
 
+    // Payment Options
+    @Column(length = 50)
+    private String paymentOption;           // ADVANCE, DEPOSIT, PAY_AT_HOTEL
+
+    private Double depositPercentage;       // 10-20% for DEPOSIT/PAY_AT_HOTEL
+
+    private Boolean preAuthRequired = false; // Pre-authorization for PAY_AT_HOTEL
+
+    @Column(length = 50)
+    private String cancellationDepositRefundable = "FULL_REFUND"; // FULL_REFUND, PARTIAL_REFUND, CONDITIONAL_REFUND, NON_REFUNDABLE
+
     // প্রতিটি Hotel এর সাথে একটি HotelDetails যুক্ত থাকবে
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)

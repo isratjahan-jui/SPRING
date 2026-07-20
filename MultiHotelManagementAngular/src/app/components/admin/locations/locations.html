@@ -1,0 +1,109 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Location Management</h2>
+    <button class="btn btn-primary" (click)="openCreate()">+ Add Location</button>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card bg-primary text-white">
+        <div class="card-body">
+          <h6>Total Locations</h6>
+          <p class="fs-4 fw-bold mb-0">{{ locations.length }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <p class="text-muted">Loading locations...</p>
+  } @else if (locations.length === 0) {
+    <p class="text-muted">No locations found.</p>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Image</th>
+            <th>Location Name</th>
+            <th>City</th>
+            <th>Hotels</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (loc of locations; track loc.id) {
+            <tr>
+              <td>{{ loc.id }}</td>
+              <td>
+                @if (loc.locationImage) {
+                  <img
+                    [src]="getImageUrl(loc.locationImage)"
+                    alt="{{ loc.locationName }}"
+                    class="location-thumb"
+                  />
+                } @else {
+                  <span class="text-muted">No Image</span>
+                }
+              </td>
+              <td>{{ loc.locationName }}</td>
+              <td>{{ loc.city }}</td>
+              <td>{{ loc.totalHotels ?? 0 }}</td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary me-1" (click)="openEdit(loc)">
+                  Edit
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="confirmDelete(loc.id)">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+@if (showForm) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal fade show d-block" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ editing ? 'Edit Location' : 'Add Location' }}</h5>
+          <button type="button" class="btn-close" (click)="closeForm()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Location Name</label>
+            <input type="text" class="form-control" [(ngModel)]="form.locationName" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">City</label>
+            <input type="text" class="form-control" [(ngModel)]="form.city" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Location Image</label>
+            <input
+              type="file"
+              class="form-control"
+              accept="image/*"
+              (change)="onFileSelected($event)"
+            />
+            @if (imagePreview) {
+              <img [src]="imagePreview" alt="Preview" class="mt-2 img-thumbnail image-preview" />
+            }
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+          <button type="button" class="btn btn-primary" (click)="save()">
+            {{ editing ? 'Update Location' : 'Create Location' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

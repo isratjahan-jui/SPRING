@@ -10,7 +10,13 @@ import com.MHM.MultiHotelManagement.entity.Room;
 import com.MHM.MultiHotelManagement.entity.FoodItem;
 import com.MHM.MultiHotelManagement.entity.ExtraService;
 import com.MHM.MultiHotelManagement.entity.HotelExtraService;
+import com.MHM.MultiHotelManagement.entity.HotelDetails;
+import com.MHM.MultiHotelManagement.entity.Payment;
+import com.MHM.MultiHotelManagement.entity.Commission;
+import com.MHM.MultiHotelManagement.entity.Wallet;
+import com.MHM.MultiHotelManagement.entity.WalletTransaction;
 import com.MHM.MultiHotelManagement.enums.BookingStatus;
+import com.MHM.MultiHotelManagement.enums.PaymentStatus;
 import com.MHM.MultiHotelManagement.enums.ServiceStatus;
 import com.MHM.MultiHotelManagement.repository.BookingRepository;
 import com.MHM.MultiHotelManagement.repository.CustomerRepository;
@@ -18,6 +24,11 @@ import com.MHM.MultiHotelManagement.repository.HotelRepository;
 import com.MHM.MultiHotelManagement.repository.RoomRepository;
 import com.MHM.MultiHotelManagement.repository.FoodItemRepository;
 import com.MHM.MultiHotelManagement.repository.HotelExtraServiceRepository;
+import com.MHM.MultiHotelManagement.repository.HotelDetailsRepository;
+import com.MHM.MultiHotelManagement.repository.PaymentRepository;
+import com.MHM.MultiHotelManagement.repository.CommissionRepository;
+import com.MHM.MultiHotelManagement.repository.WalletRepository;
+import com.MHM.MultiHotelManagement.repository.WalletTransactionRepository;
 import com.MHM.MultiHotelManagement.service.BookingService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +43,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -44,6 +57,11 @@ public class BookingServiceImple implements BookingService {
     private final RoomRepository roomRepository;
     private final FoodItemRepository foodItemRepository;
     private final HotelExtraServiceRepository hotelExtraServiceRepository;
+    private final HotelDetailsRepository hotelDetailsRepository;
+    private final PaymentRepository paymentRepository;
+    private final CommissionRepository commissionRepository;
+    private final WalletRepository walletRepository;
+    private final WalletTransactionRepository walletTransactionRepository;
 
     @Value("${image.upload.dir:uploads}")
     private String uploadDir;
@@ -53,13 +71,23 @@ public class BookingServiceImple implements BookingService {
                                HotelRepository hotelRepository,
                                RoomRepository roomRepository,
                                FoodItemRepository foodItemRepository,
-                               HotelExtraServiceRepository hotelExtraServiceRepository) {
+                               HotelExtraServiceRepository hotelExtraServiceRepository,
+                               HotelDetailsRepository hotelDetailsRepository,
+                               PaymentRepository paymentRepository,
+                               CommissionRepository commissionRepository,
+                               WalletRepository walletRepository,
+                               WalletTransactionRepository walletTransactionRepository) {
         this.bookingRepository = bookingRepository;
         this.customerRepository = customerRepository;
         this.hotelRepository = hotelRepository;
         this.roomRepository = roomRepository;
         this.foodItemRepository = foodItemRepository;
         this.hotelExtraServiceRepository = hotelExtraServiceRepository;
+        this.hotelDetailsRepository = hotelDetailsRepository;
+        this.paymentRepository = paymentRepository;
+        this.commissionRepository = commissionRepository;
+        this.walletRepository = walletRepository;
+        this.walletTransactionRepository = walletTransactionRepository;
     }
 
     @Override
@@ -394,6 +422,123 @@ public class BookingServiceImple implements BookingService {
         booking.setDueAmount(booking.getDueAmount().add(extraCharge));
         booking.setTotalAmount(booking.getTotalAmount().add(extraCharge));
         Booking updated = bookingRepository.save(booking);
+        return BookingMapperDTO.toResponseDTO(updated);
+    }
+
+    @Override
+    @Transactional
+    public BookingResponseDTO cancelBooking(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
+
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            throw new IllegalStateException("Booking is already cancelled");
+        }
+        if (booking.getStatus() == BookingStatus.CHECKED_OUT) {
+            throw new IllegalStateException("Cannot cancel a checked-out booking");
+        }
+
+        HotelDetails hotelDetails = hotelDetailsRepository.findByHotel_Id(booking.getHotel().getId()).orElse(null);
+        String refundPolicy = hotelDetails != null ? hotelDetails.getCancellationDepositRefundable() : "FULL_REFUND";
+
+        BigDecimal advancePaid = booking.getAdvanceAmount() != null ? booking.getAdvanceAmount() : BigDecimal.ZERO;
+        BigDecimal refundAmount = BigDecimal.ZERO;
+        BigDecimal commissionRetained = BigDecimal.ZERO;
+        String refundNote = "";
+
+        if (advancePaid.compareTo(BigDecimal.ZERO) > 0) {
+            switch (refundPolicy) {
+                case "FULL_REFUND":
+                    refundAmount = advancePaid;
+                    commissionRetained = BigDecimal.ZERO;
+                    refundNote = "Full refund: 100% of deposit returned.";
+                    break;
+
+                case "PARTIAL_REFUND":
+                    refundAmount = advancePaid.multiply(BigDecimal.valueOf(0.5)).setScale(2, RoundingMode.HALF_UP);
+                    commissionRetained = advancePaid.subtract(refundAmount);
+                    refundNote = "Partial refund: 50% returned, 50% retained as commission.";
+                    break;
+
+                case "CONDITIONAL_REFUND":
+                    boolean isEarlyCancel = booking.getCancellationDeadline() != null
+                            && new Date().before(booking.getCancellationDeadline());
+                    if (isEarlyCancel) {
+                        refundAmount = advancePaid;
+                        commissionRetained = BigDecimal.ZERO;
+                        refundNote = "Conditional refund: Early cancellation, full refund.";
+                    } else {
+                        refundAmount = advancePaid.multiply(BigDecimal.valueOf(0.3)).setScale(2, RoundingMode.HALF_UP);
+                        commissionRetained = advancePaid.subtract(refundAmount);
+                        refundNote = "Conditional refund: Late cancellation, 30% returned, 70% retained.";
+                    }
+                    break;
+
+                case "NON_REFUNDABLE":
+                default:
+                    refundAmount = BigDecimal.ZERO;
+                    commissionRetained = advancePaid;
+                    refundNote = "Non-refundable: No deposit refund on cancellation.";
+                    break;
+            }
+        }
+
+        // Restore room availability
+        Room room = booking.getRoom();
+        room.setAvailableRooms(room.getAvailableRooms() + booking.getNumberOfRooms());
+        room.setBookedRooms(room.getBookedRooms() - booking.getNumberOfRooms());
+        if (room.getAvailableRooms() > 0) {
+            room.setIsAvailable(true);
+        }
+        roomRepository.save(room);
+
+        // Update payment status to REFUNDED if there's a refund
+        Optional<Payment> paymentOpt = paymentRepository.findByBooking_Id(bookingId);
+        if (paymentOpt.isPresent() && refundAmount.compareTo(BigDecimal.ZERO) > 0) {
+            Payment payment = paymentOpt.get();
+            if (payment.getStatus() == PaymentStatus.PAID) {
+                payment.setStatus(PaymentStatus.REFUNDED);
+                paymentRepository.save(payment);
+            }
+        }
+
+        // Handle commission retention for partial/conditional/non-refundable
+        if (commissionRetained.compareTo(BigDecimal.ZERO) > 0) {
+            Commission retainedCommission = new Commission();
+            retainedCommission.setBooking(booking);
+            retainedCommission.setCommissionRate(10.0);
+            retainedCommission.setAdminEarnings(commissionRetained.doubleValue());
+            retainedCommission.setHotelOwnerEarnings(0.0);
+            paymentOpt.ifPresent(retainedCommission::setPayment);
+            commissionRepository.save(retainedCommission);
+        }
+
+        // Credit refund to customer wallet
+        if (refundAmount.compareTo(BigDecimal.ZERO) > 0 && booking.getCustomer() != null) {
+            Wallet wallet = walletRepository.findByUser_Id(booking.getCustomer().getUser().getId())
+                    .orElseGet(() -> {
+                        Wallet newWallet = new Wallet();
+                        newWallet.setUser(booking.getCustomer().getUser());
+                        return walletRepository.save(newWallet);
+                    });
+
+            wallet.setBalance(wallet.getBalance().add(refundAmount));
+            walletRepository.save(wallet);
+
+            WalletTransaction transaction = new WalletTransaction();
+            transaction.setWallet(wallet);
+            transaction.setAmount(refundAmount);
+            transaction.setType("CREDIT");
+            transaction.setDescription("Refund for cancelled booking #" + bookingId + " - " + refundNote);
+            transaction.setReferenceId(bookingId);
+            walletTransactionRepository.save(transaction);
+        }
+
+        booking.setAdvanceAmount(advancePaid.subtract(refundAmount));
+        booking.setStatus(BookingStatus.CANCELLED);
+        booking.setCancellationPolicyText(refundNote);
+        Booking updated = bookingRepository.save(booking);
+
         return BookingMapperDTO.toResponseDTO(updated);
     }
 

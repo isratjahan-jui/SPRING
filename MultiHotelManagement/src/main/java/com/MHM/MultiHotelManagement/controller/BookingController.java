@@ -114,4 +114,9 @@ public class BookingController {
             @RequestParam double amount) {
         return ResponseEntity.ok(bookingService.addExtraCharges(id, amount));
     }
+
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<BookingResponseDTO> cancelBooking(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.cancelBooking(id));
+    }
 }

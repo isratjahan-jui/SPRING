@@ -70,6 +70,40 @@
         @if (details.nearbyAttractions) {
           <p><strong>Nearby Attractions:</strong> {{ details.nearbyAttractions }}</p>
         }
+        @if (details.paymentOption) {
+          <hr />
+          <h6 class="text-primary">Payment Options</h6>
+          <p><strong>Payment Method:</strong> {{ details.paymentOption }}</p>
+          @if (details.depositPercentage) {
+            <p><strong>Deposit Percentage:</strong> {{ details.depositPercentage }}%</p>
+          }
+          @if (details.paymentOption === 'PAY_AT_HOTEL') {
+            <p>
+              <strong>Pre-authorization Required:</strong>
+              {{ details.preAuthRequired ? 'Yes' : 'No' }}
+            </p>
+          }
+          <p>
+            <strong>Deposit Refund Policy:</strong>
+            @switch (details.cancellationDepositRefundable) {
+              @case ('FULL_REFUND') {
+                <span class="text-success">Full Refund (100% refund on early cancel)</span>
+              }
+              @case ('PARTIAL_REFUND') {
+                <span class="text-warning">Partial Refund (e.g. 50% refund, 50% commission)</span>
+              }
+              @case ('CONDITIONAL_REFUND') {
+                <span class="text-info">Conditional Refund (based on cancel timing)</span>
+              }
+              @case ('NON_REFUNDABLE') {
+                <span class="text-danger">Non-Refundable (no refund on cancel)</span>
+              }
+              @default {
+                {{ details.cancellationDepositRefundable }}
+              }
+            }
+          </p>
+        }
       </div>
     </div>
   }
@@ -157,8 +191,21 @@
               ></textarea>
             </div>
             <div class="col-md-4 mb-2">
-              <label class="form-label">Pet Policy</label>
-              <input [(ngModel)]="form.petPolicy" name="petPolicy" class="form-control" />
+              <label class="form-label">Deposit Refund Policy</label>
+              <select
+                [(ngModel)]="form.cancellationDepositRefundable"
+                name="cancellationDepositRefundable"
+                class="form-select"
+              >
+                <option value="FULL_REFUND">Full Refund (100% refund on early cancel)</option>
+                <option value="PARTIAL_REFUND">
+                  Partial Refund (e.g. 50% refund, 50% commission)
+                </option>
+                <option value="CONDITIONAL_REFUND">
+                  Conditional Refund (based on cancel timing)
+                </option>
+                <option value="NON_REFUNDABLE">Non-Refundable (no refund on cancel)</option>
+              </select>
             </div>
             <div class="col-md-4 mb-2">
               <label class="form-label">Smoking Policy</label>
@@ -184,6 +231,61 @@
                 name="nearbyAttractions"
                 class="form-control"
               />
+            </div>
+          </div>
+          <hr />
+          <h6 class="text-primary mb-3">Payment Options</h6>
+          <div class="row">
+            <div class="col-md-4 mb-2">
+              <label class="form-label">Payment Option</label>
+              <select [(ngModel)]="form.paymentOption" name="paymentOption" class="form-select">
+                <option value="ADVANCE">Advance Payment (Full payment online)</option>
+                <option value="DEPOSIT">Partial Deposit (Pay partial now, rest at hotel)</option>
+                <option value="PAY_AT_HOTEL">Pay at Hotel (With mandatory deposit)</option>
+              </select>
+            </div>
+            @if (form.paymentOption !== 'ADVANCE') {
+              <div class="col-md-4 mb-2">
+                <label class="form-label">Deposit Percentage (%)</label>
+                <input
+                  [(ngModel)]="form.depositPercentage"
+                  name="depositPercentage"
+                  type="number"
+                  class="form-control"
+                  min="10"
+                  max="50"
+                  step="1"
+                />
+                <small class="text-muted">Minimum 10%, Maximum 50%</small>
+              </div>
+            }
+            @if (form.paymentOption === 'PAY_AT_HOTEL') {
+              <div class="col-md-4 mb-2">
+                <label class="form-label">Pre-authorization Required</label>
+                <select
+                  [(ngModel)]="form.preAuthRequired"
+                  name="preAuthRequired"
+                  class="form-select"
+                >
+                  <option [ngValue]="true">Yes (Card hold until check-in)</option>
+                  <option [ngValue]="false">No</option>
+                </select>
+              </div>
+            }
+            <div class="col-md-4 mb-2">
+              <label class="form-label">Deposit Refund Policy</label>
+              <select
+                [(ngModel)]="form.cancellationDepositRefundable"
+                name="cancellationDepositRefundable"
+                class="form-select"
+              >
+                <option value="FULL_REFUND">Full Refund (100% refund on early cancel)</option>
+                <option value="PARTIAL_REFUND">Partial Refund (50% refund, 50% commission)</option>
+                <option value="CONDITIONAL_REFUND">
+                  Conditional Refund (based on cancel timing)
+                </option>
+                <option value="NON_REFUNDABLE">Non-Refundable (no refund on cancel)</option>
+              </select>
             </div>
           </div>
           <div class="d-flex gap-2 mt-2">

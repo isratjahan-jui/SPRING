@@ -62,6 +62,10 @@ export class OwnerHotelDetails implements OnInit {
       childPolicy: '',
       languages: '',
       nearbyAttractions: '',
+      paymentOption: 'ADVANCE',
+      depositPercentage: 20,
+      preAuthRequired: false,
+      cancellationDepositRefundable: 'FULL_REFUND',
     };
   }
 
@@ -108,6 +112,10 @@ export class OwnerHotelDetails implements OnInit {
       childPolicy: this.details.childPolicy || '',
       languages: this.details.languages || '',
       nearbyAttractions: this.details.nearbyAttractions || '',
+      paymentOption: this.details.paymentOption || 'ADVANCE',
+      depositPercentage: this.details.depositPercentage || 20,
+      preAuthRequired: this.details.preAuthRequired || false,
+      cancellationDepositRefundable: this.details.cancellationDepositRefundable || 'FULL_REFUND',
     };
     this.showForm = true;
   }

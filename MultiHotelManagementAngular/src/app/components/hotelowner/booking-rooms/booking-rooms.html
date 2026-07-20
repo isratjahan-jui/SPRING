@@ -1,0 +1,114 @@
+<div class="container-fluid py-3">
+  <h3 class="mb-3">Booking Rooms</h3>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else {
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="card summary-card bg-primary text-white">
+          <div class="card-body text-center">
+            <h6 class="card-title">Total Hotels</h6>
+            <h2>{{ hotelBookingRooms.length }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card summary-card bg-success text-white">
+          <div class="card-body text-center">
+            <h6 class="card-title">Total Rooms Booked</h6>
+            <h2>{{ totalRooms }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card summary-card bg-info text-white">
+          <div class="card-body text-center">
+            <h6 class="card-title">Total Booking Rooms</h6>
+            <h2>{{ totalBookingRoomEntries }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card summary-card bg-warning text-dark">
+          <div class="card-body text-center">
+            <h6 class="card-title">Total Price</h6>
+            <h2>&#2547;{{ totalPrice | number: '1.0-0' }}</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (hotelBookingRooms.length === 0) {
+      <div class="alert alert-info">No booking rooms found for your hotels.</div>
+    }
+
+    <!-- Grouped by Hotel -->
+    @for (group of hotelBookingRooms; track group.hotel.id) {
+      <div class="card mb-4">
+        <div
+          class="card-header bg-dark text-white d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0">{{ group.hotel.hotelName }}</h5>
+          <span class="badge bg-light text-dark">
+            {{ group.bookingRooms.length }} booking room entries |
+            {{ getTotalRoomsForHotel(group) }} rooms
+          </span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+              <thead class="table-secondary">
+                <tr>
+                  <th>#</th>
+                  <th>Booking ID</th>
+                  <th>Room Type</th>
+                  <th>Rooms</th>
+                  <th>Adults</th>
+                  <th>Children</th>
+                  <th>Price (&#2547;)</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (br of group.bookingRooms; track br.id; let i = $index) {
+                  <tr>
+                    <td>{{ i + 1 }}</td>
+                    <td>#{{ br.bookingId }}</td>
+                    <td>{{ br.roomType }}</td>
+                    <td>{{ br.numberOfRooms }}</td>
+                    <td>{{ br.adults }}</td>
+                    <td>{{ br.children }}</td>
+                    <td>{{ br.price | number: '1.0-0' }}</td>
+                    <td>
+                      <span
+                        class="badge bg-{{
+                          br.bookingStatus === 'CONFIRMED'
+                            ? 'success'
+                            : br.bookingStatus === 'CHECKED_IN'
+                              ? 'info'
+                              : br.bookingStatus === 'CHECKED_OUT'
+                                ? 'secondary'
+                                : br.bookingStatus === 'CANCELLED'
+                                  ? 'danger'
+                                  : 'warning'
+                        }}"
+                      >
+                        {{ br.bookingStatus }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

@@ -10,10 +10,12 @@ import { CustomerService } from '../../../services/customer.service';
 import { CouponService } from '../../../services/coupon.service';
 import { DealService } from '../../../services/deal.service';
 import { HotelExtraServiceService } from '../../../services/hotel-extra-service.service';
+import { HotelDetailsService } from '../../../services/hotel-details.service';
 import { Hotel } from '../../../models/hotel.model';
 import { Room } from '../../../models/room.model';
 import { DealResponse } from '../../../models/deal.model';
 import { HotelExtraService } from '../../../models/hotel-extra-service.model';
+import { HotelDetails } from '../../../models/hotel-details.model';
 import { environment } from '../../../../environments/environments';
 
 @Component({
@@ -33,9 +35,11 @@ export class BookHotel implements OnInit {
   private couponService = inject(CouponService);
   private dealService = inject(DealService);
   private extraServiceService = inject(HotelExtraServiceService);
+  private hotelDetailsService = inject(HotelDetailsService);
   private cdr = inject(ChangeDetectorRef);
 
   hotel?: Hotel;
+  hotelDetails?: HotelDetails;
   room?: Room;
   customerId: number | null = null;
   imageBaseUrl = environment.imageBaseUrl;
@@ -50,6 +54,10 @@ export class BookHotel implements OnInit {
   submitting = false;
   successMessage = '';
   errorMessage = '';
+
+  hotelPaymentOption = 'ADVANCE';
+  depositPercentage = 20;
+  showDepositInfo = false;
 
   deals: DealResponse[] = [];
   appliedDeal: DealResponse | null = null;
@@ -121,11 +129,29 @@ export class BookHotel implements OnInit {
         this.cdr.markForCheck();
       },
     });
+
+    this.hotelDetailsService.getByHotelId(hotelId).subscribe({
+      next: (data) => {
+        this.hotelDetails = data;
+        this.initPaymentOption();
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   get today(): string {
     const d = new Date();
     return d.toISOString().split('T')[0];
+  }
+
+  private initPaymentOption() {
+    if (!this.hotelDetails) return;
+    this.hotelPaymentOption = this.hotelDetails.paymentOption || 'ADVANCE';
+    this.depositPercentage = this.hotelDetails.depositPercentage || 20;
+    this.showDepositInfo = this.hotelPaymentOption !== 'ADVANCE';
+    if (this.hotelPaymentOption === 'ADVANCE') {
+      this.advanceAmount = this.estimatedTotal;
+    }
   }
 
   get minCheckOut(): string {
@@ -174,6 +200,11 @@ export class BookHotel implements OnInit {
 
   get dueAfterAdvance(): number {
     return Math.max(0, this.estimatedTotal - this.advanceAmount);
+  }
+
+  get depositAmount(): number {
+    if (this.hotelPaymentOption === 'ADVANCE') return this.estimatedTotal;
+    return Math.round((this.estimatedTotal * this.depositPercentage) / 100);
   }
 
   private autoApplyBestDeal() {
@@ -238,7 +269,8 @@ export class BookHotel implements OnInit {
       numberOfRooms: this.numberOfRooms,
       totalGuests: this.totalGuests,
       discountRate: finalDiscountRate,
-      advanceAmount: this.advanceAmount,
+      advanceAmount:
+        this.hotelPaymentOption === 'ADVANCE' ? this.estimatedTotal : this.depositAmount,
     };
     if (this.selectedExtraServiceIds.size > 0) {
       request.extraServiceIds = Array.from(this.selectedExtraServiceIds);

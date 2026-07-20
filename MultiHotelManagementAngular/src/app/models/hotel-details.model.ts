@@ -16,6 +16,10 @@ export interface HotelDetails {
   childPolicy: string;
   languages: string;
   nearbyAttractions: string;
+  paymentOption: string;
+  depositPercentage: number;
+  preAuthRequired: boolean;
+  cancellationDepositRefundable: string;
 }
 export interface HotelDetailsRequest {
   hotelId: number;
@@ -33,4 +37,8 @@ export interface HotelDetailsRequest {
   childPolicy: string;
   languages: string;
   nearbyAttractions: string;
+  paymentOption: string;
+  depositPercentage: number;
+  preAuthRequired: boolean;
+  cancellationDepositRefundable: string;
 }

@@ -24,6 +24,10 @@ public class HotelDetailsMapper {
         dto.setChildPolicy(details.getChildPolicy());
         dto.setLanguages(details.getLanguages());
         dto.setNearbyAttractions(details.getNearbyAttractions());
+        dto.setPaymentOption(details.getPaymentOption());
+        dto.setDepositPercentage(details.getDepositPercentage());
+        dto.setPreAuthRequired(details.getPreAuthRequired());
+        dto.setCancellationDepositRefundable(details.getCancellationDepositRefundable());
 
         if (details.getHotel() != null) {
             dto.setHotelId(details.getHotel().getId());
@@ -49,6 +53,10 @@ public class HotelDetailsMapper {
         details.setChildPolicy(dto.getChildPolicy());
         details.setLanguages(dto.getLanguages());
         details.setNearbyAttractions(dto.getNearbyAttractions());
+        details.setPaymentOption(dto.getPaymentOption());
+        details.setDepositPercentage(dto.getDepositPercentage());
+        details.setPreAuthRequired(dto.getPreAuthRequired());
+        details.setCancellationDepositRefundable(dto.getCancellationDepositRefundable());
         return details;
     }
 }

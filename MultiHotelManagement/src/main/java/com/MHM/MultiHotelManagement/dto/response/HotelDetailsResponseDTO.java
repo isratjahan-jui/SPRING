@@ -27,4 +27,10 @@ public class HotelDetailsResponseDTO {
     private String childPolicy;
     private String languages;
     private String nearbyAttractions;
+
+    // Payment Options
+    private String paymentOption;
+    private Double depositPercentage;
+    private Boolean preAuthRequired;
+    private String cancellationDepositRefundable;  // FULL_REFUND, PARTIAL_REFUND, CONDITIONAL_REFUND, NON_REFUNDABLE
 }

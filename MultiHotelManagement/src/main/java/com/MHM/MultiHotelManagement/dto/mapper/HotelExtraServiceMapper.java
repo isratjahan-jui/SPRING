@@ -2,6 +2,7 @@ package com.MHM.MultiHotelManagement.dto.mapper;
 
 import com.MHM.MultiHotelManagement.dto.request.HotelExtraServiceRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.HotelExtraServiceResponseDTO;
+import com.MHM.MultiHotelManagement.entity.Hotel;
 import com.MHM.MultiHotelManagement.entity.HotelExtraService;
 
 public class HotelExtraServiceMapper {
@@ -21,9 +22,10 @@ public class HotelExtraServiceMapper {
         dto.setDescription(entity.getDescription());
         dto.setPrice(entity.getPrice());
         dto.setIsActive(entity.getIsActive());
-        if (entity.getHotel() != null) {
-            dto.setHotelId(entity.getHotel().getId());
-            dto.setHotelName(entity.getHotel().getHotelName());
+        Hotel hotel = entity.getHotel();
+        if (hotel != null) {
+            dto.setHotelId(hotel.getId());
+            dto.setHotelName(hotel.getHotelName());
         }
         return dto;
     }

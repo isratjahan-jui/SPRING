@@ -180,22 +180,39 @@ export class BookingDetails implements OnInit, OnDestroy {
     if (!this.booking) return;
 
     let msg = 'Are you sure you want to cancel this booking? This action cannot be undone.';
-    if (this.isDeadlinePassed) {
-      msg =
-        'The free cancellation period has passed. Cancelling now may incur charges. Are you sure you want to proceed?';
+    if (this.hotelDetails?.cancellationDepositRefundable) {
+      const policy = this.hotelDetails.cancellationDepositRefundable;
+      if (policy === 'NON_REFUNDABLE') {
+        msg =
+          'This hotel has a NON-REFUNDABLE deposit policy. You will NOT receive any refund. Are you sure?';
+      } else if (policy === 'PARTIAL_REFUND') {
+        msg =
+          'This hotel offers PARTIAL REFUND (50%). 50% of your deposit will be refunded, 50% retained as commission. Proceed?';
+      } else if (policy === 'CONDITIONAL_REFUND') {
+        if (this.isDeadlinePassed) {
+          msg =
+            'The free cancellation period has PASSED. Late cancellation: only 30% refund. Are you sure?';
+        } else {
+          msg = 'You are within the free cancellation period. Full refund will be issued. Proceed?';
+        }
+      } else if (policy === 'FULL_REFUND') {
+        msg = 'Full refund will be issued to your wallet. Are you sure you want to cancel?';
+      }
     }
 
     if (!confirm(msg)) return;
 
     this.processing = true;
-    this.bookingService.updateStatus(this.booking.id, 'CANCELLED').subscribe({
-      next: () => {
-        if (this.booking) this.booking.status = 'CANCELLED';
+    this.bookingService.cancelBooking(this.booking.id).subscribe({
+      next: (data) => {
+        this.booking = data;
         this.processing = false;
+        this.loadHotelDetails(data.hotelId);
         this.cdr.markForCheck();
       },
-      error: () => {
+      error: (err) => {
         this.processing = false;
+        alert(err.error?.message || 'Cancellation failed. Please try again.');
         this.cdr.markForCheck();
       },
     });

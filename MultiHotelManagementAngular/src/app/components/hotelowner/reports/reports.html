@@ -11,16 +11,16 @@
       <div class="card-body">
         <h5 class="card-title">Generate Report</h5>
         <div class="row g-3">
-          <div class="col-md-4">
+          <div class="col-md-3">
             <label class="form-label">Select Hotel</label>
-            <select [(ngModel)]="selectedHotelId" class="form-select">
+            <select [(ngModel)]="selectedHotelId" class="form-select" (change)="loadReports()">
               <option [ngValue]="0" disabled>-- Choose Hotel --</option>
               @for (h of hotels; track h.id) {
                 <option [ngValue]="h.id">{{ h.hotelName }}</option>
               }
             </select>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-3">
             <label class="form-label">Report Type</label>
             <select [(ngModel)]="selectedType" class="form-select">
               <option value="" disabled>-- Choose Type --</option>
@@ -29,7 +29,7 @@
               }
             </select>
           </div>
-          <div class="col-md-4 d-flex align-items-end">
+          <div class="col-md-3 d-flex align-items-end">
             <button
               class="btn btn-primary"
               [disabled]="!selectedHotelId || !selectedType || generating"
@@ -45,31 +45,155 @@
       </div>
     </div>
 
+    @if (selectedReport) {
+      <div id="report-detail" class="report-detail-card mb-4">
+        <div class="report-detail-header">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h5 class="mb-1">{{ getReportTypeLabel(selectedReport.type) }}</h5>
+              <span class="text-muted">{{ selectedReport.hotelName }}</span>
+            </div>
+            <button class="btn-close" (click)="closeDetail()"></button>
+          </div>
+          <div class="report-meta">
+            <span>Generated: {{ selectedReport.generatedAt | date: 'medium' }}</span>
+          </div>
+        </div>
+
+        <div class="report-detail-body">
+          <div class="row g-3">
+            @if (selectedReport.income != null && selectedReport.income > 0) {
+              <div class="col-md-4">
+                <div class="stat-card stat-revenue">
+                  <div class="stat-icon"><i class="bi bi-currency-dollar"></i>$</div>
+                  <div class="stat-info">
+                    <span class="stat-value">${{ selectedReport.income.toFixed(2) }}</span>
+                    <span class="stat-label">Total Income</span>
+                  </div>
+                </div>
+              </div>
+            }
+            @if (selectedReport.totalBookings != null && selectedReport.totalBookings > 0) {
+              <div class="col-md-4">
+                <div class="stat-card stat-bookings">
+                  <div class="stat-icon"><i class="bi bi-calendar-check"></i>#</div>
+                  <div class="stat-info">
+                    <span class="stat-value">{{ selectedReport.totalBookings }}</span>
+                    <span class="stat-label">Total Bookings</span>
+                  </div>
+                </div>
+              </div>
+            }
+            @if (selectedReport.occupancyRate != null && selectedReport.occupancyRate > 0) {
+              <div class="col-md-4">
+                <div class="stat-card stat-occupancy">
+                  <div class="stat-icon"><i class="bi bi-graph-up"></i>%</div>
+                  <div class="stat-info">
+                    <span class="stat-value">{{ selectedReport.occupancyRate.toFixed(1) }}%</span>
+                    <span class="stat-label">Occupancy Rate</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="report-data-section mt-3">
+            <h6>Full Report Data</h6>
+            <table class="table table-bordered mb-0">
+              <tbody>
+                <tr>
+                  <td class="fw-semibold" style="width: 200px">Report ID</td>
+                  <td>{{ selectedReport.id }}</td>
+                </tr>
+                <tr>
+                  <td class="fw-semibold">Hotel</td>
+                  <td>{{ selectedReport.hotelName }}</td>
+                </tr>
+                <tr>
+                  <td class="fw-semibold">Report Type</td>
+                  <td>
+                    <span class="badge" [ngClass]="getReportTypeBadgeClass(selectedReport.type)">{{
+                      selectedReport.type
+                    }}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="fw-semibold">Generated At</td>
+                  <td>{{ selectedReport.generatedAt | date: 'full' }}</td>
+                </tr>
+                <tr>
+                  <td class="fw-semibold">Last Updated</td>
+                  <td>{{ selectedReport.updatedAt | date: 'full' }}</td>
+                </tr>
+                @if (selectedReport.income != null) {
+                  <tr>
+                    <td class="fw-semibold">Income</td>
+                    <td>${{ selectedReport.income.toFixed(2) }}</td>
+                  </tr>
+                }
+                @if (selectedReport.totalBookings != null) {
+                  <tr>
+                    <td class="fw-semibold">Total Bookings</td>
+                    <td>{{ selectedReport.totalBookings }}</td>
+                  </tr>
+                }
+                @if (selectedReport.occupancyRate != null) {
+                  <tr>
+                    <td class="fw-semibold">Occupancy Rate</td>
+                    <td>{{ selectedReport.occupancyRate.toFixed(1) }}%</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="report-detail-footer">
+          <button class="btn btn-outline-primary" (click)="printReport()">
+            <i class="bi bi-printer me-1"></i> Print Report
+          </button>
+          <button class="btn btn-outline-secondary" (click)="downloadReport()">
+            <i class="bi bi-download me-1"></i> Download as Text
+          </button>
+        </div>
+      </div>
+    }
+
     @if (reports.length > 0) {
       <div class="card">
         <div class="card-header">
-          <h5 class="mb-0">Generated Reports</h5>
+          <h5 class="mb-0">Generated Reports ({{ reports.length }})</h5>
         </div>
         <div class="card-body p-0">
-          <table class="table table-striped mb-0">
+          <table class="table table-hover mb-0">
             <thead>
               <tr>
                 <th>Type</th>
                 <th>Hotel</th>
+                <th>Income</th>
+                <th>Bookings</th>
+                <th>Occupancy</th>
                 <th>Generated At</th>
-                <th>Data</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               @for (r of reports; track r.id) {
-                <tr>
+                <tr [class.table-active]="selectedReport?.id === r.id">
                   <td>
-                    <span class="badge bg-info">{{ r.reportType }}</span>
+                    <span class="badge" [ngClass]="getReportTypeBadgeClass(r.type)">{{
+                      r.type
+                    }}</span>
                   </td>
                   <td>{{ r.hotelName }}</td>
-                  <td>{{ r.generatedAt | date: 'medium' }}</td>
+                  <td>${{ (r.income || 0).toFixed(2) }}</td>
+                  <td>{{ r.totalBookings || 0 }}</td>
+                  <td>{{ (r.occupancyRate || 0).toFixed(1) }}%</td>
+                  <td>{{ r.generatedAt | date: 'short' }}</td>
                   <td>
-                    <pre class="mb-0 small">{{ r.reportData }}</pre>
+                    <button class="btn btn-sm btn-outline-primary" (click)="viewReport(r)">
+                      View
+                    </button>
                   </td>
                 </tr>
               }
@@ -77,9 +201,16 @@
           </table>
         </div>
       </div>
-    } @else if (selectedHotelId) {
+    } @else if (selectedHotelId && !loadingReports) {
       <div class="text-center py-4 text-muted">
-        No reports generated yet. Select a hotel and type above to generate.
+        No reports generated yet. Select a report type above to generate one.
+      </div>
+    }
+
+    @if (loadingReports) {
+      <div class="text-center py-4">
+        <div class="spinner-border spinner-border-sm text-primary"></div>
+        <p class="text-muted mt-2 small">Loading reports...</p>
       </div>
     }
   }

@@ -27,9 +27,14 @@ import { AdminOwners } from './components/admin/owners/owners';
 import { AdminCustomers } from './components/admin/customers/customers';
 import { AdminCommissions } from './components/admin/commissions/commissions';
 import { AdminPayments } from './components/admin/payments/payments';
+import { AdminNotifications } from './components/admin/notifications/notifications';
+import { AdminSupport } from './components/admin/support/support';
+import { AdminLocations } from './components/admin/locations/locations';
 import { CustomerPayments } from './components/customer/payments/payments';
 import { CustomerProfile } from './components/customer/profile/profile';
 import { CustomerSupport } from './components/customer/support/support';
+import { CustomerNotifications } from './components/customer/notifications/notifications';
+import { CustomerWallet } from './components/customer/wallet/wallet';
 import { DeleteHotel } from './components/hotel/delete-hotel/delete-hotel';
 import { OwnerDashboard } from './components/hotelowner/dashboard/dashboard';
 import { CustomerDashboard } from './components/customer/dashboard/dashboard';
@@ -41,8 +46,10 @@ import { OwnerGallery } from './components/hotelowner/gallery/gallery';
 import { OwnerFoodItems } from './components/hotelowner/food-items/food-items';
 import { OwnerHotelDetails } from './components/hotelowner/hotel-details/hotel-details';
 import { OwnerBookings } from './components/hotelowner/bookings/bookings';
+import { OwnerBookingRooms } from './components/hotelowner/booking-rooms/booking-rooms';
 import { OwnerDeals } from './components/hotelowner/deals/deals';
 import { OwnerExtraServices } from './components/hotelowner/extra-services/extra-services';
+import { ExtraServicesBookingComponent } from './components/hotelowner/extra-services-booking/extra-services-booking';
 import { OwnerCoupons } from './components/hotelowner/coupons/coupons';
 import { OwnerWallet } from './components/hotelowner/wallet/wallet';
 import { OwnerNotifications } from './components/hotelowner/notifications/notifications';
@@ -102,6 +109,21 @@ export const routes: Routes = [
     component: AdminPayments,
     canActivate: [authGuard, roleGuard(['ADMIN'])],
   },
+  {
+    path: 'admin/notifications',
+    component: AdminNotifications,
+    canActivate: [authGuard, roleGuard(['ADMIN'])],
+  },
+  {
+    path: 'admin/support',
+    component: AdminSupport,
+    canActivate: [authGuard, roleGuard(['ADMIN'])],
+  },
+  {
+    path: 'admin/locations',
+    component: AdminLocations,
+    canActivate: [authGuard, roleGuard(['ADMIN'])],
+  },
 
   {
     path: 'owner',
@@ -144,6 +166,11 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])],
   },
   {
+    path: 'owner/booking-rooms',
+    component: OwnerBookingRooms,
+    canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])],
+  },
+  {
     path: 'owner/payments',
     component: Payments,
     canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])],
@@ -156,6 +183,11 @@ export const routes: Routes = [
   {
     path: 'owner/extra-services',
     component: OwnerExtraServices,
+    canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])],
+  },
+  {
+    path: 'owner/extra-services-booking',
+    component: ExtraServicesBookingComponent,
     canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])],
   },
   {
@@ -232,6 +264,16 @@ export const routes: Routes = [
   {
     path: 'customer/support',
     component: CustomerSupport,
+    canActivate: [authGuard, roleGuard(['CUSTOMER'])],
+  },
+  {
+    path: 'customer/notifications',
+    component: CustomerNotifications,
+    canActivate: [authGuard, roleGuard(['CUSTOMER'])],
+  },
+  {
+    path: 'customer/wallet',
+    component: CustomerWallet,
     canActivate: [authGuard, roleGuard(['CUSTOMER'])],
   },
   {
