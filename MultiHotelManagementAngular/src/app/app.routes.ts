@@ -57,6 +57,7 @@ import { OwnerReports } from './components/hotelowner/reports/reports';
 import { OwnerProfile } from './components/hotelowner/profile/profile';
 import { CustomerDeals } from './components/customer/deals/deals';
 import { CustomerCoupons } from './components/customer/coupons/coupons';
+import { CustomerCheckinCheckout } from './components/customer/checkin-checkout/checkin-checkout';
 import { Payments } from './components/hotelowner/payments/payments';
 import { RoleRedirect } from './components/auth/role-redirect/role-redirect';
 
@@ -285,6 +286,11 @@ export const routes: Routes = [
   {
     path: 'customer/coupons',
     component: CustomerCoupons,
+    canActivate: [authGuard, roleGuard(['CUSTOMER'])],
+  },
+  {
+    path: 'customer/checkin-checkout',
+    component: CustomerCheckinCheckout,
     canActivate: [authGuard, roleGuard(['CUSTOMER'])],
   },
 

@@ -73,7 +73,7 @@ export class BookHotel implements OnInit {
   availability: RoomAvailabilityResponse | null = null;
   checkingAvailability = false;
 
-  selectedPaymentMethod = 'pay_at_hotel';
+  selectedPaymentMethod = 'ONLINE';
 
   ngOnInit() {
     const hotelId = Number(this.route.snapshot.paramMap.get('hotelId'));
@@ -269,8 +269,7 @@ export class BookHotel implements OnInit {
       numberOfRooms: this.numberOfRooms,
       totalGuests: this.totalGuests,
       discountRate: finalDiscountRate,
-      advanceAmount:
-        this.hotelPaymentOption === 'ADVANCE' ? this.estimatedTotal : this.depositAmount,
+      advanceAmount: 0,
     };
     if (this.selectedExtraServiceIds.size > 0) {
       request.extraServiceIds = Array.from(this.selectedExtraServiceIds);
@@ -282,7 +281,7 @@ export class BookHotel implements OnInit {
         this.successMessage = 'Booking confirmed successfully!';
         this.cdr.markForCheck();
 
-        if (this.selectedPaymentMethod === 'pay_at_hotel') {
+        if (this.selectedPaymentMethod === 'OFFLINE') {
           setTimeout(() => this.router.navigate(['/customer/bookings']), 1500);
         } else {
           setTimeout(() => this.router.navigate(['/customer/pay', createdBooking.id]), 1000);

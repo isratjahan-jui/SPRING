@@ -43,10 +43,10 @@ export class MakePayment implements OnInit {
 
   methods: PaymentMethod[] = [
     {
-      id: 'CASH',
-      label: 'Cash on Arrival',
-      icon: '💰',
-      description: 'Pay at the hotel during check-in',
+      id: 'SSLCOMMERZ',
+      label: 'SSLCommerz',
+      icon: '🔒',
+      description: 'Pay via SSLCommerz secure gateway (bKash, Nagad, Rocket, Cards)',
     },
     {
       id: 'BKASH',
@@ -59,24 +59,6 @@ export class MakePayment implements OnInit {
       label: 'Nagad',
       icon: '💳',
       description: 'Send money to our Nagad merchant number',
-    },
-    {
-      id: 'ROCKET',
-      label: 'Rocket',
-      icon: '🚀',
-      description: 'Send money to our Rocket merchant number',
-    },
-    {
-      id: 'CARD',
-      label: 'Card (Visa/Master)',
-      icon: '💳',
-      description: 'Pay securely with your debit/credit card',
-    },
-    {
-      id: 'SSLCOMMERZ',
-      label: 'SSLCommerz',
-      icon: '🔒',
-      description: 'Pay via SSLCommerz secure gateway (bKash, Nagad, Rocket, Cards)',
     },
   ];
 
@@ -142,7 +124,7 @@ export class MakePayment implements OnInit {
     this.submitting = true;
     this.error = '';
 
-    if (this.selectedMethod === 'SSLCOMMERZ' || this.selectedMethod === 'CARD') {
+    if (this.selectedMethod === 'SSLCOMMERZ') {
       this.paymentService.initiateSslCommerz(this.booking.id).subscribe({
         next: (response) => {
           this.submitting = false;

@@ -13,8 +13,8 @@
       <h4>{{ successMessage }}</h4>
       <p class="mb-0">
         {{
-          selectedPaymentMethod === 'pay_at_hotel'
-            ? 'Redirecting to your bookings...'
+          selectedPaymentMethod === 'OFFLINE'
+            ? 'Booking reserved. Redirecting to your bookings...'
             : 'Redirecting to payment...'
         }}
       </p>
@@ -288,7 +288,7 @@
             </div>
 
             <div class="row mb-3">
-              <div class="col-md-6">
+              <!-- <div class="col-md-6">
                 <label class="form-label">Discount Rate (%)</label>
                 <input
                   type="number"
@@ -298,8 +298,8 @@
                   max="100"
                   step="0.5"
                 />
-              </div>
-              <div class="col-md-6">
+              </div> -->
+              <!-- <div class="col-md-6">
                 <label class="form-label">
                   {{
                     hotelPaymentOption === 'ADVANCE'
@@ -321,7 +321,7 @@
                     >{{ depositPercentage }}% of total = BDT {{ depositAmount }}</small
                   >
                 }
-              </div>
+              </div> -->
             </div>
 
             @if (hotelDetails) {
@@ -330,25 +330,14 @@
                   <h6 class="text-info mb-2">
                     <i class="bi bi-info-circle"></i> Payment Information
                   </h6>
-                  @if (hotelPaymentOption === 'ADVANCE') {
+                  @if (selectedPaymentMethod === 'ONLINE') {
                     <p class="mb-1 small">
-                      Full payment required at booking. No balance due at hotel.
+                      You will be redirected to SSLCommerz to complete online payment.
                     </p>
-                  } @else if (hotelPaymentOption === 'DEPOSIT') {
+                  } @else {
                     <p class="mb-1 small">
-                      Pay {{ depositPercentage }}% deposit now. Remaining BDT
-                      {{ dueAfterAdvance }} due at hotel check-in.
+                      Your room is reserved now. Full payment is due at the hotel.
                     </p>
-                  } @else if (hotelPaymentOption === 'PAY_AT_HOTEL') {
-                    <p class="mb-1 small">
-                      Mandatory {{ depositPercentage }}% deposit (BDT {{ depositAmount }}) to
-                      confirm booking.
-                    </p>
-                    @if (hotelDetails.preAuthRequired) {
-                      <p class="mb-1 small text-warning">
-                        Pre-authorization required on card at check-in.
-                      </p>
-                    }
                   }
                   @if (hotelDetails.cancellationDepositRefundable === 'FULL_REFUND') {
                     <p class="mb-0 small text-success">
@@ -372,140 +361,28 @@
 
             <div class="card bg-light p-3 mb-3">
               <h6>Payment Method</h6>
-              @if (hotelPaymentOption === 'ADVANCE') {
-                <div class="d-flex flex-wrap gap-3">
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="radio"
-                      id="pm-bkash"
-                      value="bkash"
-                      [(ngModel)]="selectedPaymentMethod"
-                    />
-                    <label class="form-check-label" for="pm-bkash">bKash</label>
-                  </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="radio"
-                      id="pm-nagad"
-                      value="nagad"
-                      [(ngModel)]="selectedPaymentMethod"
-                    />
-                    <label class="form-check-label" for="pm-nagad">Nagad</label>
-                  </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="radio"
-                      id="pm-card"
-                      value="card"
-                      [(ngModel)]="selectedPaymentMethod"
-                    />
-                    <label class="form-check-label" for="pm-card">Card</label>
-                  </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="radio"
-                      id="pm-sslcommerz"
-                      value="sslcommerz"
-                      [(ngModel)]="selectedPaymentMethod"
-                    />
-                    <label class="form-check-label" for="pm-sslcommerz">SSLCommerz</label>
-                  </div>
+              <div class="d-flex flex-wrap gap-3">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="pm-online"
+                    value="ONLINE"
+                    [(ngModel)]="selectedPaymentMethod"
+                  />
+                  <label class="form-check-label" for="pm-online">Online (SSLCommerz)</label>
                 </div>
-                <p class="text-muted small mt-2 mb-0">
-                  Full payment required. You will be redirected to payment gateway.
-                </p>
-              } @else if (hotelPaymentOption === 'DEPOSIT') {
-                <div class="d-flex flex-wrap gap-3">
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="radio"
-                      id="pm-bkash"
-                      value="bkash"
-                      [(ngModel)]="selectedPaymentMethod"
-                    />
-                    <label class="form-check-label" for="pm-bkash">bKash</label>
-                  </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="radio"
-                      id="pm-nagad"
-                      value="nagad"
-                      [(ngModel)]="selectedPaymentMethod"
-                    />
-                    <label class="form-check-label" for="pm-nagad">Nagad</label>
-                  </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="radio"
-                      id="pm-card"
-                      value="card"
-                      [(ngModel)]="selectedPaymentMethod"
-                    />
-                    <label class="form-check-label" for="pm-card">Card</label>
-                  </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="radio"
-                      id="pm-sslcommerz"
-                      value="sslcommerz"
-                      [(ngModel)]="selectedPaymentMethod"
-                    />
-                    <label class="form-check-label" for="pm-sslcommerz">SSLCommerz</label>
-                  </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="pm-offline"
+                    value="OFFLINE"
+                    [(ngModel)]="selectedPaymentMethod"
+                  />
+                  <label class="form-check-label" for="pm-offline">Offline (Pay at hotel)</label>
                 </div>
-                <p class="text-muted small mt-2 mb-0">
-                  Pay {{ depositPercentage }}% deposit now. Remaining due at hotel.
-                </p>
-              } @else if (hotelPaymentOption === 'PAY_AT_HOTEL') {
-                <div class="d-flex flex-wrap gap-3">
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="radio"
-                      id="pm-hotel"
-                      value="pay_at_hotel"
-                      [(ngModel)]="selectedPaymentMethod"
-                    />
-                    <label class="form-check-label" for="pm-hotel">Pay at Hotel</label>
-                  </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="radio"
-                      id="pm-bkash"
-                      value="bkash"
-                      [(ngModel)]="selectedPaymentMethod"
-                    />
-                    <label class="form-check-label" for="pm-bkash">bKash (Deposit)</label>
-                  </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="radio"
-                      id="pm-card"
-                      value="card"
-                      [(ngModel)]="selectedPaymentMethod"
-                    />
-                    <label class="form-check-label" for="pm-card">Card (Deposit)</label>
-                  </div>
-                </div>
-                <p class="text-muted small mt-2 mb-0">
-                  @if (selectedPaymentMethod === 'pay_at_hotel') {
-                    Pay full amount at hotel check-in. Deposit BDT {{ depositAmount }} required to
-                    confirm.
-                  } @else {
-                    Pay {{ depositPercentage }}% deposit online. Remaining due at hotel.
-                  }
-                </p>
-              }
+              </div>
             </div>
 
             <button

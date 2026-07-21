@@ -136,27 +136,12 @@
                 >
               </div>
             }
-            @if (selectedMethod === 'ROCKET') {
-              <div class="alert alert-info">
-                <strong>Rocket Merchant Number:</strong> 01XXXXXXXXX<br />
-                <small
-                  >Send the exact amount to this Rocket number. After sending, click Pay Now to
-                  confirm.</small
-                >
-              </div>
-            }
-            @if (selectedMethod === 'CARD') {
+            @if (selectedMethod === 'SSLCOMMERZ') {
               <div class="alert alert-info">
                 <small
-                  >Card payment is processed via SSLCommerz secure gateway. You will be redirected
-                  to complete the payment.</small
+                  >You will be redirected to SSLCommerz secure payment gateway to complete the
+                  payment.</small
                 >
-              </div>
-            }
-            @if (selectedMethod === 'CASH') {
-              <div class="alert alert-warning">
-                <strong>Pay at Hotel:</strong> You can pay this amount when you check in at the
-                hotel. No online payment needed.
               </div>
             }
 
@@ -210,7 +195,7 @@
               }
             </div>
 
-            @if (selectedMethod === 'SSLCOMMERZ' || selectedMethod === 'CARD') {
+            @if (selectedMethod === 'SSLCOMMERZ') {
               <button
                 class="btn btn-success btn-lg w-100"
                 (click)="submitPayment()"
@@ -219,19 +204,7 @@
                 @if (submitting) {
                   <span class="spinner-border spinner-border-sm me-1"></span>
                 }
-                Pay BDT {{ amount }} via
-                {{ selectedMethod === 'SSLCOMMERZ' ? 'SSLCommerz' : 'Card' }}
-              </button>
-            } @else if (selectedMethod === 'CASH') {
-              <button
-                class="btn btn-warning btn-lg w-100"
-                (click)="submitPayment()"
-                [disabled]="submitting || amount <= 0"
-              >
-                @if (submitting) {
-                  <span class="spinner-border spinner-border-sm me-1"></span>
-                }
-                Confirm Pay at Hotel (BDT {{ amount }})
+                Pay BDT {{ amount }} via SSLCommerz
               </button>
             } @else {
               <button

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,8 +59,8 @@ public class SslCommerzClient {
         body.put("cancel_url", cancelUrl);
         body.put("ipn_url", ipnUrl);
         body.put("product_name", productName);
-        body.put("product_category", "Hotel Booking");
-        body.put("product_profile", "non-express-goods");
+        body.put("product_category", "travel");
+        body.put("product_profile", "travel");
         body.put("cus_name", customerName);
         body.put("cus_email", customerEmail);
         body.put("cus_phone", customerPhone);
@@ -68,7 +70,6 @@ public class SslCommerzClient {
         body.put("cus_country", "Bangladesh");
         body.put("shipping_method", "NO");
         body.put("num_of_item", "1");
-        body.put("emitter", "NO");
 
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -77,7 +78,9 @@ public class SslCommerzClient {
             StringBuilder formBody = new StringBuilder();
             for (Map.Entry<String, String> entry : body.entrySet()) {
                 if (formBody.length() > 0) formBody.append("&");
-                formBody.append(entry.getKey()).append("=").append(entry.getValue());
+                formBody.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
+                formBody.append("=");
+                formBody.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
             }
 
             HttpEntity<String> request = new HttpEntity<>(formBody.toString(), headers);

@@ -1,0 +1,192 @@
+<div class="container mt-4">
+  <h2 class="mb-4">Check-in / Check-out</h2>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+      <p class="text-muted mt-2">Loading bookings...</p>
+    </div>
+  } @else {
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4">
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          [class.active]="activeTab === 'checkin'"
+          (click)="activeTab = 'checkin'"
+          style="cursor: pointer"
+        >
+          Check-in
+          @if (checkinBookings.length > 0) {
+            <span class="badge bg-success ms-1">{{ checkinBookings.length }}</span>
+          }
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          [class.active]="activeTab === 'checkout'"
+          (click)="activeTab = 'checkout'"
+          style="cursor: pointer"
+        >
+          Check-out
+          @if (checkoutBookings.length > 0) {
+            <span class="badge bg-info ms-1">{{ checkoutBookings.length }}</span>
+          }
+        </a>
+      </li>
+    </ul>
+
+    @if (uploadMessage) {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ uploadMessage }}
+        <button type="button" class="btn-close" (click)="uploadMessage = ''"></button>
+      </div>
+    }
+
+    <!-- Check-in Tab -->
+    @if (activeTab === 'checkin') {
+      @if (checkinBookings.length === 0) {
+        <div class="text-center py-5">
+          <p class="text-muted fs-5">No bookings ready for check-in.</p>
+          <a routerLink="/customer/bookings" class="btn btn-outline-primary">View My Bookings</a>
+        </div>
+      } @else {
+        <div class="row">
+          @for (booking of checkinBookings; track booking.id) {
+            <div class="col-md-6 mb-4">
+              <div class="card border-success h-100">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                  <h6 class="mb-0">Booking #{{ booking.id }}</h6>
+                  <span class="badge bg-light text-success">Ready for Check-in</span>
+                </div>
+                <div class="card-body">
+                  <h5 class="card-title">{{ booking.hotelName }}</h5>
+                  <p class="mb-1"><strong>Room:</strong> {{ booking.roomType }}</p>
+                  <p class="mb-1"><strong>Check-in:</strong> {{ booking.checkInDate | date: 'mediumDate' }}</p>
+                  <p class="mb-1"><strong>Check-out:</strong> {{ booking.checkOutDate | date: 'mediumDate' }}</p>
+                  <p class="mb-1"><strong>Guests:</strong> {{ booking.totalGuests }}</p>
+                  <p class="mb-1"><strong>Rooms:</strong> {{ booking.numberOfRooms }}</p>
+                  <hr />
+
+                  @if (isFullOnlinePayment(booking)) {
+                    <div class="alert alert-info py-2 small mb-3">
+                      <strong>Full Online Payment Hotel</strong> — Complete online check-in below to get your digital room key.
+                    </div>
+
+                    @if (!booking.onlineCheckIn) {
+                      <div class="mb-3">
+                        <label class="form-label small fw-bold">Upload NID/Passport</label>
+                        <input
+                          type="file"
+                          class="form-control form-control-sm"
+                          accept="image/*,.pdf"
+                          (change)="onFileSelected($event, booking.id)"
+                        />
+                      </div>
+                      <button
+                        class="btn btn-success btn-sm"
+                        (click)="submitOnlineCheckIn(booking.id)"
+                        [disabled]="!selectedFile || uploadBookingId !== booking.id || processing"
+                      >
+                        @if (processing && processingBookingId === booking.id) {
+                          <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        Online Check-in
+                      </button>
+                    } @else {
+                      <div class="alert alert-success py-2 small mb-0">
+                        Online check-in completed! Digital key issued.
+                      </div>
+                    }
+                  } @else {
+                    <div class="alert alert-warning py-2 small mb-0">
+                      Pay remaining <strong>BDT {{ booking.dueAmount }}</strong> at hotel reception for check-in.
+                    </div>
+                  }
+                </div>
+                <div class="card-footer">
+                  <a [routerLink]="['/customer/booking', booking.id]" class="btn btn-outline-primary btn-sm">
+                    View Details
+                  </a>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+
+    <!-- Check-out Tab -->
+    @if (activeTab === 'checkout') {
+      @if (checkoutBookings.length === 0) {
+        <div class="text-center py-5">
+          <p class="text-muted fs-5">No bookings ready for check-out.</p>
+          <a routerLink="/customer/bookings" class="btn btn-outline-primary">View My Bookings</a>
+        </div>
+      } @else {
+        <div class="row">
+          @for (booking of checkoutBookings; track booking.id) {
+            <div class="col-md-6 mb-4">
+              <div class="card border-info h-100">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                  <h6 class="mb-0">Booking #{{ booking.id }}</h6>
+                  <span class="badge bg-light text-info">Checked In</span>
+                </div>
+                <div class="card-body">
+                  <h5 class="card-title">{{ booking.hotelName }}</h5>
+                  <p class="mb-1"><strong>Room:</strong> {{ booking.roomType }}</p>
+                  <p class="mb-1"><strong>Check-in:</strong> {{ booking.checkInDate | date: 'mediumDate' }}</p>
+                  <p class="mb-1"><strong>Check-out:</strong> {{ booking.checkOutDate | date: 'mediumDate' }}</p>
+                  <hr />
+
+                  @if (booking.dueAmount > 0) {
+                    <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded mb-3">
+                      <span>Remaining Due:</span>
+                      <span class="fw-bold text-danger">BDT {{ booking.dueAmount }}</span>
+                    </div>
+                  } @else {
+                    <div class="alert alert-success py-2 small mb-3">
+                      All payments settled. Ready for express check-out!
+                    </div>
+                  }
+
+                  <div class="d-flex gap-2">
+                    @if (isFullOnlinePayment(booking)) {
+                      <button
+                        class="btn btn-secondary btn-sm"
+                        (click)="expressCheckOut(booking.id)"
+                        [disabled]="processing && processingBookingId === booking.id"
+                      >
+                        @if (processing && processingBookingId === booking.id) {
+                          <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        Express Check-out
+                      </button>
+                    } @else {
+                      <button
+                        class="btn btn-secondary btn-sm"
+                        (click)="requestCheckOut(booking.id)"
+                        [disabled]="processing && processingBookingId === booking.id"
+                      >
+                        @if (processing && processingBookingId === booking.id) {
+                          <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        Request Check-out
+                      </button>
+                    }
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <a [routerLink]="['/customer/booking', booking.id]" class="btn btn-outline-primary btn-sm">
+                    View Details
+                  </a>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+  }
+</div>
