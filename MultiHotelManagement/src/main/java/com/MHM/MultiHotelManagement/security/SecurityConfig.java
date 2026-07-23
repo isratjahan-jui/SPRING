@@ -104,6 +104,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/payments/sslcommerz/cancel").permitAll()
                         .requestMatchers("/api/payments/sslcommerz/ipn").permitAll()
 
+                        // Static resources
+                        .requestMatchers("/favicon.ico").permitAll()
+
                         // ── Hotel Owner endpoints ─────────────────────────
                         .requestMatchers(HttpMethod.POST, "/api/hotels").hasRole("HOTEL_OWNER")
                         .requestMatchers(HttpMethod.PUT, "/api/hotels/**").hasRole("HOTEL_OWNER")
@@ -191,7 +194,12 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200", "http://192.168.88.250:4200"));
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:4200",
+                "http://192.168.88.250:4200",
+                "https://sandbox.sslcommerz.com",
+                "https://sslcommerz.com"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT","PATCH",  "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
         configuration.setAllowCredentials(true);

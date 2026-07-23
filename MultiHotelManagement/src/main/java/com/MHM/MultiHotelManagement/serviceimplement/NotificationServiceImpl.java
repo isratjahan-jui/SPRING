@@ -12,7 +12,6 @@ import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.repository.NotificationRepository;
 import com.MHM.MultiHotelManagement.repository.UserRepository;
 import com.MHM.MultiHotelManagement.service.NotificationService;
-import com.MHM.MultiHotelManagement.service.SseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

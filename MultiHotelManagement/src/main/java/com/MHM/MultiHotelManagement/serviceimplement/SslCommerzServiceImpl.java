@@ -40,32 +40,44 @@ public class SslCommerzServiceImpl implements SslCommerzService {
     @Transactional
     public Map<String, Object> initiatePayment(Long bookingId) {
         Booking booking = bookingRepository.findByIdWithDetails(bookingId)
-                .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
 
-        if (booking.getDueAmount().compareTo(BigDecimal.ZERO) <= 0) {
+        if (booking.getDueAmount() == null || booking.getDueAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new BadRequestException("No amount due for this booking");
         }
 
-        // Generate unique transaction ID
         String transactionId = "TXN-" + UUID.randomUUID().toString().substring(0, 12).toUpperCase();
 
-        // Create payment record with PENDING status
-        Payment payment = new Payment();
-        payment.setBooking(booking);
-        payment.setAmount(booking.getDueAmount());
-        payment.setCustomerId(booking.getCustomer() != null ? booking.getCustomer().getId() : null);
-        payment.setMethod("SSLCOMMERZ");
-        payment.setStatus(PaymentStatus.PENDING);
-        payment.setTransactionId(transactionId);
-        payment.setTransactionDate(LocalDateTime.now());
+        Payment payment = paymentRepository.findByBooking_Id(bookingId).orElse(null);
+
+        if (payment != null) {
+            if (payment.getStatus() == PaymentStatus.PAID) {
+                throw new BadRequestException("Payment already completed for this booking");
+            }
+            payment.setAmount(booking.getDueAmount());
+            payment.setMethod("SSLCOMMERZ");
+            payment.setStatus(PaymentStatus.PENDING);
+            payment.setTransactionId(transactionId);
+            payment.setTransactionDate(LocalDateTime.now());
+        } else {
+            payment = new Payment();
+            payment.setBooking(booking);
+            payment.setAmount(booking.getDueAmount());
+            payment.setCustomerId(booking.getCustomer() != null ? booking.getCustomer().getId() : null);
+            payment.setMethod("SSLCOMMERZ");
+            payment.setStatus(PaymentStatus.PENDING);
+            payment.setTransactionId(transactionId);
+            payment.setTransactionDate(LocalDateTime.now());
+        }
         payment = paymentRepository.save(payment);
 
-        // Build SSLCommerz session request
         String customerName = booking.getCustomer() != null ? booking.getCustomer().getCustomerName() : "Guest";
-        String customerEmail = booking.getCustomer() != null && booking.getCustomer().getUser() != null
+        String customerEmail = (booking.getCustomer() != null && booking.getCustomer().getUser() != null)
                 ? booking.getCustomer().getUser().getEmail() : "";
         String customerPhone = booking.getCustomer() != null ? booking.getCustomer().getPhone() : "";
         String hotelName = booking.getHotel() != null ? booking.getHotel().getHotelName() : "Hotel Booking";
+
+        log.info("Initiating SSLCommerz for booking={}, amount={}, customer={}", bookingId, booking.getDueAmount(), customerName);
 
         Map<String, Object> result = sslCommerzClient.initiateSession(
                 transactionId,
@@ -90,55 +102,59 @@ public class SslCommerzServiceImpl implements SslCommerzService {
             return;
         }
 
-        Payment payment = paymentRepository.findByTransactionId(transactionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found for transaction: " + transactionId));
-
-        // Re-validate with SSLCommerz
-        String valId = params.get("val_id");
-        if (valId == null) {
-            log.warn("SSLCommerz success callback missing val_id for tran_id: {}", transactionId);
-            payment.setStatus(PaymentStatus.FAILED);
-            paymentRepository.save(payment);
+        Payment payment = paymentRepository.findByTransactionId(transactionId).orElse(null);
+        if (payment == null) {
+            log.warn("SSLCommerz success callback - payment not found for tran_id: {}", transactionId);
             return;
         }
 
-        Map<String, Object> validation = sslCommerzClient.validateTransaction(valId);
-        String status = (String) validation.get("status");
-        if (!"VALIDATED".equals(status)) {
-            log.warn("SSLCommerz validation failed for tran_id: {}, status: {}", transactionId, status);
+        try {
+            String valId = params.get("val_id");
+            if (valId == null) {
+                log.warn("SSLCommerz success callback missing val_id for tran_id: {}", transactionId);
+                payment.setStatus(PaymentStatus.FAILED);
+                paymentRepository.save(payment);
+                return;
+            }
+
+            Map<String, Object> validation = sslCommerzClient.validateTransaction(valId);
+            String status = (String) validation.get("status");
+            if (!"VALIDATED".equals(status)) {
+                log.warn("SSLCommerz validation failed for tran_id: {}, status: {}", transactionId, status);
+                payment.setStatus(PaymentStatus.FAILED);
+                paymentRepository.save(payment);
+                return;
+            }
+
+            Object validatedAmountObj = validation.get("amount");
+            BigDecimal validatedAmount = new BigDecimal(String.valueOf(validatedAmountObj));
+            if (validatedAmount.compareTo(payment.getAmount()) != 0) {
+                log.error("Amount mismatch for tran_id: expected {}, got {}", payment.getAmount(), validatedAmount);
+                payment.setStatus(PaymentStatus.FAILED);
+                paymentRepository.save(payment);
+                return;
+            }
+
+            payment.setStatus(PaymentStatus.PAID);
+            payment.setBankTransactionId((String) validation.get("bank_tran_id"));
+            payment.setValidationId(valId);
+            payment.setTransactionDate(LocalDateTime.now());
+            paymentRepository.save(payment);
+
+            Booking booking = payment.getBooking();
+            booking.setAdvanceAmount(booking.getAdvanceAmount().add(validatedAmount));
+            booking.setDueAmount(booking.getDueAmount().subtract(validatedAmount).max(BigDecimal.ZERO));
+            if (booking.getDueAmount().compareTo(BigDecimal.ZERO) <= 0) {
+                booking.setStatus(BookingStatus.CONFIRMED);
+            }
+            bookingRepository.save(booking);
+
+            generateInvoice(booking, payment);
+        } catch (Exception e) {
+            log.error("Error processing SSLCommerz success for tran_id: {}", transactionId, e);
             payment.setStatus(PaymentStatus.FAILED);
             paymentRepository.save(payment);
-            return;
         }
-
-        // Validate amount matches
-        Object validatedAmountObj = validation.get("amount");
-        BigDecimal validatedAmount = new BigDecimal(String.valueOf(validatedAmountObj));
-        if (validatedAmount.compareTo(payment.getAmount()) != 0) {
-            log.error("Amount mismatch for tran_id: expected {}, got {}", payment.getAmount(), validatedAmount);
-            payment.setStatus(PaymentStatus.FAILED);
-            paymentRepository.save(payment);
-            return;
-        }
-
-        // Mark payment as PAID
-        payment.setStatus(PaymentStatus.PAID);
-        payment.setBankTransactionId((String) validation.get("bank_tran_id"));
-        payment.setValidationId(valId);
-        payment.setTransactionDate(LocalDateTime.now());
-        paymentRepository.save(payment);
-
-        // Update booking
-        Booking booking = payment.getBooking();
-        booking.setAdvanceAmount(booking.getAdvanceAmount().add(validatedAmount));
-        booking.setDueAmount(booking.getDueAmount().subtract(validatedAmount).max(BigDecimal.ZERO));
-        if (booking.getDueAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            booking.setStatus(BookingStatus.CONFIRMED);
-        }
-        bookingRepository.save(booking);
-
-        // Auto-generate invoice
-        generateInvoice(booking, payment);
     }
 
     @Override

@@ -9,12 +9,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payments")
+@CrossOrigin("*")
+@Slf4j
 public class PaymentController {
 
     private final PaymentService paymentService;
@@ -80,39 +83,69 @@ public class PaymentController {
     @PostMapping("/sslcommerz/init/{bookingId}")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<Map<String, Object>> initiateSslCommerz(@PathVariable Long bookingId) {
-        return ResponseEntity.ok(sslCommerzService.initiatePayment(bookingId));
+        try {
+            return ResponseEntity.ok(sslCommerzService.initiatePayment(bookingId));
+        } catch (Exception e) {
+            Map<String, Object> error = new java.util.HashMap<>();
+            error.put("error", true);
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
     }
 
-    @PostMapping("/sslcommerz/success")
-    public ResponseEntity<Void> sslCommerzSuccess(@RequestParam Map<String, String> params,
-                                                   jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
-        sslCommerzService.handleSuccess(params);
+    @RequestMapping(value = "/sslcommerz/success", method = {RequestMethod.POST, RequestMethod.GET})
+    public void sslCommerzSuccess(jakarta.servlet.http.HttpServletRequest request,
+                                  jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
+        Map<String, String> params = extractParams(request);
         String tranId = params.getOrDefault("tran_id", "");
+        try {
+            sslCommerzService.handleSuccess(params);
+        } catch (Exception e) {
+            log.error("SSLCommerz success handler error: {}", e.getMessage());
+        }
         response.sendRedirect("http://localhost:4200/customer/payment-result?status=success&tran_id=" + tranId);
-        return ResponseEntity.status(HttpStatus.FOUND).build();
     }
 
-    @PostMapping("/sslcommerz/fail")
-    public ResponseEntity<Void> sslCommerzFail(@RequestParam Map<String, String> params,
-                                                jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
-        sslCommerzService.handleFail(params);
+    @RequestMapping(value = "/sslcommerz/fail", method = {RequestMethod.POST, RequestMethod.GET})
+    public void sslCommerzFail(jakarta.servlet.http.HttpServletRequest request,
+                               jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
+        Map<String, String> params = extractParams(request);
         String tranId = params.getOrDefault("tran_id", "");
+        try {
+            sslCommerzService.handleFail(params);
+        } catch (Exception e) {
+            log.error("SSLCommerz fail handler error: {}", e.getMessage());
+        }
         response.sendRedirect("http://localhost:4200/customer/payment-result?status=fail&tran_id=" + tranId);
-        return ResponseEntity.status(HttpStatus.FOUND).build();
     }
 
-    @PostMapping("/sslcommerz/cancel")
-    public ResponseEntity<Void> sslCommerzCancel(@RequestParam Map<String, String> params,
-                                                  jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
-        sslCommerzService.handleCancel(params);
+    @RequestMapping(value = "/sslcommerz/cancel", method = {RequestMethod.POST, RequestMethod.GET})
+    public void sslCommerzCancel(jakarta.servlet.http.HttpServletRequest request,
+                                 jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
+        Map<String, String> params = extractParams(request);
         String tranId = params.getOrDefault("tran_id", "");
+        try {
+            sslCommerzService.handleCancel(params);
+        } catch (Exception e) {
+            log.error("SSLCommerz cancel handler error: {}", e.getMessage());
+        }
         response.sendRedirect("http://localhost:4200/customer/payment-result?status=cancel&tran_id=" + tranId);
-        return ResponseEntity.status(HttpStatus.FOUND).build();
     }
 
-    @PostMapping("/sslcommerz/ipn")
-    public ResponseEntity<String> sslCommerzIpn(@RequestParam Map<String, String> params) {
+    @RequestMapping(value = "/sslcommerz/ipn", method = {RequestMethod.POST, RequestMethod.GET})
+    public ResponseEntity<String> sslCommerzIpn(jakarta.servlet.http.HttpServletRequest request) {
+        Map<String, String> params = extractParams(request);
         sslCommerzService.handleIpn(params);
         return ResponseEntity.ok("OK");
+    }
+
+    private Map<String, String> extractParams(jakarta.servlet.http.HttpServletRequest request) {
+        Map<String, String> params = new java.util.HashMap<>();
+        java.util.Enumeration<String> paramNames = request.getParameterNames();
+        while (paramNames.hasMoreElements()) {
+            String name = paramNames.nextElement();
+            params.put(name, request.getParameter(name));
+        }
+        return params;
     }
 }

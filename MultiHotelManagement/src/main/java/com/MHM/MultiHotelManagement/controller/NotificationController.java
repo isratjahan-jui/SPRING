@@ -4,7 +4,7 @@ import com.MHM.MultiHotelManagement.dto.request.NotificationRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.NotificationResponseDTO;
 import com.MHM.MultiHotelManagement.enums.Role;
 import com.MHM.MultiHotelManagement.service.NotificationService;
-import com.MHM.MultiHotelManagement.service.SseService;
+import com.MHM.MultiHotelManagement.serviceimplement.SseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

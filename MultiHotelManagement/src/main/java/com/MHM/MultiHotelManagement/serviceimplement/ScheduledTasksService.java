@@ -1,4 +1,4 @@
-package com.MHM.MultiHotelManagement.service;
+package com.MHM.MultiHotelManagement.serviceimplement;
 
 import com.MHM.MultiHotelManagement.entity.Booking;
 import com.MHM.MultiHotelManagement.entity.Room;

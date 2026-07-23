@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -165,6 +167,24 @@ public class GlobalExceptionHandler {
         body.put("error", "Internal Server Error");
         body.put("message", ex.getMessage() != null ? ex.getMessage() : "An unexpected error occurred.");
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // ── No Resource Found (404) ─────────────────────────────────
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public void handleNoResource(org.springframework.web.servlet.resource.NoResourceFoundException ex,
+                                 HttpServletResponse response) throws IOException {
+        if (ex.getResourcePath() != null && ex.getResourcePath().contains("favicon")) {
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            return;
+        }
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", "Not Found");
+        body.put("message", ex.getMessage());
+        response.setStatus(HttpStatus.NOT_FOUND.value());
+        response.setContentType("application/json");
+        new com.fasterxml.jackson.databind.ObjectMapper().writeValue(response.getOutputStream(), body);
     }
 
     // ── All other exceptions (500) ────────────────────────────────

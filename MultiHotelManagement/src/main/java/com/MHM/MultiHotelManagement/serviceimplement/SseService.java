@@ -1,4 +1,4 @@
-package com.MHM.MultiHotelManagement.service;
+package com.MHM.MultiHotelManagement.serviceimplement;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
