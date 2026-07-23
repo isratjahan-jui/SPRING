@@ -1,19 +1,15 @@
 <div class="support-page">
   <div class="support-header">
     <div class="header-content">
-      <h1>Help Center</h1>
-      <p>We're here to help. Submit a ticket and our team will get back to you.</p>
+      <h1>Hotel Support Tickets</h1>
+      <p>Manage support tickets related to your hotels</p>
     </div>
-    <button class="btn-new-ticket" (click)="openForm()">
-      <span class="btn-icon">+</span>
-      New Support Ticket
-    </button>
   </div>
 
   @if (loading) {
     <div class="loading-state">
       <div class="spinner"></div>
-      <p>Loading your tickets...</p>
+      <p>Loading tickets...</p>
     </div>
   } @else {
     @if (successMsg) {
@@ -36,7 +32,7 @@
       </div>
       <div class="stat-card stat-pending">
         <span class="stat-number">{{ tickets.filter((t) => t.status === 'PENDING').length }}</span>
-        <span class="stat-label">Awaiting Response</span>
+        <span class="stat-label">Pending</span>
       </div>
       <div class="stat-card stat-progress">
         <span class="stat-number">{{
@@ -44,26 +40,62 @@
         }}</span>
         <span class="stat-label">In Progress</span>
       </div>
-      <div class="stat-card stat-resolved">
+      <div class="stat-card stat-escalated">
         <span class="stat-number">{{
-          tickets.filter((t) => t.status === 'RESOLVED' || t.status === 'CLOSED').length
+          tickets.filter((t) => t.status === 'ESCALATED').length
         }}</span>
-        <span class="stat-label">Resolved</span>
+        <span class="stat-label">Escalated</span>
       </div>
     </div>
+
+    @if (hotelStats.length > 0) {
+      <div class="hotel-stats-section">
+        <h6 class="section-title">Hotel-wise Breakdown</h6>
+        <div class="hotel-stats-grid">
+          @for (hs of hotelStats; track hs.hotelId) {
+            <div class="hotel-stat-card">
+              <div class="hotel-stat-header">
+                <span class="hotel-stat-name">&#127976; {{ hs.hotelName }}</span>
+                <span class="hotel-stat-total">{{ hs.stats.totalTickets }} tickets</span>
+              </div>
+              <div class="hotel-stat-bars">
+                <div class="stat-bar-item">
+                  <span class="bar-label">Pending</span>
+                  <span class="bar-count bar-pending">{{ hs.stats.pendingCount }}</span>
+                </div>
+                <div class="stat-bar-item">
+                  <span class="bar-label">In Progress</span>
+                  <span class="bar-count bar-progress">{{ hs.stats.inProgressCount }}</span>
+                </div>
+                <div class="stat-bar-item">
+                  <span class="bar-label">Escalated</span>
+                  <span class="bar-count bar-escalated">{{ hs.stats.escalatedCount }}</span>
+                </div>
+                <div class="stat-bar-item">
+                  <span class="bar-label">Resolved</span>
+                  <span class="bar-count bar-resolved">{{
+                    hs.stats.resolvedCount + hs.stats.closedCount
+                  }}</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
 
     <div class="filters-bar">
       <div class="search-box">
         <span class="search-icon">&#128269;</span>
         <input
           type="text"
-          placeholder="Search tickets..."
+          placeholder="Search by subject, customer, hotel..."
           [(ngModel)]="searchTerm"
-          (ngModelChange)="onFilterChange()"
+          (ngModelChange)="applyFilters()"
         />
       </div>
       <div class="filter-group">
-        <select [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()">
+        <select [(ngModel)]="filterStatus" (ngModelChange)="applyFilters()">
           <option value="">All Statuses</option>
           <option value="PENDING">Awaiting Response</option>
           <option value="IN_PROGRESS">In Progress</option>
@@ -71,7 +103,7 @@
           <option value="RESOLVED">Resolved</option>
           <option value="CLOSED">Closed</option>
         </select>
-        <select [(ngModel)]="filterPriority" (ngModelChange)="onFilterChange()">
+        <select [(ngModel)]="filterPriority" (ngModelChange)="applyFilters()">
           <option value="">All Priorities</option>
           <option value="URGENT">Urgent</option>
           <option value="HIGH">High</option>
@@ -85,27 +117,20 @@
       <div class="empty-state">
         <div class="empty-icon">&#128222;</div>
         <h3>No support tickets</h3>
-        <p>Need help? Create a support ticket and our team will assist you.</p>
-        <button class="btn-new-ticket" (click)="openForm()">+ Create Your First Ticket</button>
+        <p>No support tickets found for your hotels.</p>
       </div>
     } @else {
       <div class="tickets-list">
         @for (ticket of filteredTickets; track ticket.id) {
-          <div class="ticket-card" (click)="openDetail(ticket)">
-            <div class="ticket-left">
+          <div class="ticket-card">
+            <div class="ticket-left" (click)="openDetail(ticket)">
               <div class="ticket-id">#{{ ticket.id }}</div>
               <div class="ticket-main">
                 <h4 class="ticket-subject">{{ ticket.subject }}</h4>
                 <div class="ticket-meta">
-                  <span class="meta-category">
-                    <span
-                      [innerHTML]="categoryIcons[ticket.category || 'OTHER'] || '&#128221;'"
-                    ></span>
-                    {{ getCategoryLabel(ticket.category || '') }}
-                  </span>
-                  @if (ticket.hotelName) {
-                    <span class="meta-hotel">&#127976; {{ ticket.hotelName }}</span>
-                  }
+                  <span class="meta-customer">&#128100; {{ ticket.customerName }}</span>
+                  <span class="meta-hotel">&#127976; {{ ticket.hotelName }}</span>
+                  <span class="meta-category">{{ getCategoryLabel(ticket.category || '') }}</span>
                   <span class="meta-time">{{ getTimeAgo(ticket.createdAt) }}</span>
                 </div>
               </div>
@@ -117,15 +142,17 @@
               <span class="priority-badge {{ priorityClass(ticket.priority) }}">
                 {{ ticket.priority }}
               </span>
-              <div class="ticket-agent">
-                @if (ticket.agentName) {
-                  <span class="agent-assigned">&#128100; {{ ticket.agentName }}</span>
-                } @else {
-                  <span class="agent-pending">Awaiting assignment</span>
+              <div class="ticket-actions">
+                <button class="btn-action btn-view" (click)="openDetail(ticket)">View</button>
+                @if (
+                  ticket.status !== 'CLOSED' &&
+                  ticket.status !== 'RESOLVED' &&
+                  ticket.status !== 'ESCALATED'
+                ) {
+                  <button class="btn-action btn-escalate" (click)="openEscalate(ticket)">
+                    &#9888; Escalate
+                  </button>
                 }
-              </div>
-              <div class="ticket-replies">
-                <span class="reply-count">{{ ticket.replyCount }}</span> replies
               </div>
             </div>
           </div>
@@ -135,96 +162,11 @@
   }
 </div>
 
-@if (showForm) {
-  <div class="modal-backdrop fade show"></div>
-  <div class="modal fade show d-block" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content custom-modal">
-        <div class="modal-header-custom">
-          <h5 class="modal-title">Submit a Support Ticket</h5>
-          <button type="button" class="btn-close-custom" (click)="closeForm()">&times;</button>
-        </div>
-        <div class="modal-body-custom">
-          <div class="form-group">
-            <label class="form-label">Subject <span class="required">*</span></label>
-            <input
-              type="text"
-              class="form-input"
-              [(ngModel)]="form.subject"
-              placeholder="Brief description of your issue"
-            />
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Category</label>
-              <select class="form-select" [(ngModel)]="form.category">
-                <option value="">General Inquiry</option>
-                <option value="BOOKING">Booking Issue</option>
-                <option value="PAYMENT">Payment Problem</option>
-                <option value="CANCELATION">Cancellation</option>
-                <option value="REFUND">Refund Request</option>
-                <option value="HOTEL_SERVICE">Hotel Service</option>
-                <option value="ROOM">Room Issue</option>
-                <option value="STAFF">Staff Behavior</option>
-                <option value="BILLING">Billing Dispute</option>
-                <option value="OTHER">Other</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Priority</label>
-              <select class="form-select" [(ngModel)]="form.priority">
-                <option value="LOW">Low - General question</option>
-                <option value="MEDIUM">Medium - Need assistance</option>
-                <option value="HIGH">High - Urgent issue</option>
-                <option value="URGENT">Urgent - Immediate attention</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Related Hotel (optional)</label>
-            <select class="form-select" [(ngModel)]="form.hotelId">
-              <option value="">Select a hotel (if applicable)</option>
-              @for (hotel of hotels; track hotel.id) {
-                <option [value]="hotel.id">{{ hotel.hotelName }}</option>
-              }
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Description <span class="required">*</span></label>
-            <textarea
-              class="form-textarea"
-              rows="5"
-              [(ngModel)]="form.description"
-              placeholder="Please describe your issue in detail. Include any booking references, dates, or other relevant information."
-            ></textarea>
-          </div>
-        </div>
-        <div class="modal-footer-custom">
-          <button type="button" class="btn-cancel" (click)="closeForm()">Cancel</button>
-          <button
-            type="button"
-            class="btn-submit"
-            (click)="submitTicket()"
-            [disabled]="submitting || !form.subject.trim() || !form.description.trim()"
-          >
-            @if (submitting) {
-              <span class="spinner-sm"></span>
-              Submitting...
-            } @else {
-              Submit Ticket
-            }
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-}
-
 @if (showDetailModal) {
   <div class="modal-backdrop fade show"></div>
   <div class="modal fade show d-block" tabindex="-1">
     <div class="modal-dialog modal-lg">
-      <div class="modal-content custom-modal modal-detail">
+      <div class="modal-content custom-modal">
         <div class="modal-header-custom">
           <div>
             <h5 class="modal-title">Ticket #{{ selectedTicket?.id }}</h5>
@@ -255,18 +197,14 @@
               }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Assigned To</span>
-              <span class="detail-value">{{
-                selectedTicket?.agentName || 'Awaiting assignment'
-              }}</span>
+              <span class="detail-label">Customer</span>
+              <span class="detail-value">{{ selectedTicket?.customerName }}</span>
             </div>
           </div>
-          @if (selectedTicket?.hotelName) {
-            <div class="detail-hotel">
-              <span class="detail-label">Related Hotel</span>
-              <span class="detail-value">&#127976; {{ selectedTicket?.hotelName }}</span>
-            </div>
-          }
+          <div class="detail-hotel">
+            <span class="detail-label">Related Hotel</span>
+            <span class="detail-value">&#127976; {{ selectedTicket?.hotelName }}</span>
+          </div>
           <div class="detail-description">
             <span class="detail-label">Description</span>
             <p>{{ selectedTicket?.description }}</p>
@@ -276,7 +214,7 @@
             <h6 class="conversation-title">Conversation</h6>
             @if (replies.length === 0) {
               <div class="no-replies">
-                <p>No replies yet. Our team will get back to you soon.</p>
+                <p>No replies yet.</p>
               </div>
             } @else {
               <div class="conversation-list">
@@ -303,8 +241,8 @@
                           reply.replierRole === 'ADMIN'
                             ? 'Support Team'
                             : reply.replierRole === 'HOTEL_OWNER'
-                              ? 'Hotel Staff'
-                              : 'You'
+                              ? 'You'
+                              : 'Customer'
                         }}</span>
                       </div>
                       <span class="message-time">{{ getTimeAgo(reply.createdAt) }}</span>
@@ -339,17 +277,59 @@
           </div>
         </div>
         <div class="modal-footer-custom">
-          @if (selectedTicket?.status !== 'CLOSED' && selectedTicket?.status !== 'RESOLVED') {
-            <button class="btn-close-ticket" (click)="closeTicket(selectedTicket!.id)">
-              Close Ticket
-            </button>
-          }
-          @if (selectedTicket?.status === 'CLOSED' || selectedTicket?.status === 'RESOLVED') {
-            <button class="btn-reopen" (click)="reopenTicket(selectedTicket!.id)">
-              &#8634; Reopen Ticket
+          @if (
+            selectedTicket?.status !== 'CLOSED' &&
+            selectedTicket?.status !== 'RESOLVED' &&
+            selectedTicket?.status !== 'ESCALATED'
+          ) {
+            <button class="btn-escalate-footer" (click)="openEscalate(selectedTicket!)">
+              &#9888; Escalate to Admin
             </button>
           }
           <button class="btn-cancel" (click)="closeDetailModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showEscalateModal) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal fade show d-block" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content custom-modal">
+        <div class="modal-header-custom">
+          <h5 class="modal-title">Escalate Ticket #{{ escalateTicket?.id }}</h5>
+          <button type="button" class="btn-close-custom" (click)="closeEscalateModal()">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body-custom">
+          <div class="escalate-notice">
+            <span class="notice-icon">&#9888;</span>
+            <div>
+              <strong>Escalate to Admin</strong>
+              <p>
+                This ticket will be escalated to the admin team for priority resolution. The
+                customer will be notified.
+              </p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reason for Escalation (optional)</label>
+            <textarea
+              class="form-textarea"
+              rows="3"
+              [(ngModel)]="escalateReason"
+              placeholder="Why are you escalating this ticket? (e.g., requires admin intervention, resource constraints, etc.)"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer-custom">
+          <button class="btn-cancel" (click)="closeEscalateModal()">Cancel</button>
+          <button class="btn-escalate-confirm" (click)="confirmEscalate()">
+            Escalate to Admin
+          </button>
         </div>
       </div>
     </div>

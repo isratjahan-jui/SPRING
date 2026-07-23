@@ -78,6 +78,25 @@ export class NotificationService {
     });
   }
 
+  loadNotificationsByRole(role: string) {
+    const user = this.auth.getUser();
+    if (!user) return;
+
+    this.http
+      .get<NotificationItem[]>(`${this.API_URL}/user/${user.userId}/role/${role}`)
+      .subscribe({
+        next: (data) => {
+          this.notificationsSubject.next(data);
+          this.unreadCountSubject.next(data.filter((n) => !n.readStatus).length);
+        },
+        error: () => {},
+      });
+  }
+
+  getByUserAndRole(userId: number, role: string): Observable<NotificationItem[]> {
+    return this.http.get<NotificationItem[]>(`${this.API_URL}/user/${userId}/role/${role}`);
+  }
+
   getUnreadCount(): Observable<number> {
     return this.unreadCount$;
   }

@@ -32,6 +32,7 @@ export class CustomerNotifications implements OnInit, OnDestroy {
     }
 
     this.notificationService.connect();
+    this.notificationService.loadNotificationsByRole('CUSTOMER');
     this.notificationService.notifications$.subscribe((data) => {
       this.notifications = data;
       this.loading = false;

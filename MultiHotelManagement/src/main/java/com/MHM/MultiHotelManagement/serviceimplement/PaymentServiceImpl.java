@@ -17,6 +17,10 @@ import com.MHM.MultiHotelManagement.repository.InvoiceRepository;
 import com.MHM.MultiHotelManagement.repository.PaymentRepository;
 import com.MHM.MultiHotelManagement.repository.RoomRepository;
 import com.MHM.MultiHotelManagement.service.PaymentService;
+import com.MHM.MultiHotelManagement.service.NotificationService;
+import com.MHM.MultiHotelManagement.dto.request.NotificationRequestDTO;
+import com.MHM.MultiHotelManagement.enums.NotificationChannel;
+import com.MHM.MultiHotelManagement.enums.NotificationType;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,17 +43,20 @@ public class PaymentServiceImpl implements PaymentService {
     private final ExtraServiceRepository extraServiceRepository;
     private final RoomRepository roomRepository;
     private final InvoiceRepository invoiceRepository;
+    private final NotificationService notificationService;
 
     public PaymentServiceImpl(PaymentRepository paymentRepository,
                               BookingRepository bookingRepository,
                               ExtraServiceRepository extraServiceRepository,
                               RoomRepository roomRepository,
-                              InvoiceRepository invoiceRepository) {
+                              InvoiceRepository invoiceRepository,
+                              NotificationService notificationService) {
         this.paymentRepository = paymentRepository;
         this.bookingRepository = bookingRepository;
         this.extraServiceRepository = extraServiceRepository;
         this.roomRepository = roomRepository;
         this.invoiceRepository = invoiceRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -99,6 +106,26 @@ public class PaymentServiceImpl implements PaymentService {
             } catch (Exception e) {
                 log.error("Invoice generation failed for payment {}: {}", saved.getId(), e.getMessage(), e);
             }
+
+            // Send payment notification
+            try {
+                if (booking.getCustomer() != null && booking.getCustomer().getUser() != null) {
+                    NotificationRequestDTO customerNotification = new NotificationRequestDTO();
+                    customerNotification.setUserId(booking.getCustomer().getUser().getId());
+                    customerNotification.setType(NotificationType.PAYMENT_SUCCESSFUL);
+                    customerNotification.setChannel(NotificationChannel.WEB);
+                    customerNotification.setMessage("Payment of ৳" + saved.getAmount() + " received for booking #" + booking.getId() + ". Thank you!");
+                    notificationService.createNotification(customerNotification);
+                }
+                if (booking.getHotel() != null && booking.getHotel().getOwner() != null && booking.getHotel().getOwner().getUser() != null) {
+                    NotificationRequestDTO ownerNotification = new NotificationRequestDTO();
+                    ownerNotification.setUserId(booking.getHotel().getOwner().getUser().getId());
+                    ownerNotification.setType(NotificationType.PAYMENT_SUCCESSFUL);
+                    ownerNotification.setChannel(NotificationChannel.WEB);
+                    ownerNotification.setMessage("Payment of ৳" + saved.getAmount() + " received for booking #" + booking.getId() + " at " + booking.getHotel().getHotelName());
+                    notificationService.createNotification(ownerNotification);
+                }
+            } catch (Exception ignored) {}
         }
 
         return PaymentMapper.toResponseDTO(saved);
@@ -170,6 +197,19 @@ public class PaymentServiceImpl implements PaymentService {
 
         payment.setStatus(PaymentStatus.REFUNDED);
         Payment saved = paymentRepository.save(payment);
+
+        // Send refund notification
+        try {
+            if (booking.getCustomer() != null && booking.getCustomer().getUser() != null) {
+                NotificationRequestDTO customerNotification = new NotificationRequestDTO();
+                customerNotification.setUserId(booking.getCustomer().getUser().getId());
+                customerNotification.setType(NotificationType.PAYMENT_REFUNDED);
+                customerNotification.setChannel(NotificationChannel.WEB);
+                customerNotification.setMessage("Refund of ৳" + saved.getAmount() + " processed for booking #" + bookingId + ". Amount credited to your wallet.");
+                notificationService.createNotification(customerNotification);
+            }
+        } catch (Exception ignored) {}
+
         return PaymentMapper.toResponseDTO(saved);
     }
 

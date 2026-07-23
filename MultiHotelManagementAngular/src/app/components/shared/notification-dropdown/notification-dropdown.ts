@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { NotificationService, NotificationItem } from '../../../services/notification.service';
+import { AuthService } from '../../../services/auth.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -11,6 +12,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class NotificationDropdown {
   private notificationService = inject(NotificationService);
+  private auth = inject(AuthService);
   isOpen = signal(false);
 
   notifications = toSignal(this.notificationService.notifications$, {
@@ -21,7 +23,12 @@ export class NotificationDropdown {
   toggle() {
     this.isOpen.update((v) => !v);
     if (this.isOpen()) {
-      this.notificationService.loadNotifications();
+      const user = this.auth.getUser();
+      if (user) {
+        this.notificationService.loadNotificationsByRole(user.role);
+      } else {
+        this.notificationService.loadNotifications();
+      }
     }
   }
 

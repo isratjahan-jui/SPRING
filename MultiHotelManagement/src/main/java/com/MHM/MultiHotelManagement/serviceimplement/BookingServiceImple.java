@@ -30,6 +30,10 @@ import com.MHM.MultiHotelManagement.repository.CommissionRepository;
 import com.MHM.MultiHotelManagement.repository.WalletRepository;
 import com.MHM.MultiHotelManagement.repository.WalletTransactionRepository;
 import com.MHM.MultiHotelManagement.service.BookingService;
+import com.MHM.MultiHotelManagement.service.NotificationService;
+import com.MHM.MultiHotelManagement.dto.request.NotificationRequestDTO;
+import com.MHM.MultiHotelManagement.enums.NotificationChannel;
+import com.MHM.MultiHotelManagement.enums.NotificationType;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -62,6 +66,7 @@ public class BookingServiceImple implements BookingService {
     private final CommissionRepository commissionRepository;
     private final WalletRepository walletRepository;
     private final WalletTransactionRepository walletTransactionRepository;
+    private final NotificationService notificationService;
 
     @Value("${image.upload.dir:uploads}")
     private String uploadDir;
@@ -76,7 +81,8 @@ public class BookingServiceImple implements BookingService {
                                PaymentRepository paymentRepository,
                                CommissionRepository commissionRepository,
                                WalletRepository walletRepository,
-                               WalletTransactionRepository walletTransactionRepository) {
+                               WalletTransactionRepository walletTransactionRepository,
+                               NotificationService notificationService) {
         this.bookingRepository = bookingRepository;
         this.customerRepository = customerRepository;
         this.hotelRepository = hotelRepository;
@@ -88,6 +94,7 @@ public class BookingServiceImple implements BookingService {
         this.commissionRepository = commissionRepository;
         this.walletRepository = walletRepository;
         this.walletTransactionRepository = walletTransactionRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -175,6 +182,23 @@ public class BookingServiceImple implements BookingService {
             room.setIsAvailable(false);
         }
         roomRepository.save(room);
+
+        // Send notifications
+        try {
+            NotificationRequestDTO customerNotification = new NotificationRequestDTO();
+            customerNotification.setUserId(customer.getUser().getId());
+            customerNotification.setType(NotificationType.BOOKING_CONFIRMED);
+            customerNotification.setChannel(NotificationChannel.WEB);
+            customerNotification.setMessage("Booking request submitted at " + hotel.getHotelName() + ". Awaiting confirmation. Booking ID: #" + saved.getId());
+            notificationService.createNotification(customerNotification);
+
+            NotificationRequestDTO ownerNotification = new NotificationRequestDTO();
+            ownerNotification.setUserId(hotel.getOwner().getUser().getId());
+            ownerNotification.setType(NotificationType.BOOKING_CONFIRMED);
+            ownerNotification.setChannel(NotificationChannel.WEB);
+            ownerNotification.setMessage("New booking request from " + customer.getCustomerName() + " at " + hotel.getHotelName() + ". Booking ID: #" + saved.getId());
+            notificationService.createNotification(ownerNotification);
+        } catch (Exception ignored) {}
 
         return BookingMapperDTO.toResponseDTO(saved);
     }
@@ -322,6 +346,42 @@ public class BookingServiceImple implements BookingService {
 
         booking.setStatus(newStatus);
         Booking updated = bookingRepository.save(booking);
+
+        // Send notifications based on status change
+        try {
+            String hotelName = booking.getHotel().getHotelName();
+            Long customerUserId = booking.getCustomer().getUser().getId();
+            Long ownerUserId = booking.getHotel().getOwner().getUser().getId();
+
+            switch (newStatus) {
+                case CONFIRMED -> {
+                    sendNotificationToUser(customerUserId, NotificationType.BOOKING_CONFIRMED,
+                            "Your booking at " + hotelName + " has been confirmed. Booking ID: #" + booking.getId());
+                    sendNotificationToUser(ownerUserId, NotificationType.BOOKING_CONFIRMED,
+                            "Booking #" + booking.getId() + " has been confirmed for " + hotelName);
+                }
+                case CANCELLED -> {
+                    sendNotificationToUser(customerUserId, NotificationType.BOOKING_CANCELLED,
+                            "Your booking at " + hotelName + " has been cancelled. Booking ID: #" + booking.getId());
+                    sendNotificationToUser(ownerUserId, NotificationType.BOOKING_CANCELLED,
+                            "Booking #" + booking.getId() + " has been cancelled for " + hotelName);
+                }
+                case CHECKED_IN -> {
+                    sendNotificationToUser(customerUserId, NotificationType.BOOKING_REMINDER,
+                            "Welcome! You have successfully checked in at " + hotelName + ". Booking ID: #" + booking.getId());
+                    sendNotificationToUser(ownerUserId, NotificationType.BOOKING_REMINDER,
+                            "Guest " + booking.getContractPersonName() + " has checked in at " + hotelName);
+                }
+                case CHECKED_OUT -> {
+                    sendNotificationToUser(customerUserId, NotificationType.BOOKING_REMINDER,
+                            "You have successfully checked out from " + hotelName + ". Booking ID: #" + booking.getId());
+                    sendNotificationToUser(ownerUserId, NotificationType.BOOKING_REMINDER,
+                            "Guest " + booking.getContractPersonName() + " has checked out from " + hotelName);
+                }
+                default -> {}
+            }
+        } catch (Exception ignored) {}
+
         return BookingMapperDTO.toResponseDTO(updated);
     }
 
@@ -348,6 +408,16 @@ public class BookingServiceImple implements BookingService {
         booking.setDigitalKey(key);
 
         Booking updated = bookingRepository.save(booking);
+
+        // Send check-in notifications
+        try {
+            String hotelName = booking.getHotel().getHotelName();
+            sendNotificationToUser(booking.getCustomer().getUser().getId(), NotificationType.BOOKING_REMINDER,
+                    "Online check-in successful at " + hotelName + ". Your digital key is: " + key);
+            sendNotificationToUser(booking.getHotel().getOwner().getUser().getId(), NotificationType.BOOKING_REMINDER,
+                    "Guest " + booking.getContractPersonName() + " has completed online check-in at " + hotelName);
+        } catch (Exception ignored) {}
+
         return BookingMapperDTO.toResponseDTO(updated);
     }
 
@@ -371,6 +441,16 @@ public class BookingServiceImple implements BookingService {
         roomRepository.save(room);
 
         Booking updated = bookingRepository.save(booking);
+
+        // Send check-out notifications
+        try {
+            String hotelName = booking.getHotel().getHotelName();
+            sendNotificationToUser(booking.getCustomer().getUser().getId(), NotificationType.BOOKING_REMINDER,
+                    "Express check-out successful from " + hotelName + ". Thank you for staying with us! Booking ID: #" + bookingId);
+            sendNotificationToUser(booking.getHotel().getOwner().getUser().getId(), NotificationType.BOOKING_REMINDER,
+                    "Guest " + booking.getContractPersonName() + " has checked out from " + hotelName);
+        } catch (Exception ignored) {}
+
         return BookingMapperDTO.toResponseDTO(updated);
     }
 
@@ -408,6 +488,16 @@ public class BookingServiceImple implements BookingService {
         roomRepository.save(room);
 
         Booking updated = bookingRepository.save(booking);
+
+        // Send no-show notifications
+        try {
+            String hotelName = booking.getHotel().getHotelName();
+            sendNotificationToUser(booking.getCustomer().getUser().getId(), NotificationType.BOOKING_CANCELLED,
+                    "Your booking at " + hotelName + " has been marked as No-Show. Booking ID: #" + bookingId);
+            sendNotificationToUser(booking.getHotel().getOwner().getUser().getId(), NotificationType.BOOKING_CANCELLED,
+                    "Booking #" + bookingId + " has been marked as No-Show for " + hotelName);
+        } catch (Exception ignored) {}
+
         return BookingMapperDTO.toResponseDTO(updated);
     }
 
@@ -539,6 +629,21 @@ public class BookingServiceImple implements BookingService {
         booking.setCancellationPolicyText(refundNote);
         Booking updated = bookingRepository.save(booking);
 
+        // Send cancellation notifications
+        try {
+            String hotelName = booking.getHotel().getHotelName();
+            Long customerUserId = booking.getCustomer().getUser().getId();
+            Long ownerUserId = booking.getHotel().getOwner().getUser().getId();
+
+            String customerMsg = "Your booking at " + hotelName + " has been cancelled. Booking ID: #" + bookingId;
+            if (refundAmount.compareTo(BigDecimal.ZERO) > 0) {
+                customerMsg += " Refund of ৳" + refundAmount + " has been credited to your wallet.";
+            }
+            sendNotificationToUser(customerUserId, NotificationType.BOOKING_CANCELLED, customerMsg);
+            sendNotificationToUser(ownerUserId, NotificationType.BOOKING_CANCELLED,
+                    "Booking #" + bookingId + " has been cancelled for " + hotelName + ". Refund note: " + refundNote);
+        } catch (Exception ignored) {}
+
         return BookingMapperDTO.toResponseDTO(updated);
     }
 
@@ -561,5 +666,14 @@ public class BookingServiceImple implements BookingService {
         } catch (Exception e) {
             throw new RuntimeException("ID image upload failed: " + e.getMessage());
         }
+    }
+
+    private void sendNotificationToUser(Long userId, NotificationType type, String message) {
+        NotificationRequestDTO dto = new NotificationRequestDTO();
+        dto.setUserId(userId);
+        dto.setType(type);
+        dto.setChannel(NotificationChannel.WEB);
+        dto.setMessage(message);
+        notificationService.createNotification(dto);
     }
 }

@@ -5,6 +5,9 @@ import com.MHM.MultiHotelManagement.dto.request.NotificationRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.NotificationResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Notification;
 import com.MHM.MultiHotelManagement.entity.User;
+import com.MHM.MultiHotelManagement.enums.NotificationChannel;
+import com.MHM.MultiHotelManagement.enums.NotificationType;
+import com.MHM.MultiHotelManagement.enums.Role;
 import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.repository.NotificationRepository;
 import com.MHM.MultiHotelManagement.repository.UserRepository;
@@ -14,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -75,5 +79,65 @@ public class NotificationServiceImpl implements NotificationService {
                 .stream()
                 .map(NotificationMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<NotificationResponseDTO> getNotificationsByUserAndRole(Long userId, Role role) {
+        return notificationRepository.findByUser_IdAndUser_Role(userId, role)
+                .stream()
+                .map(NotificationMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<NotificationResponseDTO> getUnreadByUserAndRole(Long userId, Role role) {
+        return notificationRepository.findByUser_IdAndUser_RoleAndReadStatus(userId, role, false)
+                .stream()
+                .map(NotificationMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public List<NotificationResponseDTO> broadcastToRole(Role role, NotificationRequestDTO dto) {
+        List<User> users = userRepository.findByRole(role);
+        List<NotificationResponseDTO> responses = new ArrayList<>();
+
+        for (User user : users) {
+            Notification notification = new Notification();
+            notification.setMessage(dto.getMessage());
+            notification.setType(dto.getType());
+            notification.setChannel(dto.getChannel());
+            notification.setUser(user);
+            notification.setReadStatus(false);
+
+            Notification saved = notificationRepository.save(notification);
+            NotificationResponseDTO response = NotificationMapper.toDTO(saved);
+            sseService.sendNotification(user.getId(), response);
+            responses.add(response);
+        }
+
+        return responses;
+    }
+
+    @Override
+    @Transactional
+    public void sendPromotionalNotification(String message, Long hotelId) {
+        List<User> customers = userRepository.findByRole(Role.CUSTOMER);
+
+        for (User customer : customers) {
+            Notification notification = new Notification();
+            notification.setMessage(message);
+            notification.setType(NotificationType.PROMOTIONAL);
+            notification.setChannel(NotificationChannel.WEB);
+            notification.setUser(customer);
+            notification.setReadStatus(false);
+
+            Notification saved = notificationRepository.save(notification);
+            NotificationResponseDTO response = NotificationMapper.toDTO(saved);
+            sseService.sendNotification(customer.getId(), response);
+        }
     }
 }

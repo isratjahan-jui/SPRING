@@ -9,6 +9,7 @@ import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.repository.CouponRepository;
 import com.MHM.MultiHotelManagement.repository.HotelRepository;
 import com.MHM.MultiHotelManagement.service.CouponService;
+import com.MHM.MultiHotelManagement.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ public class CouponServiceImpl implements CouponService {
 
     private final CouponRepository couponRepository;
     private final HotelRepository hotelRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -39,6 +41,17 @@ public class CouponServiceImpl implements CouponService {
         coupon.setActive(true);
 
         Coupon saved = couponRepository.save(coupon);
+
+        // Send promotional notification to all customers
+        try {
+            String discountText = dto.getDiscountPercent() != null && dto.getDiscountPercent() > 0
+                    ? dto.getDiscountPercent() + "% off"
+                    : "৳" + dto.getDiscountAmount() + " off";
+            String message = "New coupon available at " + hotel.getHotelName() + "! Use code " + dto.getCode()
+                    + " for " + discountText + ". Valid until " + dto.getValidUntil();
+            notificationService.sendPromotionalNotification(message, dto.getHotelId());
+        } catch (Exception ignored) {}
+
         return CouponMapper.toDTO(saved);
     }
 

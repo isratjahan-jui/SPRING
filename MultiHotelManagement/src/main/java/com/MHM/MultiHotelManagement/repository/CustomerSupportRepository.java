@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CustomerSupportRepository extends JpaRepository<CustomerSupport, Long> {
@@ -17,6 +18,8 @@ public interface CustomerSupportRepository extends JpaRepository<CustomerSupport
         SELECT cs FROM CustomerSupport cs
         LEFT JOIN FETCH cs.customer c
         LEFT JOIN FETCH cs.agent a
+        LEFT JOIN FETCH cs.hotel h
+        LEFT JOIN FETCH cs.replies
         WHERE c.id = :customerId
     """)
     List<CustomerSupport> findByCustomer_Id(@Param("customerId") Long customerId);
@@ -25,9 +28,40 @@ public interface CustomerSupportRepository extends JpaRepository<CustomerSupport
         SELECT cs FROM CustomerSupport cs
         LEFT JOIN FETCH cs.customer c
         LEFT JOIN FETCH cs.agent a
+        LEFT JOIN FETCH cs.hotel h
+        LEFT JOIN FETCH cs.replies
         WHERE a.id = :agentId
     """)
     List<CustomerSupport> findByAgent_Id(@Param("agentId") Long agentId);
+
+    @Query("""
+        SELECT cs FROM CustomerSupport cs
+        LEFT JOIN FETCH cs.customer c
+        LEFT JOIN FETCH cs.agent a
+        LEFT JOIN FETCH cs.hotel h
+        LEFT JOIN FETCH cs.replies
+        WHERE h.id = :hotelId
+    """)
+    List<CustomerSupport> findByHotel_Id(@Param("hotelId") Long hotelId);
+
+    @Query("""
+        SELECT cs FROM CustomerSupport cs
+        LEFT JOIN FETCH cs.customer c
+        LEFT JOIN FETCH cs.agent a
+        LEFT JOIN FETCH cs.hotel h
+        LEFT JOIN FETCH cs.replies
+    """)
+    List<CustomerSupport> findAllWithDetails();
+
+    @Query("""
+        SELECT cs FROM CustomerSupport cs
+        LEFT JOIN FETCH cs.customer c
+        LEFT JOIN FETCH cs.agent a
+        LEFT JOIN FETCH cs.hotel h
+        LEFT JOIN FETCH cs.replies
+        WHERE cs.id = :id
+    """)
+    Optional<CustomerSupport> findByIdWithDetails(@Param("id") Long id);
 
     List<CustomerSupport> findByStatus(CustomerSupportTicketStatus status);
 

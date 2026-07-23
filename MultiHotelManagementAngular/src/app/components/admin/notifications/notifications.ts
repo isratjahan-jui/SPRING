@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environments';
 import { NotificationItem } from '../../../services/notification.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-admin-notifications',
@@ -14,6 +15,7 @@ import { NotificationItem } from '../../../services/notification.service';
 export class AdminNotifications implements OnInit {
   private http = inject(HttpClient);
   private cdr = inject(ChangeDetectorRef);
+  private auth = inject(AuthService);
   private API_URL = environment.apiUrl + 'notifications';
 
   notifications: NotificationItem[] = [];
@@ -45,7 +47,32 @@ export class AdminNotifications implements OnInit {
 
   channels = ['EMAIL', 'SMS', 'PUSH', 'WEB', 'SYSTEM'];
 
-  ngOnInit() {}
+  ngOnInit() {
+    const user = this.auth.getUser();
+    if (user) {
+      this.loadByRole(user.role);
+    }
+  }
+
+  loadByRole(role: string) {
+    const user = this.auth.getUser();
+    if (!user) return;
+    this.loading = true;
+    this.http
+      .get<NotificationItem[]>(`${this.API_URL}/user/${user.userId}/role/${role}`)
+      .subscribe({
+        next: (data) => {
+          this.notifications = data;
+          this.loading = false;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.notifications = [];
+          this.loading = false;
+          this.cdr.markForCheck();
+        },
+      });
+  }
 
   openCreate() {
     this.form = { userId: null, message: '', type: 'GENERAL', channel: 'WEB' };

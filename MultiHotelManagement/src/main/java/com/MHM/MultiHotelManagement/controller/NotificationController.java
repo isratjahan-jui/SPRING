@@ -2,6 +2,7 @@ package com.MHM.MultiHotelManagement.controller;
 
 import com.MHM.MultiHotelManagement.dto.request.NotificationRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.NotificationResponseDTO;
+import com.MHM.MultiHotelManagement.enums.Role;
 import com.MHM.MultiHotelManagement.service.NotificationService;
 import com.MHM.MultiHotelManagement.service.SseService;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,34 @@ public class NotificationController {
     @GetMapping("/user/{userId}/unread")
     public ResponseEntity<List<NotificationResponseDTO>> getUnread(@PathVariable Long userId) {
         return ResponseEntity.ok(notificationService.getUnreadNotifications(userId));
+    }
+
+    @GetMapping("/user/{userId}/role/{role}")
+    public ResponseEntity<List<NotificationResponseDTO>> getByUserAndRole(
+            @PathVariable Long userId,
+            @PathVariable Role role) {
+        return ResponseEntity.ok(notificationService.getNotificationsByUserAndRole(userId, role));
+    }
+
+    @GetMapping("/user/{userId}/role/{role}/unread")
+    public ResponseEntity<List<NotificationResponseDTO>> getUnreadByUserAndRole(
+            @PathVariable Long userId,
+            @PathVariable Role role) {
+        return ResponseEntity.ok(notificationService.getUnreadByUserAndRole(userId, role));
+    }
+
+    @PostMapping("/broadcast")
+    public ResponseEntity<List<NotificationResponseDTO>> broadcast(
+            @RequestParam Role role,
+            @RequestBody NotificationRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(notificationService.broadcastToRole(role, dto));
+    }
+
+    @PostMapping("/promotional")
+    public ResponseEntity<Void> sendPromotional(@RequestBody NotificationRequestDTO dto) {
+        notificationService.sendPromotionalNotification(dto.getMessage(), null);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping(value = "/subscribe/{userId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

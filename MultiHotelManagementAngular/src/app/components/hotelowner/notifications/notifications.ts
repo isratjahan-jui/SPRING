@@ -17,6 +17,7 @@ export class OwnerNotifications implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.notificationService.connect();
+    this.notificationService.loadNotificationsByRole('HOTEL_OWNER');
     this.notificationService.notifications$.subscribe((data) => {
       this.notifications = data;
       this.loading = false;

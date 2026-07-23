@@ -11,6 +11,7 @@ import com.MHM.MultiHotelManagement.repository.DealsRepository;
 import com.MHM.MultiHotelManagement.repository.HotelRepository;
 import com.MHM.MultiHotelManagement.repository.RoomRepository;
 import com.MHM.MultiHotelManagement.service.DealsService;
+import com.MHM.MultiHotelManagement.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ public class DealsServiceImpl implements DealsService {
     private final DealsRepository dealsRepository;
     private final HotelRepository hotelRepository;
     private final RoomRepository roomRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -51,6 +53,17 @@ public class DealsServiceImpl implements DealsService {
         deals.setIsActive(true);
 
         Deals saved = dealsRepository.save(deals);
+
+        // Send promotional notification to all customers
+        try {
+            String discountText = dto.getDiscountPercent() != null && dto.getDiscountPercent() > 0
+                    ? dto.getDiscountPercent() + "% off"
+                    : "৳" + dto.getDiscountAmount() + " off";
+            String message = "New deal at " + hotel.getHotelName() + "! " + dto.getDealTitle()
+                    + " - " + discountText + ". Valid from " + dto.getStartDate() + " to " + dto.getEndDate();
+            notificationService.sendPromotionalNotification(message, dto.getHotelId());
+        } catch (Exception ignored) {}
+
         return DealsMapper.toDTO(saved);
     }
 

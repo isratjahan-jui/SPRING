@@ -2,12 +2,15 @@ package com.MHM.MultiHotelManagement.entity;
 
 import com.MHM.MultiHotelManagement.enums.CustomerSupportTicketPriority;
 import com.MHM.MultiHotelManagement.enums.CustomerSupportTicketStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "support_tickets")
@@ -20,22 +23,38 @@ public class CustomerSupport {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String subject;          // সমস্যার শিরোনাম
-    private String description;      // সমস্যার বিস্তারিত
+    private String subject;
+    private String description;
 
     @Enumerated(EnumType.STRING)
-    private CustomerSupportTicketStatus status;     // PENDING, IN_PROGRESS, RESOLVED, CLOSED
+    private CustomerSupportTicketStatus status;
 
     @Enumerated(EnumType.STRING)
-    private CustomerSupportTicketPriority priority; // LOW, MEDIUM, HIGH, URGENT
+    private CustomerSupportTicketPriority priority;
+
+    private String category;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;       // কোন গ্রাহক ticket দিয়েছে
+    private Customer customer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hotel_id")
+    private Hotel hotel;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agent_id")
-    private User agent;              // কোন agent ticket handle করছে
+    private User agent;
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<SupportReply> replies = new ArrayList<>();
+
+    private Boolean escalated = false;
+
+    private LocalDateTime firstResponseAt;
+
+    private LocalDateTime resolvedAt;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -50,4 +69,4 @@ public class CustomerSupport {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-    }
+}

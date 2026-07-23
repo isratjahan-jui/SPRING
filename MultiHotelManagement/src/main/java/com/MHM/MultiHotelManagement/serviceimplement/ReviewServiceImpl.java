@@ -1,14 +1,18 @@
 package com.MHM.MultiHotelManagement.serviceimplement;
 
 import com.MHM.MultiHotelManagement.dto.mapper.ReviewMapperDTO;
+import com.MHM.MultiHotelManagement.dto.request.NotificationRequestDTO;
 import com.MHM.MultiHotelManagement.dto.request.ReviewRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.ReviewResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Customer;
 import com.MHM.MultiHotelManagement.entity.Hotel;
 import com.MHM.MultiHotelManagement.entity.Review;
+import com.MHM.MultiHotelManagement.enums.NotificationChannel;
+import com.MHM.MultiHotelManagement.enums.NotificationType;
 import com.MHM.MultiHotelManagement.repository.CustomerRepository;
 import com.MHM.MultiHotelManagement.repository.HotelRepository;
 import com.MHM.MultiHotelManagement.repository.ReviewRepository;
+import com.MHM.MultiHotelManagement.service.NotificationService;
 import com.MHM.MultiHotelManagement.service.ReviewService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -22,13 +26,16 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final HotelRepository hotelRepository;
     private final CustomerRepository customerRepository;
+    private final NotificationService notificationService;
 
     public ReviewServiceImpl(ReviewRepository reviewRepository,
                              HotelRepository hotelRepository,
-                             CustomerRepository customerRepository) {
+                             CustomerRepository customerRepository,
+                             NotificationService notificationService) {
         this.reviewRepository = reviewRepository;
         this.hotelRepository = hotelRepository;
         this.customerRepository = customerRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -49,6 +56,18 @@ public class ReviewServiceImpl implements ReviewService {
         review.setCustomer(customer);
 
         Review saved = reviewRepository.save(review);
+
+        // Send review received notification to hotel owner
+        try {
+            NotificationRequestDTO ownerNotification = new NotificationRequestDTO();
+            ownerNotification.setUserId(hotel.getOwner().getUser().getId());
+            ownerNotification.setType(NotificationType.REVIEW_RECEIVED);
+            ownerNotification.setChannel(NotificationChannel.WEB);
+            ownerNotification.setMessage("New review received for " + hotel.getHotelName()
+                    + " from " + customer.getCustomerName() + ". Rating: " + dto.getRating() + "/5");
+            notificationService.createNotification(ownerNotification);
+        } catch (Exception ignored) {}
+
         return ReviewMapperDTO.toResponseDTO(saved);
     }
 

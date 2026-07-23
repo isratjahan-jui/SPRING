@@ -10,6 +10,8 @@ public class CustomerSupportRequestDTO {
     private String description;
     private CustomerSupportTicketStatus status;
     private CustomerSupportTicketPriority priority;
+    private String category;
     private Long customerId;
+    private Long hotelId;
     private Long agentId;
 }

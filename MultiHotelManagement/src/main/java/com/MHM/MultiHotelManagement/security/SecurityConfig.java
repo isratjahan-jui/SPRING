@@ -150,7 +150,8 @@ public class SecurityConfig {
 
                         // ── Admin + Owner endpoints ───────────────────────
                         .requestMatchers("/api/commissions/**").hasAnyRole("ADMIN", "HOTEL_OWNER")
-                        .requestMatchers("/api/support/**").hasAnyRole("ADMIN", "CUSTOMER")
+                        .requestMatchers("/api/support/**").hasAnyRole("ADMIN", "CUSTOMER", "HOTEL_OWNER")
+                        .requestMatchers("/api/support-replies/**").hasAnyRole("ADMIN", "CUSTOMER", "HOTEL_OWNER")
                         .requestMatchers("/api/notifications/**").hasAnyRole("ADMIN", "CUSTOMER", "HOTEL_OWNER")
 
                         // ── All other requests need authentication ────────

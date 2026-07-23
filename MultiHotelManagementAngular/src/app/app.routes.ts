@@ -55,6 +55,7 @@ import { OwnerWallet } from './components/hotelowner/wallet/wallet';
 import { OwnerNotifications } from './components/hotelowner/notifications/notifications';
 import { OwnerReports } from './components/hotelowner/reports/reports';
 import { OwnerProfile } from './components/hotelowner/profile/profile';
+import { OwnerSupport } from './components/hotelowner/support/support';
 import { CustomerDeals } from './components/customer/deals/deals';
 import { CustomerCoupons } from './components/customer/coupons/coupons';
 import { CustomerCheckinCheckout } from './components/customer/checkin-checkout/checkin-checkout';
@@ -205,6 +206,11 @@ export const routes: Routes = [
   {
     path: 'owner/notifications',
     component: OwnerNotifications,
+    canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])],
+  },
+  {
+    path: 'owner/support',
+    component: OwnerSupport,
     canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])],
   },
   {

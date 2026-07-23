@@ -41,6 +41,10 @@ public class DatabaseMigration implements CommandLineRunner {
         dropUniqueConstraintsOnColumn("invoices", "booking_id");
         dropUniqueConstraintsOnColumn("invoices", "payment_id");
 
+        addColumnIfNotExists("support_tickets", "escalated", "BOOLEAN DEFAULT FALSE");
+        addColumnIfNotExists("support_tickets", "first_response_at", "DATETIME NULL");
+        addColumnIfNotExists("support_tickets", "resolved_at", "DATETIME NULL");
+
         generateMissingInvoices();
     }
 
@@ -117,6 +121,22 @@ public class DatabaseMigration implements CommandLineRunner {
             }
         } catch (Exception e) {
             log.debug("No unique constraints to drop on {}.{}", table, column);
+        }
+    }
+
+    private void addColumnIfNotExists(String table, String column, String definition) {
+        try (Connection conn = dataSource.getConnection()) {
+            DatabaseMetaData meta = conn.getMetaData();
+            ResultSet rs = meta.getColumns(null, null, table, column);
+            if (!rs.next()) {
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.execute("ALTER TABLE " + table + " ADD COLUMN " + column + " " + definition);
+                    log.info("Added column {} to table {}", column, table);
+                }
+            }
+            rs.close();
+        } catch (Exception e) {
+            log.debug("Column {} may already exist on {}", column, table);
         }
     }
 }
