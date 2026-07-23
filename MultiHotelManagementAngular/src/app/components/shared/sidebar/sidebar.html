@@ -4,6 +4,11 @@
     <span class="brand-text">TripNest</span>
   </div>
 
+   <div class="sidebar-footer">
+    <a routerLink="/home" class="sidebar-footer-link">
+      <span class="nav-icon">&#8592;</span> Back to Site
+    </a>
+  </div>
   <nav class="sidebar-nav">
     @if (userRole === 'ADMIN') {
       <div class="nav-section">Main</div>
@@ -150,9 +155,5 @@
     }
   </nav>
 
-  <div class="sidebar-footer">
-    <a routerLink="/home" class="sidebar-footer-link">
-      <span class="nav-icon">&#8592;</span> Back to Site
-    </a>
-  </div>
+ 
 </div>

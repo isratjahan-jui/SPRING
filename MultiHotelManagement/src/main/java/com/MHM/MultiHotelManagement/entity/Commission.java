@@ -34,6 +34,10 @@ public class Commission {
     @JoinColumn(name = "payment_id", nullable = false)
     private Payment payment;
 
+//    @OneToOne
+//    @JoinColumn(name = "payment_id", nullable = true)
+//    private Payment payment;
+
     // Commission ↔ ExtraService (Optional)
     @OneToOne
     @JoinColumn(name = "extra_service_id", nullable = true)

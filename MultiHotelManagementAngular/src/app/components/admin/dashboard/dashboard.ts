@@ -8,7 +8,7 @@ import { BookingService } from '../../../services/booking.service';
 import { CommissionService } from '../../../services/commission.service';
 import { RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -38,13 +38,29 @@ export class AdminDashboard implements OnInit {
   ngOnInit() {
     const user = this.auth.getUser();
     this.userName = user?.name || user?.email || 'Admin';
+    console.log('[AdminDashboard] user:', user);
 
     forkJoin({
-      owners: this.ownerService.getAllOwners().pipe(catchError(() => of([]))),
-      customers: this.customerService.getAllCustomers().pipe(catchError(() => of([]))),
-      hotels: this.hotelService.getAll().pipe(catchError(() => of([]))),
-      bookings: this.bookingService.getAll().pipe(catchError(() => of([]))),
-      commission: this.commissionService.getAdminTotal().pipe(catchError(() => of(0))),
+      owners: this.ownerService.getAllOwners().pipe(
+        tap(data => console.log('[AdminDashboard] owners:', data.length)),
+        catchError(err => { console.error('[AdminDashboard] owners error:', err.status, err.message); return of([]); })
+      ),
+      customers: this.customerService.getAllCustomers().pipe(
+        tap(data => console.log('[AdminDashboard] customers:', data.length)),
+        catchError(err => { console.error('[AdminDashboard] customers error:', err.status, err.message); return of([]); })
+      ),
+      hotels: this.hotelService.getAll().pipe(
+        tap(data => console.log('[AdminDashboard] hotels:', data.length)),
+        catchError(err => { console.error('[AdminDashboard] hotels error:', err.status, err.message); return of([]); })
+      ),
+      bookings: this.bookingService.getAll().pipe(
+        tap(data => console.log('[AdminDashboard] bookings:', data.length)),
+        catchError(err => { console.error('[AdminDashboard] bookings error:', err.status, err.message); return of([]); })
+      ),
+      commission: this.commissionService.getAdminTotal().pipe(
+        tap(data => console.log('[AdminDashboard] commission:', data)),
+        catchError(err => { console.error('[AdminDashboard] commission error:', err.status, err.message); return of(0); })
+      ),
     }).subscribe({
       next: (result) => {
         this.ownerCount = result.owners.length;

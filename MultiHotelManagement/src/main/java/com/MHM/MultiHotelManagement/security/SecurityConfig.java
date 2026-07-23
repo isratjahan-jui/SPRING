@@ -196,6 +196,15 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
+        // Permissive rule — SSLCommerz gateway callbacks (no credentials)
+        // Must be registered BEFORE the catch-all /** rule
+        CorsConfiguration sslCommerz = new CorsConfiguration();
+        sslCommerz.setAllowedOriginPatterns(List.of("*"));
+        sslCommerz.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
+        sslCommerz.setAllowedHeaders(List.of("*"));
+        sslCommerz.setAllowCredentials(false);
+        source.registerCorsConfiguration("/api/payments/sslcommerz/**", sslCommerz);
+
         // Strict rule — Angular frontend only (credentialed)
         CorsConfiguration strict = new CorsConfiguration();
         strict.setAllowedOrigins(List.of(
@@ -207,14 +216,6 @@ public class SecurityConfig {
         strict.setAllowCredentials(true);
         strict.setExposedHeaders(List.of("Authorization"));
         source.registerCorsConfiguration("/**", strict);
-
-        // Permissive rule — SSLCommerz gateway callbacks (no credentials)
-        CorsConfiguration sslCommerz = new CorsConfiguration();
-        sslCommerz.setAllowedOriginPatterns(List.of("*"));
-        sslCommerz.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
-        sslCommerz.setAllowedHeaders(List.of("*"));
-        sslCommerz.setAllowCredentials(false);
-        source.registerCorsConfiguration("/api/payments/sslcommerz/**", sslCommerz);
 
         return source;
     }
