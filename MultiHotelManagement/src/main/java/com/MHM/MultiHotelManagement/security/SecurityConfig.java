@@ -104,8 +104,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/payments/sslcommerz/cancel").permitAll()
                         .requestMatchers("/api/payments/sslcommerz/ipn").permitAll()
 
-                        // Static resources
+                        // Static resources & browser probes
                         .requestMatchers("/favicon.ico").permitAll()
+                        .requestMatchers("/.well-known/**").permitAll()
 
                         // ── Hotel Owner endpoints ─────────────────────────
                         .requestMatchers(HttpMethod.POST, "/api/hotels").hasRole("HOTEL_OWNER")
@@ -193,21 +194,28 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:4200",
-                "http://192.168.88.250:4200",
-                "https://sandbox.sslcommerz.com",
-                "https://sslcommerz.com"
-        ));
-        configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT","PATCH",  "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
-        configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("Authorization"));
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+
+        // Strict rule — Angular frontend only (credentialed)
+        CorsConfiguration strict = new CorsConfiguration();
+        strict.setAllowedOrigins(List.of(
+                "http://localhost:4200",
+                "http://192.168.88.250:4200"
+        ));
+        strict.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        strict.setAllowedHeaders(List.of("*"));
+        strict.setAllowCredentials(true);
+        strict.setExposedHeaders(List.of("Authorization"));
+        source.registerCorsConfiguration("/**", strict);
+
+        // Permissive rule — SSLCommerz gateway callbacks (no credentials)
+        CorsConfiguration sslCommerz = new CorsConfiguration();
+        sslCommerz.setAllowedOriginPatterns(List.of("*"));
+        sslCommerz.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
+        sslCommerz.setAllowedHeaders(List.of("*"));
+        sslCommerz.setAllowCredentials(false);
+        source.registerCorsConfiguration("/api/payments/sslcommerz/**", sslCommerz);
+
         return source;
     }
 

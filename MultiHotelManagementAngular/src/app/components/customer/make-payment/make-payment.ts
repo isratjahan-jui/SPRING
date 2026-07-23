@@ -48,18 +48,18 @@ export class MakePayment implements OnInit {
       icon: '🔒',
       description: 'Pay via SSLCommerz secure gateway (bKash, Nagad, Rocket, Cards)',
     },
-    {
-      id: 'BKASH',
-      label: 'bKash',
-      icon: '💳',
-      description: 'Send money to our bKash merchant number',
-    },
-    {
-      id: 'NAGAD',
-      label: 'Nagad',
-      icon: '💳',
-      description: 'Send money to our Nagad merchant number',
-    },
+    // {
+    //   id: 'BKASH',
+    //   label: 'bKash',
+    //   icon: '💳',
+    //   description: 'Send money to our bKash merchant number',
+    // },
+    // {
+    //   id: 'NAGAD',
+    //   label: 'Nagad',
+    //   icon: '💳',
+    //   description: 'Send money to our Nagad merchant number',
+    // },
   ];
 
   ngOnInit() {

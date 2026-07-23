@@ -16,7 +16,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payments")
-@CrossOrigin("*")
 @Slf4j
 public class PaymentController {
 
@@ -92,7 +91,7 @@ public class PaymentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-
+    @PreAuthorize("hasRole('CUSTOMER')")
     @RequestMapping(value = "/sslcommerz/success", method = {RequestMethod.POST, RequestMethod.GET})
     public void sslCommerzSuccess(jakarta.servlet.http.HttpServletRequest request,
                                   jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
