@@ -27,4 +27,5 @@ public interface BookingService {
     BookingResponseDTO markNoShow(Long bookingId);
     BookingResponseDTO addExtraCharges(Long bookingId, double amount);
     BookingResponseDTO cancelBooking(Long bookingId);
+    BookingResponseDTO rebook(Long oldBookingId, BookingRequestDTO dto);
 }

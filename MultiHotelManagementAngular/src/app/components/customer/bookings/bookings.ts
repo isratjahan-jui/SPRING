@@ -19,10 +19,28 @@ export class CustomerBookings implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   bookings: Booking[] = [];
+  allBookings: Booking[] = [];
   loading = true;
   cancellingId: number | null = null;
   showCancelModal = false;
   cancelTargetId: number | null = null;
+  filterStatus = '';
+
+  get activeBookings(): Booking[] {
+    return this.allBookings.filter(
+      (b) => b.status === 'PENDING' || b.status === 'CONFIRMED' || b.status === 'CHECKED_IN',
+    );
+  }
+
+  get expiredBookings(): Booking[] {
+    return this.allBookings.filter((b) => b.status === 'EXPIRED');
+  }
+
+  get completedBookings(): Booking[] {
+    return this.allBookings.filter(
+      (b) => b.status === 'CHECKED_OUT' || b.status === 'CANCELLED' || b.status === 'NO_SHOW',
+    );
+  }
 
   ngOnInit() {
     const userId = this.auth.getUser()?.userId;
@@ -32,7 +50,8 @@ export class CustomerBookings implements OnInit {
           if (customer.id) {
             this.bookingService.getByCustomer(customer.id).subscribe({
               next: (data) => {
-                this.bookings = data;
+                this.allBookings = data;
+                this.filterByStatus();
                 this.loading = false;
                 this.cdr.markForCheck();
               },
@@ -64,6 +83,15 @@ export class CustomerBookings implements OnInit {
   closeCancelModal() {
     this.showCancelModal = false;
     this.cancelTargetId = null;
+  }
+
+  filterByStatus() {
+    if (!this.filterStatus) {
+      this.bookings = this.allBookings;
+    } else {
+      this.bookings = this.allBookings.filter((b) => b.status === this.filterStatus);
+    }
+    this.cdr.markForCheck();
   }
 
   confirmCancel() {

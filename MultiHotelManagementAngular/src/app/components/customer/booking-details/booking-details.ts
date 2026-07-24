@@ -266,6 +266,10 @@ export class BookingDetails implements OnInit, OnDestroy {
         return 'bg-secondary';
       case 'CANCELLED':
         return 'bg-danger';
+      case 'NO_SHOW':
+        return 'bg-dark';
+      case 'EXPIRED':
+        return 'bg-orange text-white';
       default:
         return 'bg-light text-dark';
     }

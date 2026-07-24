@@ -54,7 +54,10 @@
                 <span
                   class="badge"
                   [class.bg-success]="c.commissionStatus === 'PAID'"
-                  [class.bg-warning]="c.commissionStatus !== 'PAID'"
+                  [class.bg-danger]="c.commissionStatus === 'CANCELLED'"
+                  [class.bg-warning]="
+                    c.commissionStatus !== 'PAID' && c.commissionStatus !== 'CANCELLED'
+                  "
                 >
                   {{ c.commissionStatus || 'PENDING' }}
                 </span>

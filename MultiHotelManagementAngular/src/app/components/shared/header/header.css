@@ -4,8 +4,8 @@
   justify-content: space-between;
   padding: 0 24px;
   height: 56px;
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-light);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -13,7 +13,7 @@
 .page-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 .header-right {
   display: flex;
@@ -29,7 +29,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: var(--primary);
   color: #fff;
   display: flex;
   align-items: center;
@@ -49,27 +49,27 @@
 .user-name {
   font-size: 13px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 .user-pill {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--bg-hover);
+  border: 1px solid var(--border-light);
   border-radius: 20px;
   padding: 4px 12px 4px 4px;
   cursor: pointer;
   transition: background 0.2s;
 }
 .user-pill:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--bg-active);
 }
 .user-avatar-sm {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: var(--primary);
   color: #fff;
   display: flex;
   align-items: center;
@@ -79,7 +79,7 @@
 }
 .user-email {
   font-size: 13px;
-  color: #e5e7eb;
+  color: var(--text-secondary);
   max-width: 160px;
   overflow: hidden;
   text-overflow: ellipsis;

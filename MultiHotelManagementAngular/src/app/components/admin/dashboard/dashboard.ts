@@ -32,6 +32,8 @@ export class AdminDashboard implements OnInit {
   pendingHotelCount = 0;
   rejectedHotelCount = 0;
   totalBookings = 0;
+  expiredBookings = 0;
+  noShowBookings = 0;
   totalCommission = 0;
   loading = true;
 
@@ -42,24 +44,39 @@ export class AdminDashboard implements OnInit {
 
     forkJoin({
       owners: this.ownerService.getAllOwners().pipe(
-        tap(data => console.log('[AdminDashboard] owners:', data.length)),
-        catchError(err => { console.error('[AdminDashboard] owners error:', err.status, err.message); return of([]); })
+        tap((data) => console.log('[AdminDashboard] owners:', data.length)),
+        catchError((err) => {
+          console.error('[AdminDashboard] owners error:', err.status, err.message);
+          return of([]);
+        }),
       ),
       customers: this.customerService.getAllCustomers().pipe(
-        tap(data => console.log('[AdminDashboard] customers:', data.length)),
-        catchError(err => { console.error('[AdminDashboard] customers error:', err.status, err.message); return of([]); })
+        tap((data) => console.log('[AdminDashboard] customers:', data.length)),
+        catchError((err) => {
+          console.error('[AdminDashboard] customers error:', err.status, err.message);
+          return of([]);
+        }),
       ),
       hotels: this.hotelService.getAll().pipe(
-        tap(data => console.log('[AdminDashboard] hotels:', data.length)),
-        catchError(err => { console.error('[AdminDashboard] hotels error:', err.status, err.message); return of([]); })
+        tap((data) => console.log('[AdminDashboard] hotels:', data.length)),
+        catchError((err) => {
+          console.error('[AdminDashboard] hotels error:', err.status, err.message);
+          return of([]);
+        }),
       ),
       bookings: this.bookingService.getAll().pipe(
-        tap(data => console.log('[AdminDashboard] bookings:', data.length)),
-        catchError(err => { console.error('[AdminDashboard] bookings error:', err.status, err.message); return of([]); })
+        tap((data) => console.log('[AdminDashboard] bookings:', data.length)),
+        catchError((err) => {
+          console.error('[AdminDashboard] bookings error:', err.status, err.message);
+          return of([]);
+        }),
       ),
       commission: this.commissionService.getAdminTotal().pipe(
-        tap(data => console.log('[AdminDashboard] commission:', data)),
-        catchError(err => { console.error('[AdminDashboard] commission error:', err.status, err.message); return of(0); })
+        tap((data) => console.log('[AdminDashboard] commission:', data)),
+        catchError((err) => {
+          console.error('[AdminDashboard] commission error:', err.status, err.message);
+          return of(0);
+        }),
       ),
     }).subscribe({
       next: (result) => {
@@ -71,6 +88,8 @@ export class AdminDashboard implements OnInit {
         ).length;
         this.rejectedHotelCount = result.hotels.filter((h) => h.status === 'REJECTED').length;
         this.totalBookings = result.bookings.length;
+        this.expiredBookings = result.bookings.filter((b: any) => b.status === 'EXPIRED').length;
+        this.noShowBookings = result.bookings.filter((b: any) => b.status === 'NO_SHOW').length;
         this.totalCommission = result.commission;
         this.loading = false;
         this.cdr.markForCheck();

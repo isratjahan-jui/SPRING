@@ -10,10 +10,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
   color: #fff;
   padding: 24px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
 }
 .profile-info h4 {
   margin: 0 0 4px;
@@ -28,7 +28,7 @@
 }
 .profile-card .btn:hover {
   background: #fff;
-  color: #667eea;
+  color: var(--primary);
 }
 
 /* Stats Grid */
@@ -39,9 +39,9 @@
   margin-bottom: 32px;
 }
 .stat-card {
-  background: #fff;
-  border: 1px solid #dee2e6;
-  border-radius: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
   padding: 20px;
   display: flex;
   align-items: center;
@@ -52,12 +52,12 @@
 }
 .stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
 }
 .stat-icon {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -67,14 +67,14 @@
 .stat-info h3 {
   margin: 0;
   font-size: 13px;
-  color: #6c757d;
+  color: var(--text-muted);
   font-weight: 500;
 }
 .stat-value {
   margin: 4px 0 0;
   font-size: 24px;
   font-weight: 700;
-  color: #212529;
+  color: var(--text-primary);
 }
 
 /* Quick Actions */
@@ -92,19 +92,19 @@
   align-items: center;
   gap: 8px;
   padding: 20px 12px;
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
   text-decoration: none;
-  color: #212529;
+  color: var(--text-primary);
   font-weight: 500;
   font-size: 14px;
   transition: all 0.2s;
 }
 .action-card:hover {
-  background: #667eea;
+  background: var(--primary);
   color: #fff;
-  border-color: #667eea;
+  border-color: var(--primary);
   transform: translateY(-2px);
 }
 .action-icon {
@@ -118,8 +118,8 @@
 
 /* Empty State */
 .empty-state {
-  background: #f8f9fa;
-  border-radius: 12px;
+  background: var(--bg-page);
+  border-radius: var(--radius-lg);
   padding: 48px 24px;
 }
 

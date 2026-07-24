@@ -96,10 +96,20 @@
                                 ? 'secondary'
                                 : br.bookingStatus === 'CANCELLED'
                                   ? 'danger'
-                                  : 'warning'
+                                  : br.bookingStatus === 'NO_SHOW'
+                                    ? 'dark'
+                                    : br.bookingStatus === 'EXPIRED'
+                                      ? 'bg-orange text-white'
+                                      : 'warning'
                         }}"
                       >
-                        {{ br.bookingStatus }}
+                        {{
+                          br.bookingStatus === 'NO_SHOW'
+                            ? 'No Show'
+                            : br.bookingStatus === 'EXPIRED'
+                              ? 'Expired'
+                              : br.bookingStatus
+                        }}
                       </span>
                     </td>
                   </tr>

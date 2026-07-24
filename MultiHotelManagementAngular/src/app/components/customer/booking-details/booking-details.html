@@ -321,6 +321,28 @@
               @if (booking.status === 'CANCELLED') {
                 <p class="text-muted mb-0">This booking has been cancelled.</p>
               }
+              @if (booking.status === 'NO_SHOW') {
+                <div class="alert alert-dark mb-0">
+                  <strong>No-Show:</strong> You did not check in on the scheduled date. This booking
+                  has been marked as No-Show. No refund will be issued. You may rebook a new stay.
+                  <a
+                    [routerLink]="['/book-hotel', booking.hotelId, booking.roomId]"
+                    class="btn btn-primary btn-sm ms-2"
+                    >Rebook Now</a
+                  >
+                </div>
+              }
+              @if (booking.status === 'EXPIRED') {
+                <div class="alert alert-warning mb-0">
+                  <strong>Expired:</strong> This pending booking was not confirmed before the
+                  check-in date and has expired.
+                  <a
+                    [routerLink]="['/book-hotel', booking.hotelId, booking.roomId]"
+                    class="btn btn-primary btn-sm ms-2"
+                    >Rebook Now</a
+                  >
+                </div>
+              }
             </div>
           </div>
         </div>

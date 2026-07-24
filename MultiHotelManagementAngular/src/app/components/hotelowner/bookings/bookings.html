@@ -21,6 +21,7 @@
         <option value="CHECKED_OUT">Checked Out</option>
         <option value="CANCELLED">Cancelled</option>
         <option value="NO_SHOW">No Show</option>
+        <option value="EXPIRED">Expired</option>
       </select>
     </div>
   </div>
@@ -88,10 +89,18 @@
                             ? 'danger'
                             : b.status === 'NO_SHOW'
                               ? 'dark'
-                              : 'warning'
+                              : b.status === 'EXPIRED'
+                                ? 'bg-orange text-white'
+                                : 'warning'
                   }}"
                 >
-                  {{ b.status === 'NO_SHOW' ? 'No Show' : b.status }}
+                  {{
+                    b.status === 'NO_SHOW'
+                      ? 'No Show'
+                      : b.status === 'EXPIRED'
+                        ? 'Expired'
+                        : b.status
+                  }}
                 </span>
               </td>
               <td>

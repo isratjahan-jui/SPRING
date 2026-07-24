@@ -1,0 +1,1 @@
+import"./chunk-2NFLSA4Y.js";var t=[{path:"",loadComponent:()=>import("./chunk-6OJWJMXN.js").then(o=>o.HotelListComponent)},{path:":id",loadComponent:()=>import("./chunk-KHA5GQBK.js").then(o=>o.HotelDetailComponent)}];export{t as default};

@@ -107,6 +107,19 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         LEFT JOIN FETCH b.customer c
         LEFT JOIN FETCH c.user
         LEFT JOIN FETCH b.hotel h
+        LEFT JOIN FETCH h.owner o
+        LEFT JOIN FETCH o.user
+        LEFT JOIN FETCH b.room
+        WHERE b.status = 'PENDING'
+        AND b.checkOutDate < :now
+    """)
+    List<Booking> findOverduePendingBookings(@Param("now") Date now);
+
+    @Query("""
+        SELECT b FROM Booking b
+        LEFT JOIN FETCH b.customer c
+        LEFT JOIN FETCH c.user
+        LEFT JOIN FETCH b.hotel h
         LEFT JOIN FETCH b.room
     """)
     List<Booking> findAllWithDetails();

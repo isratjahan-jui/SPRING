@@ -7,7 +7,7 @@
   position: relative;
   background: none;
   border: none;
-  color: var(--text-color, #333);
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 6px;
   border-radius: 50%;
@@ -18,14 +18,14 @@
 }
 
 .notification-bell:hover {
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--bg-hover);
 }
 
 .badge {
   position: absolute;
   top: 0;
   right: 0;
-  background: #e74c3c;
+  background: var(--danger);
   color: #fff;
   font-size: 10px;
   font-weight: 700;
@@ -51,10 +51,10 @@
   right: 0;
   width: 340px;
   max-height: 420px;
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -66,15 +66,16 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-light);
   font-weight: 600;
   font-size: 14px;
+  color: var(--text-primary);
 }
 
 .mark-all-read {
   background: none;
   border: none;
-  color: #3498db;
+  color: var(--primary);
   cursor: pointer;
   font-size: 12px;
   font-weight: 500;
@@ -92,7 +93,7 @@
 .empty {
   padding: 32px 16px;
   text-align: center;
-  color: #999;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
@@ -103,19 +104,19 @@
   padding: 10px 16px;
   cursor: pointer;
   transition: background 0.15s;
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .notification-item:hover {
-  background: #f8f9fa;
+  background: var(--bg-hover);
 }
 
 .notification-item.unread {
-  background: #ebf5fb;
+  background: var(--primary-lighter);
 }
 
 .notification-item.unread:hover {
-  background: #d6eaf8;
+  background: #d0e3f7;
 }
 
 .notif-content {
@@ -127,26 +128,27 @@
   margin: 0;
   font-size: 13px;
   line-height: 1.4;
-  color: #333;
+  color: var(--text-primary);
   word-wrap: break-word;
 }
 
 .notif-content small {
-  color: #999;
+  color: var(--text-muted);
   font-size: 11px;
 }
 
 .delete-btn {
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--border-default);
   cursor: pointer;
   font-size: 16px;
   padding: 0 2px;
   line-height: 1;
   flex-shrink: 0;
+  transition: color 0.15s;
 }
 
 .delete-btn:hover {
-  color: #e74c3c;
+  color: var(--danger);
 }

@@ -12,8 +12,8 @@
 }
 
 .modal-content {
-  background: #fff;
-  border-radius: 8px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
   width: 90%;
   max-width: 800px;
   max-height: 85vh;
@@ -25,7 +25,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .modal-body {
@@ -35,4 +35,8 @@
 .table th,
 .table td {
   vertical-align: middle;
+}
+
+.bg-orange {
+  background-color: var(--accent-orange) !important;
 }

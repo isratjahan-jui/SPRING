@@ -52,10 +52,20 @@
                           ? 'secondary'
                           : b.status === 'CANCELLED'
                             ? 'danger'
-                            : 'warning'
+                            : b.status === 'NO_SHOW'
+                              ? 'dark'
+                              : b.status === 'EXPIRED'
+                                ? 'bg-orange text-white'
+                                : 'warning'
                   }}"
                 >
-                  {{ b.status }}
+                  {{
+                    b.status === 'NO_SHOW'
+                      ? 'No Show'
+                      : b.status === 'EXPIRED'
+                        ? 'Expired'
+                        : b.status
+                  }}
                 </span>
               </td>
               <td>

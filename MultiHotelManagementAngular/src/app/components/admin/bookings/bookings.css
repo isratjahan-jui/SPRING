@@ -1,0 +1,9 @@
+.bg-orange {
+  background-color: #fd7e14 !important;
+}
+.modal-backdrop {
+  z-index: 1040;
+}
+.modal {
+  z-index: 1050;
+}

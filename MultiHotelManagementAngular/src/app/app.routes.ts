@@ -27,6 +27,7 @@ import { AdminOwners } from './components/admin/owners/owners';
 import { AdminCustomers } from './components/admin/customers/customers';
 import { AdminCommissions } from './components/admin/commissions/commissions';
 import { AdminPayments } from './components/admin/payments/payments';
+import { AdminBookings } from './components/admin/bookings/bookings';
 import { AdminNotifications } from './components/admin/notifications/notifications';
 import { AdminSupport } from './components/admin/support/support';
 import { AdminLocations } from './components/admin/locations/locations';
@@ -105,6 +106,11 @@ export const routes: Routes = [
   {
     path: 'admin/commissions',
     component: AdminCommissions,
+    canActivate: [authGuard, roleGuard(['ADMIN'])],
+  },
+  {
+    path: 'admin/bookings',
+    component: AdminBookings,
     canActivate: [authGuard, roleGuard(['ADMIN'])],
   },
   {

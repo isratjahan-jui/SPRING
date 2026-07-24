@@ -7,9 +7,9 @@
 .support-header {
   margin-bottom: 32px;
   padding: 32px;
-  background: linear-gradient(135deg, #4a148c 0%, #7b1fa2 100%);
+  background: linear-gradient(135deg, var(--primary-lighter) 0%, #ebf4ff 100%);
   border-radius: 16px;
-  color: white;
+  color: var(--text-primary);
 }
 
 .header-content h1 {
@@ -32,7 +32,7 @@
   width: 40px;
   height: 40px;
   border: 3px solid #e0e0e0;
-  border-top-color: #4a148c;
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin: 0 auto 16px;
@@ -88,8 +88,8 @@
 }
 
 .stat-card {
-  background: white;
-  border: 1px solid #e8e8e8;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 20px;
   text-align: center;
@@ -99,7 +99,7 @@
   display: block;
   font-size: 32px;
   font-weight: 700;
-  color: #4a148c;
+  color: var(--primary);
 }
 .stat-card.stat-pending .stat-number {
   color: #f57c00;
@@ -119,7 +119,7 @@
 .stat-label {
   display: block;
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary);
   margin-top: 4px;
 }
 
@@ -135,8 +135,8 @@
 }
 
 .clickable-stat.active-filter {
-  border-color: #4a148c;
-  box-shadow: 0 0 0 2px rgba(74, 20, 140, 0.2);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.2);
 }
 
 .sla-cards {
@@ -150,8 +150,8 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  background: white;
-  border: 1px solid #e8e8e8;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 20px;
 }
@@ -166,11 +166,11 @@
 .sla-value {
   font-size: 24px;
   font-weight: 700;
-  color: #4a148c;
+  color: var(--primary);
 }
 .sla-label {
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .filters-bar {
@@ -192,20 +192,20 @@
   top: 50%;
   transform: translateY(-50%);
   font-size: 14px;
-  color: #999;
+  color: var(--text-muted);
 }
 
 .search-box input {
   width: 100%;
   padding: 12px 12px 12px 42px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   font-size: 14px;
 }
 
 .search-box input:focus {
   outline: none;
-  border-color: #4a148c;
+  border-color: var(--primary);
 }
 
 .filter-group {
@@ -215,23 +215,23 @@
 
 .filter-group select {
   padding: 12px 16px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   font-size: 14px;
-  background: white;
+  background: var(--bg-card);
 }
 
 .filter-group select:focus {
   outline: none;
-  border-color: #4a148c;
+  border-color: var(--primary);
 }
 
 .empty-state {
   text-align: center;
   padding: 80px 20px;
-  background: white;
+  background: var(--bg-card);
   border-radius: 16px;
-  border: 1px solid #e8e8e8;
+  border: 1px solid var(--border-light);
 }
 
 .empty-icon {
@@ -240,19 +240,19 @@
 }
 .empty-state h3 {
   font-size: 20px;
-  color: #333;
+  color: var(--text-primary);
   margin: 0 0 8px 0;
 }
 .empty-state p {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
   margin: 0;
 }
 
 .tickets-table-wrapper {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
-  border: 1px solid #e8e8e8;
+  border: 1px solid var(--border-light);
   overflow-x: auto;
 }
 
@@ -265,10 +265,10 @@
 .tickets-table th {
   padding: 14px 12px;
   text-align: left;
-  background: #f8f9fa;
+  background: var(--bg-page);
   font-weight: 600;
-  color: #666;
-  border-bottom: 2px solid #e8e8e8;
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--border-light);
   white-space: nowrap;
   font-size: 12px;
   text-transform: uppercase;
@@ -282,7 +282,7 @@
 }
 
 .tickets-table tr:hover {
-  background: #fafbff;
+  background: var(--bg-hover);
 }
 .tickets-table tr.escalated-row {
   background: #fff8f8;
@@ -293,7 +293,7 @@
 
 .td-id {
   font-weight: 600;
-  color: #666;
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 .td-center {
@@ -317,13 +317,13 @@
 }
 
 .ticket-link {
-  color: #333;
+  color: var(--text-primary);
   text-decoration: none;
   font-weight: 600;
 }
 
 .ticket-link:hover {
-  color: #4a148c;
+  color: var(--primary);
 }
 
 .escalated-dot {
@@ -392,13 +392,13 @@
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 11px;
-  background: #f5f5f5;
-  color: #333;
+  background: var(--bg-page);
+  color: var(--text-primary);
   white-space: nowrap;
 }
 
 .unassigned {
-  color: #999;
+  color: var(--text-muted);
   font-style: italic;
 }
 
@@ -477,19 +477,19 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .modal-header-custom .modal-title {
   font-size: 18px;
   font-weight: 700;
-  color: #333;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .modal-subtitle {
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
   margin: 4px 0 0 0;
 }
 
@@ -498,13 +498,13 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #999;
+  color: var(--text-muted);
   padding: 0;
   line-height: 1;
 }
 
 .btn-close-custom:hover {
-  color: #333;
+  color: var(--text-primary);
 }
 
 .modal-body-custom {
@@ -520,7 +520,7 @@
   display: block;
   font-size: 13px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 6px;
 }
 
@@ -528,7 +528,7 @@
 .form-select {
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   font-size: 14px;
   box-sizing: border-box;
@@ -537,7 +537,7 @@
 .form-input:focus,
 .form-select:focus {
   outline: none;
-  border-color: #4a148c;
+  border-color: var(--primary);
 }
 
 .modal-footer-custom {
@@ -545,27 +545,27 @@
   justify-content: flex-end;
   gap: 12px;
   padding: 16px 24px;
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid var(--border-light);
 }
 
 .btn-cancel {
   padding: 10px 20px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-default);
   border-radius: 8px;
-  background: white;
+  background: var(--bg-card);
   font-size: 14px;
   cursor: pointer;
 }
 
 .btn-cancel:hover {
-  background: #f5f5f5;
+  background: var(--bg-page);
 }
 
 .btn-submit {
   padding: 10px 24px;
   border: none;
   border-radius: 8px;
-  background: #4a148c;
+  background: var(--primary);
   color: white;
   font-size: 14px;
   font-weight: 600;
@@ -573,7 +573,7 @@
 }
 
 .btn-submit:hover {
-  background: #311b92;
+  background: var(--primary-dark);
 }
 .btn-submit:disabled {
   opacity: 0.6;
@@ -597,13 +597,13 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #999;
+  color: var(--text-muted);
   font-weight: 600;
 }
 
 .detail-value {
   font-size: 14px;
-  color: #333;
+  color: var(--text-primary);
 }
 .detail-hotel {
   margin-bottom: 16px;
@@ -614,7 +614,7 @@
 .detail-description p {
   margin: 8px 0 0 0;
   font-size: 14px;
-  color: #333;
+  color: var(--text-primary);
   line-height: 1.6;
 }
 
@@ -623,7 +623,7 @@
   gap: 24px;
   margin-bottom: 24px;
   padding: 16px;
-  background: #f8f9fa;
+  background: var(--bg-page);
   border-radius: 10px;
 }
 
@@ -635,26 +635,26 @@
 .sla-detail-value {
   font-size: 16px;
   font-weight: 700;
-  color: #4a148c;
+  color: var(--primary);
 }
 
 .conversation-section {
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid var(--border-light);
   padding-top: 20px;
 }
 .conversation-title {
   font-size: 15px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   margin: 0 0 16px 0;
 }
 
 .no-replies {
   text-align: center;
   padding: 32px;
-  background: #f8f9fa;
+  background: var(--bg-page);
   border-radius: 10px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .conversation-list {
@@ -672,8 +672,8 @@
 }
 
 .conversation-message.staff-message {
-  background: #ede7f6;
-  border-left-color: #4a148c;
+  background: var(--primary-lighter);
+  border-left-color: var(--primary);
 }
 
 .message-header {
@@ -703,25 +703,25 @@
 }
 
 .staff-message .author-avatar {
-  background: #4a148c;
+  background: var(--primary);
 }
 .author-name {
   font-size: 13px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
 }
 .author-role {
   font-size: 11px;
-  color: #999;
+  color: var(--text-muted);
 }
 .message-time {
   font-size: 12px;
-  color: #999;
+  color: var(--text-muted);
 }
 .message-text {
   margin: 0;
   font-size: 14px;
-  color: #333;
+  color: var(--text-primary);
   line-height: 1.5;
 }
 
@@ -737,7 +737,7 @@
   padding: 10px 24px;
   border: none;
   border-radius: 8px;
-  background: #4a148c;
+  background: var(--primary);
   color: white;
   font-size: 14px;
   font-weight: 600;
@@ -749,7 +749,7 @@
 }
 
 .btn-send:hover {
-  background: #311b92;
+  background: var(--primary-dark);
 }
 .btn-send:disabled {
   opacity: 0.6;

@@ -10,6 +10,7 @@ import java.util.List;
 public class BookingResponseDTO {
     private Long id;
     private Long hotelId;
+    private Long roomId;
     private String customerName;
     private String hotelName;
     private String roomType;

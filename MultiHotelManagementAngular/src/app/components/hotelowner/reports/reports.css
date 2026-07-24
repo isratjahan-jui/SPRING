@@ -5,15 +5,15 @@ pre {
 
 /* Report Detail Card */
 .report-detail-card {
-  border: 1px solid #e0e7ff;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
 
 .report-detail-header {
-  background: linear-gradient(135deg, #2563eb, #1e40af);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #fff;
   padding: 20px 24px;
 }
@@ -43,10 +43,10 @@ pre {
 
 .report-detail-footer {
   padding: 16px 24px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-light);
   display: flex;
   gap: 12px;
-  background: #f9fafb;
+  background: var(--bg-page);
 }
 
 /* Stat Cards */
@@ -55,9 +55,9 @@ pre {
   align-items: center;
   gap: 14px;
   padding: 16px 18px;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  background: var(--bg-card);
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease;
@@ -65,13 +65,13 @@ pre {
 
 .stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-md);
 }
 
 .stat-icon {
   width: 48px;
   height: 48px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -81,18 +81,18 @@ pre {
 }
 
 .stat-revenue .stat-icon {
-  background: #dcfce7;
-  color: #16a34a;
+  background: var(--success-light);
+  color: var(--success);
 }
 
 .stat-bookings .stat-icon {
-  background: #dbeafe;
-  color: #2563eb;
+  background: var(--primary-lighter);
+  color: var(--primary);
 }
 
 .stat-occupancy .stat-icon {
-  background: #fef3c7;
-  color: #d97706;
+  background: var(--warning-light);
+  color: var(--accent-orange);
 }
 
 .stat-info {
@@ -103,29 +103,29 @@ pre {
 .stat-value {
   font-size: 20px;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-primary);
   line-height: 1.2;
 }
 
 .stat-label {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-top: 2px;
 }
 
 /* Badge Variants */
 .badge-type-daily {
-  background-color: #dbeafe;
-  color: #1e40af;
+  background-color: var(--primary-lighter);
+  color: var(--primary-dark);
 }
 
 .badge-type-weekly {
-  background-color: #dcfce7;
+  background-color: var(--success-light);
   color: #166534;
 }
 
 .badge-type-monthly {
-  background-color: #fef3c7;
+  background-color: var(--warning-light);
   color: #92400e;
 }
 
@@ -137,7 +137,7 @@ pre {
 /* Report Data Table */
 .report-data-section h6 {
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   margin-bottom: 10px;
 }
 
@@ -152,7 +152,7 @@ pre {
 
 /* Table Active Row */
 .table-active td {
-  background-color: #eff6ff !important;
+  background-color: var(--primary-lighter) !important;
 }
 
 /* Print Styles */
@@ -177,7 +177,7 @@ pre {
   }
 
   .report-detail-header {
-    background: #2563eb !important;
+    background: var(--primary) !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

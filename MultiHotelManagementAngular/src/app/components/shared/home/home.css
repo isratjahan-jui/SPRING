@@ -1,32 +1,34 @@
 .hero-section {
-  background: linear-gradient(135deg, #1a1d21 0%, #2d3748 100%);
+  background: linear-gradient(135deg, var(--primary-lighter) 0%, #ebf4ff 50%, #f0f7ff 100%);
   padding: 60px 0;
 }
 .search-group {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 .search-group .form-control {
-  border-color: #dee2e6;
+  border-color: var(--border-default);
   padding: 12px 16px;
   font-size: 15px;
 }
 .search-group .form-control:focus {
   box-shadow: none;
-  border-color: #86b7fe;
+  border-color: var(--primary-light);
 }
 .search-group .input-group-text {
-  border-color: #dee2e6;
-  color: #6c757d;
+  border-color: var(--border-default);
+  color: var(--text-muted);
+  background: var(--bg-card);
 }
 .hotel-card {
   transition:
     transform 0.2s,
     box-shadow 0.2s;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
 }
 .hotel-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12) !important;
+  box-shadow: var(--shadow-lg) !important;
 }

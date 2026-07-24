@@ -45,6 +45,8 @@ public class DatabaseMigration implements CommandLineRunner {
         addColumnIfNotExists("support_tickets", "first_response_at", "DATETIME NULL");
         addColumnIfNotExists("support_tickets", "resolved_at", "DATETIME NULL");
 
+        addColumnIfNotExists("commissions", "commission_status", "VARCHAR(20) DEFAULT 'ACTIVE'");
+
         generateMissingInvoices();
     }
 

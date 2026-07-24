@@ -75,4 +75,8 @@ export class BookingService {
   cancelBooking(id: number) {
     return this.http.post<Booking>(`${this.API_URL}/${id}/cancel`, {});
   }
+
+  rebook(oldBookingId: number, data: BookingRequest) {
+    return this.http.post<Booking>(`${this.API_URL}/${oldBookingId}/rebook`, data);
+  }
 }

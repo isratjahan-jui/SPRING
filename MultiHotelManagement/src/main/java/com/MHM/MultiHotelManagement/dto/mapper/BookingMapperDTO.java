@@ -35,6 +35,7 @@ public class BookingMapperDTO {
         }
         if (booking.getRoom() != null) {
             response.setRoomType(booking.getRoom().getRoomType());
+            response.setRoomId(booking.getRoom().getId());
         }
 
         response.setCheckInDate(booking.getCheckInDate());

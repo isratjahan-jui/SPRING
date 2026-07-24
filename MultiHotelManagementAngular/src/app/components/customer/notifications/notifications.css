@@ -9,9 +9,9 @@
   align-items: flex-start;
   gap: 14px;
   padding: 14px 16px;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  background: #fff;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
   transition:
     background-color 0.2s,
     border-color 0.2s,
@@ -19,19 +19,19 @@
 }
 
 .notification-item:hover {
-  background: #f8f9fa;
+  background: var(--bg-hover);
 }
 
 .notification-item.unread {
-  background: #f0f7ff;
-  border-left: 3px solid #0d6efd;
+  background: var(--primary-lighter);
+  border-left: 3px solid var(--primary);
 }
 
 .notification-icon {
   width: 40px;
   height: 40px;
   min-width: 40px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -40,15 +40,15 @@
 }
 
 .icon-booking {
-  background: linear-gradient(135deg, #0d6efd, #6610f2);
+  background: linear-gradient(135deg, var(--primary), #6610f2);
 }
 
 .icon-payment {
-  background: linear-gradient(135deg, #198754, #20c997);
+  background: linear-gradient(135deg, var(--success), #20c997);
 }
 
 .icon-checkin {
-  background: linear-gradient(135deg, #0dcaf0, #0d6efd);
+  background: linear-gradient(135deg, var(--info), var(--primary));
 }
 
 .icon-checkout {
@@ -56,11 +56,11 @@
 }
 
 .icon-review {
-  background: linear-gradient(135deg, #ffc107, #fd7e14);
+  background: linear-gradient(135deg, var(--warning), var(--accent-orange));
 }
 
 .icon-support {
-  background: linear-gradient(135deg, #dc3545, #d63384);
+  background: linear-gradient(135deg, var(--danger), #d63384);
 }
 
 .icon-promotion {
@@ -82,7 +82,7 @@
 
 .notification-content p {
   margin-bottom: 4px;
-  color: #212529;
+  color: var(--text-primary);
 }
 
 .notification-actions {
@@ -92,7 +92,7 @@
 }
 
 .empty-state {
-  color: #6c757d;
+  color: var(--text-muted);
 }
 
 .empty-state i {

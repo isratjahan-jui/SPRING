@@ -35,6 +35,8 @@ import com.MHM.MultiHotelManagement.dto.request.NotificationRequestDTO;
 import com.MHM.MultiHotelManagement.enums.NotificationChannel;
 import com.MHM.MultiHotelManagement.enums.NotificationType;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,6 +56,8 @@ import java.util.UUID;
 
 @Service
 public class BookingServiceImple implements BookingService {
+
+    private static final Logger log = LoggerFactory.getLogger(BookingServiceImple.class);
 
     private final BookingRepository bookingRepository;
     private final CustomerRepository customerRepository;
@@ -645,6 +649,21 @@ public class BookingServiceImple implements BookingService {
         } catch (Exception ignored) {}
 
         return BookingMapperDTO.toResponseDTO(updated);
+    }
+
+    @Override
+    @Transactional
+    public BookingResponseDTO rebook(Long oldBookingId, BookingRequestDTO dto) {
+        Booking oldBooking = bookingRepository.findById(oldBookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
+
+        if (oldBooking.getStatus() != BookingStatus.NO_SHOW
+                && oldBooking.getStatus() != BookingStatus.EXPIRED
+                && oldBooking.getStatus() != BookingStatus.CANCELLED) {
+            throw new IllegalStateException("Can only rebook from NO_SHOW, EXPIRED, or CANCELLED bookings");
+        }
+
+        return createBooking(dto);
     }
 
     private String uploadIdImage(MultipartFile file, Long bookingId) {

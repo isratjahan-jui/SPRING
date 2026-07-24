@@ -24,6 +24,9 @@ public class Commission {
     private Double adminEarnings;
     private Double hotelOwnerEarnings;
 
+    @Column(nullable = false)
+    private String commissionStatus = "ACTIVE";
+
     // protiti Commission ekti Booking er sathe jukto
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id", nullable = false)

@@ -12,3 +12,7 @@
     max-width: 100% !important;
   }
 }
+
+.bg-orange {
+  background-color: var(--accent-orange) !important;
+}

@@ -64,16 +64,12 @@ public class BookingController {
         return ResponseEntity.ok("Booking deleted successfully");
     }
 
-    // ✅ নতুন অংশ: FoodItem integration
-
-    // বুকিংয়ের সাথে খাবার সিলেক্ট করা
     @PostMapping("/{id}/food-items")
     public ResponseEntity<BookingResponseDTO> addFoodItems(@PathVariable Long id,
                                                            @RequestBody List<Long> foodItemIds) {
         return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.addFoodItemsToBooking(id, foodItemIds));
     }
 
-    // বুকিংয়ের খাবার cancel করা
     @PutMapping("/{id}/food-items/cancel")
     public ResponseEntity<BookingResponseDTO> cancelFoodItems(@PathVariable Long id) {
         return ResponseEntity.ok(bookingService.cancelFoodItemsFromBooking(id));
@@ -118,5 +114,12 @@ public class BookingController {
     @PostMapping("/{id}/cancel")
     public ResponseEntity<BookingResponseDTO> cancelBooking(@PathVariable Long id) {
         return ResponseEntity.ok(bookingService.cancelBooking(id));
+    }
+
+    @PostMapping("/{id}/rebook")
+    public ResponseEntity<BookingResponseDTO> rebook(
+            @PathVariable Long id,
+            @RequestBody BookingRequestDTO dto) {
+        return ResponseEntity.ok(bookingService.rebook(id, dto));
     }
 }
