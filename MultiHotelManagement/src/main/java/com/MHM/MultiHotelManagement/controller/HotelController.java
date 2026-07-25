@@ -50,6 +50,11 @@ public class HotelController {
     public ResponseEntity<List<HotelResponseDTO>> getByCity(@PathVariable String city) {
         return ResponseEntity.ok(hotelService.getHotelsByCity(city));
     }
+    // ✅ নতুন endpoint: Approved hotels by location
+    @GetMapping("/location/{locationId}/approved")
+    public ResponseEntity<List<HotelResponseDTO>> getApprovedHotelsByLocation(@PathVariable Long locationId) {
+        return ResponseEntity.ok(hotelService.getApprovedHotelsByLocation(locationId));
+    }
 
     @GetMapping("/search")
     public ResponseEntity<List<HotelResponseDTO>> search(@RequestParam String q) {

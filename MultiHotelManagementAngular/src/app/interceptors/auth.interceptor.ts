@@ -1,13 +1,13 @@
 import { HttpInterceptorFn } from "@angular/common/http";
-import { StorageService } from "../services/storage.service";
 import { inject } from "@angular/core";
-
-
-
+import { Router } from "@angular/router";
+import { catchError, throwError } from "rxjs";
+import { StorageService } from "../services/storage.service";
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-    
+
   const storage = inject(StorageService);
+  const router  = inject(Router);
   const token   = storage.getToken();
 
   if (token) {
@@ -16,5 +16,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     });
   }
 
-  return next(req);
+  return next(req).pipe(
+    catchError((err) => {
+      if (err.status === 401) {
+        storage.clearSession();
+        router.navigate(['/login']);
+      }
+      return throwError(() => err);
+    })
+  );
 };

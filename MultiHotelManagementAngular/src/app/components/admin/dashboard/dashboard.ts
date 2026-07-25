@@ -1,14 +1,16 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { HotelOwnerService } from '../../../services/hotel-owner.service';
 import { CustomerService } from '../../../services/customer.service';
 import { HotelService } from '../../../services/hotel.service';
 import { BookingService } from '../../../services/booking.service';
+import { PaymentService } from '../../../services/payment.service';
 import { CommissionService } from '../../../services/commission.service';
-import { RouterLink } from '@angular/router';
+import { CustomerSupportService } from '../../../services/customer-support.service';
 import { forkJoin, of } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -22,7 +24,9 @@ export class AdminDashboard implements OnInit {
   private customerService = inject(CustomerService);
   private hotelService = inject(HotelService);
   private bookingService = inject(BookingService);
+  private paymentService = inject(PaymentService);
   private commissionService = inject(CommissionService);
+  private supportService = inject(CustomerSupportService);
   private cdr = inject(ChangeDetectorRef);
 
   userName = '';
@@ -32,65 +36,44 @@ export class AdminDashboard implements OnInit {
   pendingHotelCount = 0;
   rejectedHotelCount = 0;
   totalBookings = 0;
-  expiredBookings = 0;
-  noShowBookings = 0;
+  activeBookings = 0;
+  totalPayments = 0;
+  paidPayments = 0;
   totalCommission = 0;
+  totalTickets = 0;
+  openTickets = 0;
   loading = true;
 
   ngOnInit() {
     const user = this.auth.getUser();
     this.userName = user?.name || user?.email || 'Admin';
-    console.log('[AdminDashboard] user:', user);
 
     forkJoin({
-      owners: this.ownerService.getAllOwners().pipe(
-        tap((data) => console.log('[AdminDashboard] owners:', data.length)),
-        catchError((err) => {
-          console.error('[AdminDashboard] owners error:', err.status, err.message);
-          return of([]);
-        }),
-      ),
-      customers: this.customerService.getAllCustomers().pipe(
-        tap((data) => console.log('[AdminDashboard] customers:', data.length)),
-        catchError((err) => {
-          console.error('[AdminDashboard] customers error:', err.status, err.message);
-          return of([]);
-        }),
-      ),
-      hotels: this.hotelService.getAll().pipe(
-        tap((data) => console.log('[AdminDashboard] hotels:', data.length)),
-        catchError((err) => {
-          console.error('[AdminDashboard] hotels error:', err.status, err.message);
-          return of([]);
-        }),
-      ),
-      bookings: this.bookingService.getAll().pipe(
-        tap((data) => console.log('[AdminDashboard] bookings:', data.length)),
-        catchError((err) => {
-          console.error('[AdminDashboard] bookings error:', err.status, err.message);
-          return of([]);
-        }),
-      ),
-      commission: this.commissionService.getAdminTotal().pipe(
-        tap((data) => console.log('[AdminDashboard] commission:', data)),
-        catchError((err) => {
-          console.error('[AdminDashboard] commission error:', err.status, err.message);
-          return of(0);
-        }),
-      ),
+      owners: this.ownerService.getAllOwners().pipe(catchError(() => of([]))),
+      customers: this.customerService.getAllCustomers().pipe(catchError(() => of([]))),
+      hotels: this.hotelService.getAll().pipe(catchError(() => of([]))),
+      bookings: this.bookingService.getAll().pipe(catchError(() => of([]))),
+      payments: this.paymentService.getAll().pipe(catchError(() => of([]))),
+      commission: this.commissionService.getAdminTotal().pipe(catchError(() => of(0))),
+      tickets: this.supportService.getAll().pipe(catchError(() => of([]))),
     }).subscribe({
-      next: (result) => {
-        this.ownerCount = result.owners.length;
-        this.customerCount = result.customers.length;
-        this.approvedHotelCount = result.hotels.filter((h) => h.status === 'APPROVED').length;
-        this.pendingHotelCount = result.hotels.filter(
-          (h) => h.status === 'PENDING_APPROVAL',
+      next: (r) => {
+        this.ownerCount = r.owners.length;
+        this.customerCount = r.customers.length;
+        this.approvedHotelCount = r.hotels.filter((h: any) => h.status === 'APPROVED').length;
+        this.pendingHotelCount = r.hotels.filter((h: any) => h.status === 'PENDING_APPROVAL').length;
+        this.rejectedHotelCount = r.hotels.filter((h: any) => h.status === 'REJECTED').length;
+        this.totalBookings = r.bookings.length;
+        this.activeBookings = r.bookings.filter(
+          (b: any) => b.status === 'PENDING' || b.status === 'CONFIRMED' || b.status === 'CHECKED_IN',
         ).length;
-        this.rejectedHotelCount = result.hotels.filter((h) => h.status === 'REJECTED').length;
-        this.totalBookings = result.bookings.length;
-        this.expiredBookings = result.bookings.filter((b: any) => b.status === 'EXPIRED').length;
-        this.noShowBookings = result.bookings.filter((b: any) => b.status === 'NO_SHOW').length;
-        this.totalCommission = result.commission;
+        this.totalPayments = r.payments.length;
+        this.paidPayments = r.payments.filter((p: any) => p.status === 'PAID').length;
+        this.totalCommission = r.commission;
+        this.totalTickets = r.tickets.length;
+        this.openTickets = r.tickets.filter(
+          (t: any) => t.status === 'OPEN' || t.status === 'IN_PROGRESS' || t.status === 'ESCALATED',
+        ).length;
         this.loading = false;
         this.cdr.markForCheck();
       },

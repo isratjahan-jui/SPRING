@@ -83,6 +83,18 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
     """)
     List<Hotel> findHotelsByLocationId(@Param("locationId") Long locationId);
 
+
+    // ✅ নতুন method: Approved hotels by location
+    @Query("""
+        SELECT h FROM Hotel h
+        LEFT JOIN FETCH h.location l
+        LEFT JOIN FETCH h.hotelDetails hd
+        LEFT JOIN FETCH h.owner o
+        WHERE h.location.id = :locationId
+        AND h.status = 'APPROVED'
+    """)
+    List<Hotel> findApprovedHotelsByLocation(@Param("locationId") Long locationId);
+
     @Query("""
         SELECT h FROM Hotel h
         LEFT JOIN FETCH h.location l

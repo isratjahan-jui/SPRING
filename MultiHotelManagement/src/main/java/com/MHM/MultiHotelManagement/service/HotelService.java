@@ -19,4 +19,6 @@ public interface HotelService {
     List<HotelResponseDTO> getAllHotels();
     HotelResponseDTO approveHotel(Long id);
     HotelResponseDTO rejectHotel(Long id, String reason);
+    List<HotelResponseDTO> getApprovedHotelsByLocation(Long locationId);
 }
+

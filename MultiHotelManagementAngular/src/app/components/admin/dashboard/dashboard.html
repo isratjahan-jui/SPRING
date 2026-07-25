@@ -1,87 +1,238 @@
-<div class="dashboard-container">
-  <div class="dashboard-header">
-    <h1>Admin Dashboard</h1>
-    <p>Welcome, {{ userName }}</p>
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1">Admin Dashboard</h2>
+      <p class="text-muted mb-0">Welcome back, <strong>{{ userName }}</strong></p>
+    </div>
   </div>
 
   @if (loading) {
-    <p class="text-muted">Loading stats...</p>
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted mt-2">Loading dashboard...</p>
+    </div>
+  } @else {
+    <!-- Overview Cards -->
+    <div class="row g-3 mb-4">
+      <!-- Owners -->
+      <div class="col-sm-6 col-lg-3">
+        <a routerLink="/admin/owners" class="text-decoration-none">
+          <div class="card border-0 shadow-sm h-100 overview-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                  <span class="fs-4">&#128100;</span>
+                </div>
+              </div>
+              <h6 class="text-muted mb-1">Total Owners</h6>
+              <h2 class="fw-bold mb-0 text-dark">{{ ownerCount }}</h2>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Customers -->
+      <div class="col-sm-6 col-lg-3">
+        <a routerLink="/admin/customers" class="text-decoration-none">
+          <div class="card border-0 shadow-sm h-100 overview-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                  <span class="fs-4">&#128101;</span>
+                </div>
+              </div>
+              <h6 class="text-muted mb-1">Total Customers</h6>
+              <h2 class="fw-bold mb-0 text-dark">{{ customerCount }}</h2>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Bookings -->
+      <div class="col-sm-6 col-lg-3">
+        <a routerLink="/admin/bookings" class="text-decoration-none">
+          <div class="card border-0 shadow-sm h-100 overview-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+                  <span class="fs-4">&#128197;</span>
+                </div>
+              </div>
+              <h6 class="text-muted mb-1">Total Bookings</h6>
+              <h2 class="fw-bold mb-0 text-dark">{{ totalBookings }}</h2>
+              <small class="text-success">{{ activeBookings }} active</small>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Payments -->
+      <div class="col-sm-6 col-lg-3">
+        <a routerLink="/admin/payments" class="text-decoration-none">
+          <div class="card border-0 shadow-sm h-100 overview-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-info bg-opacity-10 p-3">
+                  <span class="fs-4">&#128179;</span>
+                </div>
+              </div>
+              <h6 class="text-muted mb-1">Total Payments</h6>
+              <h2 class="fw-bold mb-0 text-dark">{{ totalPayments }}</h2>
+              <small class="text-success">{{ paidPayments }} paid</small>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Hotels Row -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-lg-4">
+        <a routerLink="/admin/hotels/manage" class="text-decoration-none">
+          <div class="card border-0 shadow-sm h-100 overview-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                  <span class="fs-4">&#127976;</span>
+                </div>
+              </div>
+              <h6 class="text-muted mb-1">Approved Hotels</h6>
+              <h2 class="fw-bold mb-0 text-dark">{{ approvedHotelCount }}</h2>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-sm-6 col-lg-4">
+        <a routerLink="/admin/hotels/manage" class="text-decoration-none">
+          <div class="card border-0 shadow-sm h-100 overview-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+                  <span class="fs-4">&#9203;</span>
+                </div>
+              </div>
+              <h6 class="text-muted mb-1">Pending Hotels</h6>
+              <h2 class="fw-bold mb-0 text-dark">{{ pendingHotelCount }}</h2>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-sm-6 col-lg-4">
+        <a routerLink="/admin/hotels/manage" class="text-decoration-none">
+          <div class="card border-0 shadow-sm h-100 overview-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-danger bg-opacity-10 p-3">
+                  <span class="fs-4">&#10060;</span>
+                </div>
+              </div>
+              <h6 class="text-muted mb-1">Rejected Hotels</h6>
+              <h2 class="fw-bold mb-0 text-dark">{{ rejectedHotelCount }}</h2>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Finance & Support Row -->
+    <div class="row g-3 mb-4">
+      <!-- Commission -->
+      <div class="col-sm-6 col-lg-3">
+        <a routerLink="/admin/commissions" class="text-decoration-none">
+          <div class="card border-0 shadow-sm h-100 overview-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-secondary bg-opacity-10 p-3">
+                  <span class="fs-4">&#128176;</span>
+                </div>
+              </div>
+              <h6 class="text-muted mb-1">Total Commission</h6>
+              <h2 class="fw-bold mb-0 text-dark">BDT {{ totalCommission | number }}</h2>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Support Tickets -->
+      <div class="col-sm-6 col-lg-3">
+        <a routerLink="/admin/support" class="text-decoration-none">
+          <div class="card border-0 shadow-sm h-100 overview-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-danger bg-opacity-10 p-3">
+                  <span class="fs-4">&#128222;</span>
+                </div>
+              </div>
+              <h6 class="text-muted mb-1">Support Tickets</h6>
+              <h2 class="fw-bold mb-0 text-dark">{{ totalTickets }}</h2>
+              <small class="text-danger">{{ openTickets }} open</small>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Locations -->
+      <div class="col-sm-6 col-lg-3">
+        <a routerLink="/admin/locations" class="text-decoration-none">
+          <div class="card border-0 shadow-sm h-100 overview-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+                  <span class="fs-4">&#128205;</span>
+                </div>
+              </div>
+              <h6 class="text-muted mb-1">Locations</h6>
+              <h2 class="fw-bold mb-0 text-dark">Manage</h2>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Notifications -->
+      <div class="col-sm-6 col-lg-3">
+        <a routerLink="/admin/notifications" class="text-decoration-none">
+          <div class="card border-0 shadow-sm h-100 overview-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-info bg-opacity-10 p-3">
+                  <span class="fs-4">&#128276;</span>
+                </div>
+              </div>
+              <h6 class="text-muted mb-1">Notifications</h6>
+              <h2 class="fw-bold mb-0 text-dark">Manage</h2>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Quick Actions</h5>
+        <div class="row g-2">
+          <div class="col-auto">
+            <a routerLink="/admin/owners" class="btn btn-outline-primary btn-sm">Manage Owners</a>
+          </div>
+          <div class="col-auto">
+            <a routerLink="/admin/customers" class="btn btn-outline-success btn-sm">Manage Customers</a>
+          </div>
+          <div class="col-auto">
+            <a routerLink="/admin/bookings" class="btn btn-outline-warning btn-sm">View Bookings</a>
+          </div>
+          <div class="col-auto">
+            <a routerLink="/admin/payments" class="btn btn-outline-info btn-sm">View Payments</a>
+          </div>
+          <div class="col-auto">
+            <a routerLink="/admin/commissions" class="btn btn-outline-secondary btn-sm">Commissions</a>
+          </div>
+          <div class="col-auto">
+            <a routerLink="/admin/support" class="btn btn-outline-danger btn-sm">Support Tickets</a>
+          </div>
+        </div>
+      </div>
+    </div>
   }
-
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon">&#10003;</div>
-      <div class="stat-info">
-        <h3>Approved Hotels</h3>
-        <p class="stat-value">{{ approvedHotelCount }}</p>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">&#9203;</div>
-      <div class="stat-info">
-        <h3>Pending Hotels</h3>
-        <p class="stat-value">{{ pendingHotelCount }}</p>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">&#10060;</div>
-      <div class="stat-info">
-        <h3>Rejected Hotels</h3>
-        <p class="stat-value">{{ rejectedHotelCount }}</p>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">&#128101;</div>
-      <div class="stat-info">
-        <h3>Total Owners</h3>
-        <p class="stat-value">{{ ownerCount }}</p>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">&#128101;</div>
-      <div class="stat-info">
-        <h3>Total Customers</h3>
-        <p class="stat-value">{{ customerCount }}</p>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">&#128197;</div>
-      <div class="stat-info">
-        <h3>Total Bookings</h3>
-        <p class="stat-value">{{ totalBookings }}</p>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">&#10060;</div>
-      <div class="stat-info">
-        <h3>Expired Bookings</h3>
-        <p class="stat-value text-danger">{{ expiredBookings }}</p>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">&#9888;</div>
-      <div class="stat-info">
-        <h3>No-Show Bookings</h3>
-        <p class="stat-value text-warning">{{ noShowBookings }}</p>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">&#128176;</div>
-      <div class="stat-info">
-        <h3>Total Commission</h3>
-        <p class="stat-value">BDT {{ totalCommission | number }}</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- <div class="quick-actions">
-    <h2>Quick Actions</h2>
-    <div class="actions-grid">
-      <a routerLink="/admin/hotels/manage" class="action-btn">Manage Hotels</a>
-      <a routerLink="/admin/owners" class="action-btn">Manage Owners</a>
-      <a routerLink="/admin/customers" class="action-btn">Manage Customers</a>
-      <a routerLink="/admin/commissions" class="action-btn">Commissions</a>
-      <a routerLink="/admin/support" class="action-btn">Support Tickets</a>
-    </div>
-  </div> -->
 </div>

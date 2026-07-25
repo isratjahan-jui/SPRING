@@ -113,6 +113,16 @@ public class HotelServiceImpl implements HotelService {
                 .stream().map(HotelMapper::toDTO).collect(Collectors.toList());
     }
 
+    // ✅ নতুন method এখানে add করো
+    @Override
+    @Transactional(readOnly = true)
+    public List<HotelResponseDTO> getApprovedHotelsByLocation(Long locationId) {
+        return hotelRepo.findApprovedHotelsByLocation(locationId)
+                .stream()
+                .map(HotelMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
     @Override
     @Transactional
     public HotelResponseDTO updateHotel(Long id, HotelRequestDTO dto, MultipartFile image) {
