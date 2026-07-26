@@ -102,6 +102,15 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<ReviewResponseDTO> getReviewsByCustomer(Long customerId) {
+        return reviewRepository.findByCustomerIdWithDetails(customerId)
+                .stream()
+                .map(ReviewMapperDTO::toResponseDTO)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public void deleteReview(Long id) {
         if (!reviewRepository.existsById(id)) {

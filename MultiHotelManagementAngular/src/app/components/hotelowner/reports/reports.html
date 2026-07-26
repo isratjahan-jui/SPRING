@@ -22,17 +22,28 @@
           </div>
           <div class="col-md-3">
             <label class="form-label">Report Type</label>
-            <select [(ngModel)]="selectedType" class="form-select">
+            <select [(ngModel)]="selectedType" class="form-select" (change)="onTypeChange()">
               <option value="" disabled>-- Choose Type --</option>
               @for (t of reportTypes; track t) {
                 <option [value]="t">{{ t }}</option>
               }
+              <option value="CUSTOM">Custom Range</option>
             </select>
           </div>
+          @if (useCustomRange) {
+            <div class="col-md-3">
+              <label class="form-label">Start Date</label>
+              <input type="date" class="form-control" [(ngModel)]="customStartDate" />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">End Date</label>
+              <input type="date" class="form-control" [(ngModel)]="customEndDate" />
+            </div>
+          }
           <div class="col-md-3 d-flex align-items-end">
             <button
               class="btn btn-primary"
-              [disabled]="!selectedHotelId || !selectedType || generating"
+              [disabled]="!selectedHotelId || !selectedType || generating || (useCustomRange && (!customStartDate || !customEndDate))"
               (click)="generateReport()"
             >
               @if (generating) {
@@ -65,9 +76,9 @@
             @if (selectedReport.income != null && selectedReport.income > 0) {
               <div class="col-md-4">
                 <div class="stat-card stat-revenue">
-                  <div class="stat-icon"><i class="bi bi-currency-dollar"></i>$</div>
+                  <div class="stat-icon"><i class="bi bi-currency-dollar"></i>৳</div>
                   <div class="stat-info">
-                    <span class="stat-value">${{ selectedReport.income.toFixed(2) }}</span>
+                    <span class="stat-value">BDT {{ selectedReport.income.toFixed(2) }}</span>
                     <span class="stat-label">Total Income</span>
                   </div>
                 </div>
@@ -128,7 +139,7 @@
                 @if (selectedReport.income != null) {
                   <tr>
                     <td class="fw-semibold">Income</td>
-                    <td>${{ selectedReport.income.toFixed(2) }}</td>
+                    <td>BDT {{ selectedReport.income.toFixed(2) }}</td>
                   </tr>
                 }
                 @if (selectedReport.totalBookings != null) {
@@ -186,7 +197,7 @@
                     }}</span>
                   </td>
                   <td>{{ r.hotelName }}</td>
-                  <td>${{ (r.income || 0).toFixed(2) }}</td>
+                  <td>BDT {{ (r.income || 0).toFixed(2) }}</td>
                   <td>{{ r.totalBookings || 0 }}</td>
                   <td>{{ (r.occupancyRate || 0).toFixed(1) }}%</td>
                   <td>{{ r.generatedAt | date: 'short' }}</td>

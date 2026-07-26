@@ -93,4 +93,10 @@ public interface RoomRepository
         WHERE r.hotel.owner.id = :ownerId
     """)
     Integer countTotalRoomsByOwnerId(@Param("ownerId") Long ownerId);
+
+    @Query("""
+        SELECT COALESCE(SUM(r.totalRooms), 0) FROM Room r
+        WHERE r.hotel.id = :hotelId
+    """)
+    Integer countTotalRoomsByHotelId(@Param("hotelId") Long hotelId);
 }

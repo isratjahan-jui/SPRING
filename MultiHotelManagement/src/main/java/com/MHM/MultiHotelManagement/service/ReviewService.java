@@ -10,5 +10,6 @@ public interface ReviewService {
     ReviewResponseDTO updateReview(Long id, ReviewRequestDTO dto);
     ReviewResponseDTO getReviewById(Long id);
     List<ReviewResponseDTO> getReviewsByHotel(Long hotelId);
+    List<ReviewResponseDTO> getReviewsByCustomer(Long customerId);
     void deleteReview(Long id);
 }

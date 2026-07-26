@@ -40,6 +40,11 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getReviewsByHotel(hotelId));
     }
 
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<List<ReviewResponseDTO>> getByCustomer(@PathVariable Long customerId) {
+        return ResponseEntity.ok(reviewService.getReviewsByCustomer(customerId));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) {
         reviewService.deleteReview(id);

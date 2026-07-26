@@ -103,6 +103,56 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByStatus(BookingStatus status);
 
     @Query("""
+        SELECT COUNT(b) FROM Booking b
+        WHERE b.hotel.id = :hotelId
+        AND b.bookingDate BETWEEN :start AND :end
+    """)
+    long countBookingsByHotelAndDateRange(
+            @Param("hotelId") Long hotelId,
+            @Param("start") Date start,
+            @Param("end") Date end
+    );
+
+    @Query("""
+        SELECT COUNT(b) FROM Booking b
+        JOIN b.hotel h
+        WHERE h.owner.id = :ownerId
+        AND b.bookingDate BETWEEN :start AND :end
+    """)
+    long countBookingsByOwnerAndDateRange(
+            @Param("ownerId") Long ownerId,
+            @Param("start") Date start,
+            @Param("end") Date end
+    );
+
+    @Query("""
+        SELECT COALESCE(SUM(b.numberOfRooms), 0) FROM Booking b
+        WHERE b.hotel.id = :hotelId
+        AND b.status NOT IN ('CANCELLED', 'EXPIRED', 'NO_SHOW')
+        AND b.checkInDate < :checkOut
+        AND b.checkOutDate > :checkIn
+    """)
+    int countBookedRoomsForHotelInDateRange(
+            @Param("hotelId") Long hotelId,
+            @Param("checkIn") Date checkIn,
+            @Param("checkOut") Date checkOut
+    );
+
+    @Query("""
+        SELECT COALESCE(SUM(b.numberOfRooms), 0) FROM Booking b
+        JOIN b.hotel h
+        WHERE h.owner.id = :ownerId
+        AND b.status NOT IN ('CANCELLED', 'EXPIRED', 'NO_SHOW')
+        AND b.checkInDate < :checkOut
+        AND b.checkOutDate > :checkIn
+    """)
+    int countBookedRoomsForOwnerInDateRange(
+            @Param("ownerId") Long ownerId,
+            @Param("checkIn") Date checkIn,
+            @Param("checkOut") Date checkOut
+    );
+
+    @Query("""
         SELECT b FROM Booking b
         LEFT JOIN FETCH b.customer c
         LEFT JOIN FETCH c.user

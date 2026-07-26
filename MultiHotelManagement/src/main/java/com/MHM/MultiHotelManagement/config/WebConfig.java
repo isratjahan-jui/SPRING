@@ -32,5 +32,8 @@ public class WebConfig implements WebMvcConfigurer {
 
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("file:F:/GitHub/SPRING/assets/");
+
+        registry.addResourceHandler("/location/**")
+                .addResourceLocations("file:F:/GitHub/SPRING/assets/location/");
     }
 }

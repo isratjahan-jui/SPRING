@@ -18,6 +18,8 @@ public class ReviewMapperDTO {
         response.setId(review.getId());
         response.setRating(review.getRating());
         response.setComment(review.getComment());
+        response.setCustomerId(review.getCustomer() != null ? review.getCustomer().getId() : null);
+        response.setHotelId(review.getHotel() != null ? review.getHotel().getId() : null);
         response.setCustomerName(review.getCustomer() != null ? review.getCustomer().getCustomerName() : null);
         response.setHotelName(review.getHotel() != null ? review.getHotel().getHotelName() : null);
         response.setCreatedAt(review.getCreatedAt());

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { LocationService } from '../../../services/location.service';
 import { Location } from '../../../models/location.model';
+import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-admin-locations',
@@ -89,7 +90,7 @@ export class AdminLocations implements OnInit {
     };
     this.selectedFile = null;
     this.imagePreview = loc.locationImage
-      ? `http://localhost:8085/location/${loc.locationImage}`
+      ? `${environment.imageBaseUrl}/location/${loc.locationImage}`
       : null;
     this.showForm = true;
     this.cdr.markForCheck();
@@ -150,6 +151,6 @@ export class AdminLocations implements OnInit {
 
   getImageUrl(filename: string | undefined): string {
     if (!filename) return '';
-    return `http://localhost:8085/location/${filename}`;
+    return `${environment.imageBaseUrl}/location/${filename}`;
   }
 }

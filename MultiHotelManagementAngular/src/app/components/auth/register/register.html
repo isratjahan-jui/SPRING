@@ -1,38 +1,34 @@
-<div class="container py-5" style="max-width: 700px">
-  <h2 class="text-center mb-2">Create Account</h2>
-  <p class="text-center text-muted mb-5">Choose how you want to register</p>
+<div class="register-page">
+  <div class="register-container">
+    <div class="register-header">
+      <h2>Create Account</h2>
+      <p>Choose how you want to register</p>
+    </div>
 
-  <div class="row g-4">
-    <div class="col-md-6">
-      <a routerLink="/register/customer" class="text-decoration-none">
-        <div class="card h-100 shadow-sm border-0 text-center p-4 hover-card">
-          <div class="card-body">
-            <i class="bi bi-person-fill fs-1 text-primary mb-3"></i>
-            <h4 class="card-title text-dark">Customer</h4>
-            <p class="card-text text-muted">
-              Book hotels, manage reservations, and enjoy travel perks.
-            </p>
-          </div>
+    <div class="register-cards">
+      <a routerLink="/register/customer" class="register-card">
+        <div class="register-card-icon customer-icon">
+          <i class="bi bi-person-fill"></i>
+        </div>
+        <h4>Customer</h4>
+        <p>Book hotels, manage reservations, and enjoy travel perks.</p>
+        <div class="register-card-arrow">
+          <i class="bi bi-arrow-right"></i>
+        </div>
+      </a>
+
+      <a routerLink="/register/hotel-owner" class="register-card">
+        <div class="register-card-icon owner-icon">
+          <i class="bi bi-building"></i>
+        </div>
+        <h4>Hotel Owner</h4>
+        <p>List your hotel, manage rooms, and grow your business.</p>
+        <div class="register-card-arrow">
+          <i class="bi bi-arrow-right"></i>
         </div>
       </a>
     </div>
 
-    <div class="col-md-6">
-      <a routerLink="/register/hotel-owner" class="text-decoration-none">
-        <div class="card h-100 shadow-sm border-0 text-center p-4 hover-card">
-          <div class="card-body">
-            <i class="bi bi-building fs-1 text-success mb-3"></i>
-            <h4 class="card-title text-dark">Hotel Owner</h4>
-            <p class="card-text text-muted">
-              List your hotel, manage rooms, and grow your business.
-            </p>
-          </div>
-        </div>
-      </a>
-    </div>
+    <p class="register-switch">Already have an account? <a routerLink="/login">Login</a></p>
   </div>
-
-  <p class="text-center mt-4">
-    Already have an account? <a routerLink="/login" class="text-decoration-none">Login</a>
-  </p>
 </div>

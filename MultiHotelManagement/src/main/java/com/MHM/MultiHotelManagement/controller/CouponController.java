@@ -22,6 +22,17 @@ public class CouponController {
         return ResponseEntity.status(HttpStatus.CREATED).body(couponService.createCoupon(dto));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<CouponResponseDTO> update(@PathVariable Long id, @RequestBody CouponRequestDTO dto) {
+        return ResponseEntity.ok(couponService.updateCoupon(id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        couponService.deleteCoupon(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PutMapping("/{id}/deactivate")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
         couponService.deactivateCoupon(id);

@@ -57,6 +57,34 @@ public class CouponServiceImpl implements CouponService {
 
     @Override
     @Transactional
+    public CouponResponseDTO updateCoupon(Long id, CouponRequestDTO dto) {
+        Coupon coupon = couponRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Coupon not found"));
+
+        Hotel hotel = hotelRepository.findById(dto.getHotelId())
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
+
+        coupon.setCode(dto.getCode());
+        coupon.setDiscountPercent(dto.getDiscountPercent());
+        coupon.setDiscountAmount(dto.getDiscountAmount());
+        coupon.setValidFrom(dto.getValidFrom());
+        coupon.setValidUntil(dto.getValidUntil());
+        coupon.setHotel(hotel);
+
+        Coupon saved = couponRepository.save(coupon);
+        return CouponMapper.toDTO(saved);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCoupon(Long id) {
+        Coupon coupon = couponRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Coupon not found"));
+        couponRepository.delete(coupon);
+    }
+
+    @Override
+    @Transactional
     public void deactivateCoupon(Long id) {
         Coupon coupon = couponRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Coupon not found"));

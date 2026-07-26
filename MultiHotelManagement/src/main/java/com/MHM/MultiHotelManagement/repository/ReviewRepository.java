@@ -14,6 +14,17 @@ public interface ReviewRepository
 
     List<Review> findByHotel_Id(Long hotelId);
 
+    @Query("""
+        SELECT r FROM Review r
+        LEFT JOIN FETCH r.customer c
+        LEFT JOIN FETCH c.user
+        LEFT JOIN FETCH r.hotel
+        WHERE c.id = :customerId
+    """)
+    List<Review> findByCustomerIdWithDetails(
+            @Param("customerId") Long customerId
+    );
+
     Boolean existsByCustomer_IdAndHotel_Id(
             Long customerId, Long hotelId
     );

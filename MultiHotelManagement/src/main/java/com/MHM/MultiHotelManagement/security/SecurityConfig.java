@@ -62,11 +62,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/hotels/location/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/hotels/approved").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/hotels/search").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/hotels/owner/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/hotels/owner/**").hasAnyRole("HOTEL_OWNER", "ADMIN")
 
-                        // Location APIs (public)
+                        // Location APIs (public read)
                         .requestMatchers(HttpMethod.GET, "/api/locations").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/locations/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/locations/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/locations/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/locations/**").hasRole("ADMIN")
 
                         // Review APIs (public read)
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
@@ -138,6 +141,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/coupons/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/coupons/**").hasRole("HOTEL_OWNER")
                         .requestMatchers(HttpMethod.PUT, "/api/coupons/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/coupons/**").hasRole("HOTEL_OWNER")
                         .requestMatchers("/api/reports/**").hasRole("HOTEL_OWNER")
 
                         // ── Customer endpoints ────────────────────────────

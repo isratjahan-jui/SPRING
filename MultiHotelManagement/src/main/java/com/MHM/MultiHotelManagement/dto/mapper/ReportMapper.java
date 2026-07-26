@@ -10,8 +10,11 @@ public class ReportMapper {
         dto.setTotalBookings(report.getTotalBookings());
         dto.setIncome(report.getIncome());
         dto.setOccupancyRate(report.getOccupancyRate());
+        dto.setTotalRooms(report.getTotalRooms());
         dto.setType(report.getType());
         dto.setHotelName(report.getHotel().getHotelName());
+        dto.setDateRangeStart(report.getDateRangeStart());
+        dto.setDateRangeEnd(report.getDateRangeEnd());
         dto.setGeneratedAt(report.getGeneratedAt());
         dto.setUpdatedAt(report.getUpdatedAt());
         return dto;

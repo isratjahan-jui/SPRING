@@ -61,18 +61,22 @@ export class AdminDashboard implements OnInit {
         this.ownerCount = r.owners.length;
         this.customerCount = r.customers.length;
         this.approvedHotelCount = r.hotels.filter((h: any) => h.status === 'APPROVED').length;
-        this.pendingHotelCount = r.hotels.filter((h: any) => h.status === 'PENDING_APPROVAL').length;
+        this.pendingHotelCount = r.hotels.filter(
+          (h: any) => h.status === 'PENDING_APPROVAL',
+        ).length;
         this.rejectedHotelCount = r.hotels.filter((h: any) => h.status === 'REJECTED').length;
         this.totalBookings = r.bookings.length;
         this.activeBookings = r.bookings.filter(
-          (b: any) => b.status === 'PENDING' || b.status === 'CONFIRMED' || b.status === 'CHECKED_IN',
+          (b: any) =>
+            b.status === 'PENDING' || b.status === 'CONFIRMED' || b.status === 'CHECKED_IN',
         ).length;
         this.totalPayments = r.payments.length;
         this.paidPayments = r.payments.filter((p: any) => p.status === 'PAID').length;
         this.totalCommission = r.commission;
         this.totalTickets = r.tickets.length;
         this.openTickets = r.tickets.filter(
-          (t: any) => t.status === 'OPEN' || t.status === 'IN_PROGRESS' || t.status === 'ESCALATED',
+          (t: any) =>
+            t.status === 'PENDING' || t.status === 'IN_PROGRESS' || t.status === 'ESCALATED',
         ).length;
         this.loading = false;
         this.cdr.markForCheck();

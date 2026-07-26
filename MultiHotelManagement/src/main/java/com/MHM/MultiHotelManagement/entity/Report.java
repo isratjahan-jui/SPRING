@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -21,11 +22,15 @@ public class Report {
     private Long id;
 
     private int totalBookings;
-    private Double income;          // income (daily/weekly/monthly/yearly)
+    private Double income;
     private Double occupancyRate;
+    private int totalRooms;
 
     @Enumerated(EnumType.STRING)
-    private ReportType type;        // DAILY, WEEKLY, MONTHLY, YEARLY
+    private ReportType type;
+
+    private LocalDate dateRangeStart;
+    private LocalDate dateRangeEnd;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)

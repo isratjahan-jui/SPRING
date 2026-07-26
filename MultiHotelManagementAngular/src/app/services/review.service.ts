@@ -13,6 +13,10 @@ export class ReviewService {
     return this.http.get<ReviewResponse[]>(`${this.API_URL}/hotel/${hotelId}`);
   }
 
+  getByCustomer(customerId: number) {
+    return this.http.get<ReviewResponse[]>(`${this.API_URL}/customer/${customerId}`);
+  }
+
   getById(id: number) {
     return this.http.get<ReviewResponse>(`${this.API_URL}/${id}`);
   }
