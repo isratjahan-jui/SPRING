@@ -11,6 +11,8 @@ import com.MHM.MultiHotelManagement.repository.LocationRepository;
 import com.MHM.MultiHotelManagement.service.LocationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -69,6 +71,14 @@ public class LocationServiceImpl implements LocationService {
                 .stream()
                 .map(LocationMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    // ── Get All Paginated ────────────────────────────────────────
+    @Override
+    @Transactional(readOnly = true)
+    public Page<LocationResponseDTO> getAllLocations(Pageable pageable) {
+        return locationRepo.findAllPaginated(pageable)
+                .map(LocationMapper::toDTO);
     }
 
     // ── Get by ID ────────────────────────────────────────────────
@@ -143,6 +153,15 @@ public class LocationServiceImpl implements LocationService {
 
         if (dto.getCity() != null)
             location.setCity(dto.getCity());
+
+        if (dto.getDistrict() != null)
+            location.setDistrict(dto.getDistrict());
+
+        if (dto.getDivision() != null)
+            location.setDivision(dto.getDivision());
+
+        if (dto.getUpazila() != null)
+            location.setUpazila(dto.getUpazila());
 
         // Image update
         if (image != null && !image.isEmpty()) {

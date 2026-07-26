@@ -50,15 +50,35 @@ public class HotelController {
     public ResponseEntity<List<HotelResponseDTO>> getByCity(@PathVariable String city) {
         return ResponseEntity.ok(hotelService.getHotelsByCity(city));
     }
-    // ✅ নতুন endpoint: Approved hotels by location
+
     @GetMapping("/location/{locationId}/approved")
     public ResponseEntity<List<HotelResponseDTO>> getApprovedHotelsByLocation(@PathVariable Long locationId) {
         return ResponseEntity.ok(hotelService.getApprovedHotelsByLocation(locationId));
     }
 
+    @GetMapping("/division/{divisionName}/approved")
+    public ResponseEntity<List<HotelResponseDTO>> getHotelsByDivision(@PathVariable String divisionName) {
+        return ResponseEntity.ok(hotelService.getApprovedHotelsByDivision(divisionName));
+    }
+
+    @GetMapping("/district/{districtName}/count")
+    public ResponseEntity<Long> getHotelCountByDistrict(@PathVariable String districtName) {
+        return ResponseEntity.ok(hotelService.getHotelCountByDistrict(districtName));
+    }
+
+    @GetMapping("/upazila/{upazilaName}/approved")
+    public ResponseEntity<List<HotelResponseDTO>> getHotelsByUpazila(@PathVariable String upazilaName) {
+        return ResponseEntity.ok(hotelService.getApprovedHotelsByUpazila(upazilaName));
+    }
+
+    @GetMapping("/place/{placeName}/approved")
+    public ResponseEntity<List<HotelResponseDTO>> getHotelsByPlace(@PathVariable String placeName) {
+        return ResponseEntity.ok(hotelService.getApprovedHotelsByPlace(placeName));
+    }
+
     @GetMapping("/search")
     public ResponseEntity<List<HotelResponseDTO>> search(@RequestParam String q) {
-        return ResponseEntity.ok(hotelService.searchHotels(q));
+        return ResponseEntity.ok(hotelService.unifiedSearch(q));
     }
 
     @GetMapping("/{id:[0-9]+}")
@@ -89,5 +109,4 @@ public class HotelController {
         hotelService.deleteHotel(id);
         return ResponseEntity.ok("Hotel deleted successfully");
     }
-
 }

@@ -23,6 +23,10 @@ export class App {
     '/register',
     '/register/customer',
     '/register/hotel-owner',
+    '/forgot-password',
+    '/reset-password',
+    '/verify-email',
+    '/deals',
   ];
 
   showPublicLayout = toSignal(

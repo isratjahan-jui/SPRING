@@ -70,7 +70,10 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
         WHERE h.status = 'APPROVED'
         AND (LOWER(l.city) LIKE LOWER(CONCAT('%', :keyword, '%'))
              OR LOWER(l.locationName) LIKE LOWER(CONCAT('%', :keyword, '%'))
-             OR LOWER(h.hotelName) LIKE LOWER(CONCAT('%', :keyword, '%')))
+             OR LOWER(h.hotelName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+             OR LOWER(l.district) LIKE LOWER(CONCAT('%', :keyword, '%'))
+             OR LOWER(l.division) LIKE LOWER(CONCAT('%', :keyword, '%'))
+             OR LOWER(l.upazila) LIKE LOWER(CONCAT('%', :keyword, '%')))
     """)
     List<Hotel> searchApprovedHotels(@Param("keyword") String keyword);
 
@@ -83,8 +86,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
     """)
     List<Hotel> findHotelsByLocationId(@Param("locationId") Long locationId);
 
-
-    // ✅ নতুন method: Approved hotels by location
     @Query("""
         SELECT h FROM Hotel h
         LEFT JOIN FETCH h.location l
@@ -102,4 +103,52 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
         LEFT JOIN FETCH h.owner o
     """)
     List<Hotel> findAllWithDetails();
+
+    @Query("""
+        SELECT COUNT(h) FROM Hotel h
+        JOIN h.location l
+        WHERE LOWER(l.district) = LOWER(:districtName)
+        AND h.status = 'APPROVED'
+    """)
+    Long countApprovedHotelsByDistrict(@Param("districtName") String districtName);
+
+    @Query("""
+        SELECT h FROM Hotel h
+        LEFT JOIN FETCH h.location l
+        LEFT JOIN FETCH h.hotelDetails hd
+        LEFT JOIN FETCH h.owner o
+        WHERE LOWER(l.division) = LOWER(:divisionName)
+        AND h.status = 'APPROVED'
+    """)
+    List<Hotel> findApprovedHotelsByDivision(@Param("divisionName") String divisionName);
+
+    @Query("""
+        SELECT h FROM Hotel h
+        LEFT JOIN FETCH h.location l
+        LEFT JOIN FETCH h.hotelDetails hd
+        LEFT JOIN FETCH h.owner o
+        WHERE LOWER(l.district) = LOWER(:districtName)
+        AND h.status = 'APPROVED'
+    """)
+    List<Hotel> findApprovedHotelsByDistrict(@Param("districtName") String districtName);
+
+    @Query("""
+        SELECT h FROM Hotel h
+        LEFT JOIN FETCH h.location l
+        LEFT JOIN FETCH h.hotelDetails hd
+        LEFT JOIN FETCH h.owner o
+        WHERE LOWER(l.upazila) = LOWER(:upazilaName)
+        AND h.status = 'APPROVED'
+    """)
+    List<Hotel> findApprovedHotelsByUpazila(@Param("upazilaName") String upazilaName);
+
+    @Query("""
+        SELECT h FROM Hotel h
+        LEFT JOIN FETCH h.location l
+        LEFT JOIN FETCH h.hotelDetails hd
+        LEFT JOIN FETCH h.owner o
+        WHERE LOWER(l.locationName) = LOWER(:placeName)
+        AND h.status = 'APPROVED'
+    """)
+    List<Hotel> findApprovedHotelsByPlace(@Param("placeName") String placeName);
 }

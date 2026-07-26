@@ -1,82 +1,113 @@
-
-<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light">
-  <div class="card shadow border-0" style="width: 100%; max-width: 420px;">
-
-    <!-- Header -->
-    <div class="card-header bg-primary text-white text-center py-4">
-      <i class="bi bi-box-seam fs-1 d-block mb-1"></i>
-      <h5 class="fw-bold mb-0">Hotel Management</h5>
-      <small class="opacity-75">Sign in to your account</small>
+<div class="auth-page">
+  <div class="auth-left">
+    <div class="auth-brand">
+      <span class="auth-brand-icon">T</span>
+      <span class="auth-brand-text">Trip<span>Nest</span></span>
     </div>
+    <div class="auth-hero-content">
+      
+      <h1>Find your perfect stay</h1>
+      <p>Discover thousands of hotels across Bangladesh at the best prices.</p>
+      <div class="auth-features">
+        <div class="auth-feature">
+          <span class="auth-feature-icon">&#127976;</span>
+          <span>Premium Hotels</span>
+        </div>
+        <div class="auth-feature">
+          <span class="auth-feature-icon">&#128176;</span>
+          <span>Best Price Guarantee</span>
+        </div>
+        <div class="auth-feature">
+          <span class="auth-feature-icon">&#128274;</span>
+          <span>Secure Booking</span>
+        </div>
+      </div>
+    </div>
+    <div class="auth-left-footer">
+      &copy; 2026 TripNest. All rights reserved.
+    </div>
+  </div>
 
-    <div class="card-body p-4">
-
-      <!-- Error alert -->
-      <div *ngIf="errorMessage" class="alert alert-danger d-flex align-items-center gap-2 py-2">
-        <i class="bi bi-exclamation-triangle-fill"></i>
-        <span>{{ errorMessage }}</span>
+  <div class="auth-right">
+    <div class="auth-form-wrapper">
+      <div class="auth-form-header">
+        <h2>Welcome back</h2>
+        <p>Sign in to continue to your account</p>
       </div>
 
-      <form #loginForm="ngForm" (ngSubmit)="loginForm.valid && login()" novalidate>
+      @if (errorMessage) {
+        <div class="auth-error">
+          <span class="auth-error-icon">!</span>
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
 
-        <!-- Email -->
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Email</label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
-            <input
-              type="email"
-              class="form-control"
-              [(ngModel)]="dto.email"
-              name="email"
-              #emailRef="ngModel"
-              required
-              email
-              placeholder="you@example.com">
-          </div>
-          <div class="text-danger small mt-1" *ngIf="emailRef.invalid && emailRef.touched">
-            Enter a valid email.
-          </div>
+      <form #loginForm="ngForm" (ngSubmit)="loginForm.valid && login()" novalidate>
+        <div class="auth-field">
+          <label class="auth-label">Email address</label>
+          <input
+            type="email"
+            class="auth-input"
+            [(ngModel)]="dto.email"
+            name="email"
+            #emailRef="ngModel"
+            required
+            email
+            placeholder="you@example.com"
+          />
+          @if (emailRef.invalid && emailRef.touched) {
+            <span class="auth-field-error">Please enter a valid email address.</span>
+          }
         </div>
 
-        <!-- Password -->
-        <div class="mb-4">
-          <div class="d-flex justify-content-between">
-            <label class="form-label fw-semibold">Password</label>
-            <a href="forgot-password" class="small text-primary text-decoration-none">
-              Forgot password?
-            </a>
+        <div class="auth-field">
+          <div class="auth-label-row">
+            <label class="auth-label">Password</label>
+            <a routerLink="/forgot-password" class="auth-link">Forgot password?</a>
           </div>
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+          <div class="auth-password-wrap">
             <input
               [type]="showPassword ? 'text' : 'password'"
-              class="form-control"
+              class="auth-input"
               [(ngModel)]="dto.password"
               name="password"
               #passwordRef="ngModel"
               required
-              placeholder="Your password">
-            <button class="btn btn-outline-secondary" type="button" (click)="showPassword = !showPassword">
-              <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+              placeholder="Enter your password"
+            />
+            <button
+              type="button"
+              class="auth-password-toggle"
+              (click)="showPassword = !showPassword"
+            >
+              {{ showPassword ? '&#128065;' : '&#128064;' }}
             </button>
           </div>
-          <div class="text-danger small mt-1" *ngIf="passwordRef.invalid && passwordRef.touched">
-            Password is required.
-          </div>
+          @if (passwordRef.invalid && passwordRef.touched) {
+            <span class="auth-field-error">Password is required.</span>
+          }
         </div>
 
-        <!-- Submit -->
         <button
-          class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+          class="auth-submit"
           type="submit"
-          [disabled]="loading">
-          <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
-          <i class="bi bi-box-arrow-in-right" *ngIf="!loading"></i>
-          {{ loading ? 'Signing in...' : 'Sign In' }}
+          [disabled]="loading"
+        >
+          @if (loading) {
+            <span class="auth-spinner"></span>
+          }
+          {{ loading ? 'Signing in...' : 'Sign in' }}
         </button>
-
       </form>
+
+      <div class="auth-divider">
+        <span>or</span>
+      </div>
+
+      <p class="auth-switch">
+        Don't have an account?
+        <a routerLink="/register" class="auth-link-bold">Create one</a>
+      </p>
     </div>
   </div>
 </div>

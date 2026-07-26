@@ -7,5 +7,7 @@ public class LocationRequestDTO {
 
     private String locationName;
     private String city;
-    // image আলাদা MultipartFile হিসেবে আসবে
+    private String district;
+    private String division;
+    private String upazila;
 }

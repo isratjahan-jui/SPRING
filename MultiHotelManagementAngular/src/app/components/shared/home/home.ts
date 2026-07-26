@@ -25,6 +25,20 @@ export class HomeComponent implements OnInit {
   searchActive = false;
   imageBaseUrl = environment.imageBaseUrl;
 
+  activeDivision = '';
+  loadingHotels = false;
+
+  divisions = [
+    { name: 'Dhaka', icon: '🏙️' },
+    { name: 'Chattogram', icon: '⚓' },
+    { name: 'Rajshahi', icon: '🥭' },
+    { name: 'Khulna', icon: '🌿' },
+    { name: 'Barishal', icon: '🚢' },
+    { name: 'Sylhet', icon: '🍵' },
+    { name: 'Rangpur', icon: '🌾' },
+    { name: 'Mymensingh', icon: '🎓' },
+  ];
+
   ngOnInit() {
     this.loadHotels();
     this.dealService.getAll().subscribe((data) => (this.deals = data));
@@ -43,6 +57,7 @@ export class HomeComponent implements OnInit {
       this.loadHotels();
       return;
     }
+    this.activeDivision = '';
     this.hotelService.search(q).subscribe((data) => {
       this.hotels = data;
       this.searchActive = true;
@@ -51,6 +66,32 @@ export class HomeComponent implements OnInit {
 
   clearSearch() {
     this.searchKeyword = '';
+    this.loadHotels();
+  }
+
+  filterByDivision(division: string) {
+    if (this.activeDivision === division) {
+      this.clearDivisionFilter();
+      return;
+    }
+    this.searchKeyword = '';
+    this.searchActive = false;
+    this.activeDivision = division;
+    this.loadingHotels = true;
+    this.hotelService.getByCity(division).subscribe({
+      next: (data) => {
+        this.hotels = data;
+        this.loadingHotels = false;
+      },
+      error: () => {
+        this.hotels = [];
+        this.loadingHotels = false;
+      },
+    });
+  }
+
+  clearDivisionFilter() {
+    this.activeDivision = '';
     this.loadHotels();
   }
 }

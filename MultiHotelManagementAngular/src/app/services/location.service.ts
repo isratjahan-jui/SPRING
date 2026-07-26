@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Location } from '../models/location.model';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Location, PaginatedLocations } from '../models/location.model';
 import { environment } from '../../environments/environments';
 
 @Injectable({ providedIn: 'root' })
@@ -10,7 +10,14 @@ export class LocationService {
   constructor(private http: HttpClient) {}
 
   getAll() {
-    return this.http.get<Location[]>(this.apiUrl);
+    return this.http.get<Location[]>(`${this.apiUrl}/all`);
+  }
+
+  getPaginated(page: number = 0, size: number = 10) {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+    return this.http.get<PaginatedLocations>(this.apiUrl, { params });
   }
 
   create(data: FormData) {

@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 public class LocationMapper {
 
-    // Entity → ResponseDTO (hotels ছাড়া — simple)
     public static LocationResponseDTO toDTO(Location location) {
         LocationResponseDTO dto = new LocationResponseDTO();
 
@@ -17,8 +16,11 @@ public class LocationMapper {
         dto.setLocationName(location.getLocationName());
         dto.setLocationImage(location.getLocationImage());
         dto.setCity(location.getCity());
+        dto.setDistrict(location.getDistrict());
+        dto.setDivision(location.getDivision());
+        dto.setUpazila(location.getUpazila());
+        dto.setCreatedAt(location.getCreatedAt());
 
-        // Hotel count
         dto.setTotalHotels(
                 location.getHotels() != null
                         ? location.getHotels().size()
@@ -28,13 +30,11 @@ public class LocationMapper {
         return dto;
     }
 
-    // Entity → ResponseDTO (hotels সহ — detailed)
     public static LocationResponseDTO toDTOWithHotels(
             Location location
     ) {
         LocationResponseDTO dto = toDTO(location);
 
-        // Hotels এর basic info
         if (location.getHotels() != null
                 && !location.getHotels().isEmpty()) {
             dto.setHotels(
@@ -46,11 +46,9 @@ public class LocationMapper {
                                         .HotelBasicInfo();
                                 info.setId(hotel.getId());
                                 info.setName(hotel.getHotelName());
-
                                 info.setPricePerNight(
                                         hotel.getPricePerNight()
                                 );
-
                                 info.setRating(hotel.getRating());
                                 info.setStatus(
                                         hotel.getStatus() != null
@@ -68,11 +66,13 @@ public class LocationMapper {
         return dto;
     }
 
-    // RequestDTO → Entity
     public static Location toEntity(LocationRequestDTO dto) {
         Location location = new Location();
         location.setLocationName(dto.getLocationName());
         location.setCity(dto.getCity());
+        location.setDistrict(dto.getDistrict());
+        location.setDivision(dto.getDivision());
+        location.setUpazila(dto.getUpazila());
         return location;
     }
 }

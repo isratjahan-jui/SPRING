@@ -14,10 +14,10 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
               <li>
-                <span class="dropdown-item-text small text-muted">{{ role }}</span>
+                <span class="dropdown-item-text small" style="color: var(--text-muted);">{{ role }}</span>
               </li>
               <li><hr class="dropdown-divider" /></li>
-              <li><a class="dropdown-item text-danger" href="#" (click)="logout()">Logout</a></li>
+              <li><a class="dropdown-item" style="color: var(--danger);" href="#" (click)="logout()">Logout</a></li>
             </ul>
           </div>
         </div>
@@ -25,47 +25,43 @@
     </div>
   </header>
 } @else {
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-    <a class="navbar-brand fw-bold" routerLink="/">TripNest</a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#mainNav"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="mainNav">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link" routerLink="/">Home</a></li>
-        <li class="nav-item"><a class="nav-link" routerLink="/hotels">Hotels</a></li>
-      </ul>
-      @if (isLoggedIn) {
-        <div class="d-flex align-items-center gap-3">
-          <a class="btn btn-outline-light btn-sm" [routerLink]="dashboardRoute">Dashboard</a>
+  <nav class="tn-navbar">
+    <div class="tn-navbar-inner">
+      <div class="tn-nav-left">
+        <a class="tn-brand" routerLink="/">
+          <span class="tn-brand-icon">T</span>
+          <span class="tn-brand-text">Trip<span class="tn-brand-accent">Nest</span></span>
+        </a>
+        <ul class="tn-nav-links">
+          <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a></li>
+          <li><a routerLink="/hotels" routerLinkActive="active">Hotels</a></li>
+          <li><a routerLink="/deals" routerLinkActive="active">Deals</a></li>
+        </ul>
+      </div>
+      <div class="tn-nav-right">
+        @if (isLoggedIn) {
+          <a class="tn-btn tn-btn-outline-light btn-sm" [routerLink]="dashboardRoute">Dashboard</a>
           <app-notification-dropdown />
           <div class="dropdown">
-            <button class="user-pill dropdown-toggle" data-bs-toggle="dropdown">
-              <div class="user-avatar-sm">{{ userInitial }}</div>
-              <span class="user-email">{{ userName }}</span>
+            <button class="tn-user-pill dropdown-toggle" data-bs-toggle="dropdown">
+              <div class="tn-user-avatar">{{ userInitial }}</div>
+              <span class="tn-user-name">{{ userName }}</span>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
               <li>
-                <span class="dropdown-item-text small text-muted">{{ role }}</span>
+                <span class="dropdown-item-text small" style="color: var(--text-muted);">{{ role }}</span>
               </li>
               <li><hr class="dropdown-divider" /></li>
               <li><a class="dropdown-item" [routerLink]="dashboardRoute">Dashboard</a></li>
               <li><hr class="dropdown-divider" /></li>
-              <li><a class="dropdown-item text-danger" href="#" (click)="logout()">Logout</a></li>
+              <li><a class="dropdown-item" style="color: var(--danger);" href="#" (click)="logout()">Logout</a></li>
             </ul>
           </div>
-        </div>
-      } @else {
-        <div class="d-flex">
-          <a routerLink="/login" class="btn btn-outline-light btn-sm me-2">Login</a>
-          <a routerLink="/register" class="btn btn-primary btn-sm">Register</a>
-        </div>
-      }
+        } @else {
+          <a routerLink="/login" class="tn-btn tn-btn-ghost btn-sm">Log in</a>
+          <a routerLink="/register" class="tn-btn tn-btn-accent btn-sm">Sign up</a>
+        }
+      </div>
     </div>
   </nav>
 }

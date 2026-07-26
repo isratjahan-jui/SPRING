@@ -4,6 +4,9 @@ import com.MHM.MultiHotelManagement.dto.request.LocationRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.LocationResponseDTO;
 import com.MHM.MultiHotelManagement.service.LocationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +23,6 @@ public class LocationController {
     private final LocationService locationService;
 
     // ── Create ───────────────────────────────────────────────────
-    // POST /api/locations
     @PostMapping
     public ResponseEntity<LocationResponseDTO> create(
             @RequestPart("data") LocationRequestDTO dto,
@@ -32,15 +34,23 @@ public class LocationController {
                 .body(locationService.create(dto, image));
     }
 
-    // ── Get All ──────────────────────────────────────────────────
-    // GET /api/locations
+    // ── Get All Paginated ────────────────────────────────────────
     @GetMapping
+    public ResponseEntity<Page<LocationResponseDTO>> getAllPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(locationService.getAllLocations(pageable));
+    }
+
+    // ── Get All (no pagination) ──────────────────────────────────
+    @GetMapping("/all")
     public ResponseEntity<List<LocationResponseDTO>> getAll() {
         return ResponseEntity.ok(locationService.getAll());
     }
 
     // ── Get by ID ────────────────────────────────────────────────
-    // GET /api/locations/1
     @GetMapping("/{id}")
     public ResponseEntity<LocationResponseDTO> getById(
             @PathVariable Long id
@@ -49,7 +59,6 @@ public class LocationController {
     }
 
     // ── Get by ID with Hotels ────────────────────────────────────
-    // GET /api/locations/1/hotels
     @GetMapping("/{id}/hotels")
     public ResponseEntity<LocationResponseDTO> getByIdWithHotels(
             @PathVariable Long id
@@ -60,7 +69,6 @@ public class LocationController {
     }
 
     // ── Get by City ──────────────────────────────────────────────
-    // GET /api/locations/city/Dhaka
     @GetMapping("/city/{city}")
     public ResponseEntity<List<LocationResponseDTO>> getByCity(
             @PathVariable String city
@@ -71,7 +79,6 @@ public class LocationController {
     }
 
     // ── Search ───────────────────────────────────────────────────
-    // GET /api/locations/search?keyword=dhaka
     @GetMapping("/search")
     public ResponseEntity<List<LocationResponseDTO>> search(
             @RequestParam String keyword
@@ -82,7 +89,6 @@ public class LocationController {
     }
 
     // ── Get Locations with Hotels ────────────────────────────────
-    // GET /api/locations/with-hotels
     @GetMapping("/with-hotels")
     public ResponseEntity<List<LocationResponseDTO>> getWithHotels() {
         return ResponseEntity.ok(
@@ -91,7 +97,6 @@ public class LocationController {
     }
 
     // ── Update ───────────────────────────────────────────────────
-    // PUT /api/locations/1
     @PutMapping("/{id}")
     public ResponseEntity<LocationResponseDTO> update(
             @PathVariable Long id,
@@ -105,7 +110,6 @@ public class LocationController {
     }
 
     // ── Delete ───────────────────────────────────────────────────
-    // DELETE /api/locations/1
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         locationService.delete(id);

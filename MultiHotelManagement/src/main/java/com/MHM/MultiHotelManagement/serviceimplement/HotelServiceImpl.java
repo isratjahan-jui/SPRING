@@ -220,4 +220,67 @@ public class HotelServiceImpl implements HotelService {
     }
 
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<HotelResponseDTO> getApprovedHotelsByDivision(String divisionName) {
+        return hotelRepo.findApprovedHotelsByDivision(divisionName)
+                .stream().map(HotelMapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Long getHotelCountByDistrict(String districtName) {
+        return hotelRepo.countApprovedHotelsByDistrict(districtName);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<HotelResponseDTO> getApprovedHotelsByUpazila(String upazilaName) {
+        return hotelRepo.findApprovedHotelsByUpazila(upazilaName)
+                .stream().map(HotelMapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<HotelResponseDTO> getApprovedHotelsByPlace(String placeName) {
+        return hotelRepo.findApprovedHotelsByPlace(placeName)
+                .stream().map(HotelMapper::toDTO).collect(Collectors.toList());
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<HotelResponseDTO> unifiedSearch(String keyword) {
+        keyword = keyword.trim().toLowerCase();
+
+        // 1. Division wise
+        List<Hotel> divisionHotels = hotelRepo.findApprovedHotelsByDivision(keyword);
+        if (!divisionHotels.isEmpty()) {
+            return divisionHotels.stream().map(HotelMapper::toDTO).toList();
+        }
+
+        // 2. District wise
+        List<Hotel> districtHotels = hotelRepo.findApprovedHotelsByDistrict(keyword);
+        if (!districtHotels.isEmpty()) {
+            return districtHotels.stream().map(HotelMapper::toDTO).toList();
+        }
+
+        // 3. Upazila wise
+        List<Hotel> upazilaHotels = hotelRepo.findApprovedHotelsByUpazila(keyword);
+        if (!upazilaHotels.isEmpty()) {
+            return upazilaHotels.stream().map(HotelMapper::toDTO).toList();
+        }
+
+        // 4. Place wise
+        List<Hotel> placeHotels = hotelRepo.findApprovedHotelsByPlace(keyword);
+        if (!placeHotels.isEmpty()) {
+            return placeHotels.stream().map(HotelMapper::toDTO).toList();
+        }
+
+        // 5. Fallback → generic search
+        return hotelRepo.searchApprovedHotels(keyword)
+                .stream().map(HotelMapper::toDTO).toList();
+    }
+
+
 }

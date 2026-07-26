@@ -20,5 +20,11 @@ public interface HotelService {
     HotelResponseDTO approveHotel(Long id);
     HotelResponseDTO rejectHotel(Long id, String reason);
     List<HotelResponseDTO> getApprovedHotelsByLocation(Long locationId);
+    List<HotelResponseDTO> getApprovedHotelsByDivision(String divisionName);
+    Long getHotelCountByDistrict(String districtName);
+    List<HotelResponseDTO> getApprovedHotelsByUpazila(String upazilaName);
+    List<HotelResponseDTO> getApprovedHotelsByPlace(String placeName);
+    List<HotelResponseDTO> unifiedSearch(String keyword);
+
 }
 

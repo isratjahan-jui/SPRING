@@ -21,13 +21,19 @@ public class Location {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String locationName;
 
     private String locationImage;
 
     @Column(nullable = false)
     private String city;
+
+    private String district;
+
+    private String division;
+
+    private String upazila;
 
     // Location ↔ Hotel (One-to-Many)
     @JsonIgnore

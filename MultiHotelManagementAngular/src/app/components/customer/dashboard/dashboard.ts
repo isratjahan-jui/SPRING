@@ -1,12 +1,15 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { CustomerService } from '../../../services/customer.service';
 import { BookingService } from '../../../services/booking.service';
 import { InvoiceService } from '../../../services/invoice.service';
+import { HotelService } from '../../../services/hotel.service';
 import { Customer } from '../../../models/customer.model';
 import { Booking } from '../../../models/booking.model';
+import { Hotel } from '../../../models/hotel.model';
 import { InvoiceResponse } from '../../../models/invoice.model';
 import { StorageService } from '../../../services/storage.service';
 import { LoginResponse } from '../../../models/auth.model';
@@ -14,7 +17,7 @@ import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-customer-dashboard',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -23,6 +26,7 @@ export class CustomerDashboard implements OnInit {
   private customerService = inject(CustomerService);
   private bookingService = inject(BookingService);
   private invoiceService = inject(InvoiceService);
+  private hotelService = inject(HotelService);
   private storage = inject(StorageService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -40,6 +44,11 @@ export class CustomerDashboard implements OnInit {
   currentStay: Booking | null = null;
   totalSpent = 0;
   pendingCount = 0;
+
+  searchKeyword = '';
+  searchResults: Hotel[] = [];
+  searchActive = false;
+  searchLoading = false;
 
   ngOnInit() {
     this.user = this.storage.getUser();
@@ -140,5 +149,35 @@ export class CustomerDashboard implements OnInit {
       default:
         return 'bg-light text-dark';
     }
+  }
+
+  search() {
+    const q = this.searchKeyword.trim();
+    if (!q) {
+      this.clearSearch();
+      return;
+    }
+    this.searchLoading = true;
+    this.hotelService.search(q).subscribe({
+      next: (data) => {
+        this.searchResults = data;
+        this.searchActive = true;
+        this.searchLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.searchResults = [];
+        this.searchActive = true;
+        this.searchLoading = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  clearSearch() {
+    this.searchKeyword = '';
+    this.searchResults = [];
+    this.searchActive = false;
+    this.cdr.markForCheck();
   }
 }

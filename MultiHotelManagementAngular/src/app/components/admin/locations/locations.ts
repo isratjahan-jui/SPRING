@@ -1,12 +1,13 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { LocationService } from '../../../services/location.service';
 import { Location } from '../../../models/location.model';
 
 @Component({
   selector: 'app-admin-locations',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './locations.html',
   styleUrl: './locations.css',
 })
@@ -17,12 +18,20 @@ export class AdminLocations implements OnInit {
   locations: Location[] = [];
   loading = true;
 
+  currentPage = 0;
+  pageSize = 10;
+  totalElements = 0;
+  totalPages = 0;
+
   showForm = false;
   editing = false;
   selectedId: number | null = null;
-  form = {
+  form: any = {
     locationName: '',
     city: '',
+    district: '',
+    division: '',
+    upazila: '',
   };
   selectedFile: File | null = null;
   imagePreview: string | null = null;
@@ -33,9 +42,11 @@ export class AdminLocations implements OnInit {
 
   loadLocations() {
     this.loading = true;
-    this.locationService.getAll().subscribe({
+    this.locationService.getPaginated(this.currentPage, this.pageSize).subscribe({
       next: (data) => {
-        this.locations = data;
+        this.locations = data.content;
+        this.totalElements = data.totalElements;
+        this.totalPages = data.totalPages;
         this.loading = false;
         this.cdr.markForCheck();
       },
@@ -46,10 +57,20 @@ export class AdminLocations implements OnInit {
     });
   }
 
+  getSerial(index: number): number {
+    return this.currentPage * this.pageSize + index + 1;
+  }
+
+  goToPage(page: number) {
+    if (page < 0 || page >= this.totalPages) return;
+    this.currentPage = page;
+    this.loadLocations();
+  }
+
   openCreate() {
     this.editing = false;
     this.selectedId = null;
-    this.form = { locationName: '', city: '' };
+    this.form = { locationName: '', city: '', district: '', division: '', upazila: '' };
     this.selectedFile = null;
     this.imagePreview = null;
     this.showForm = true;
@@ -62,6 +83,9 @@ export class AdminLocations implements OnInit {
     this.form = {
       locationName: loc.locationName,
       city: loc.city,
+      district: loc.district || '',
+      division: loc.division || '',
+      upazila: loc.upazila || '',
     };
     this.selectedFile = null;
     this.imagePreview = loc.locationImage

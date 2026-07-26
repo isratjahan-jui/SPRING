@@ -1,6 +1,7 @@
 package com.MHM.MultiHotelManagement.dto.response;
 
 import lombok.Data;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -8,18 +9,18 @@ public class LocationResponseDTO {
 
     private Long id;
 
-    // Location info
     private String locationName;
     private String locationImage;
     private String city;
+    private String district;
+    private String division;
+    private String upazila;
 
-    // এই location এ কতটা hotel আছে
     private Integer totalHotels;
+    private LocalDateTime createdAt;
 
-    // Hotel এর basic info (optional)
     private List<HotelBasicInfo> hotels;
 
-    // ── Inner class — Hotel এর basic info ──
     @Data
     public static class HotelBasicInfo {
         private Long id;

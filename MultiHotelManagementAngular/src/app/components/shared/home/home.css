@@ -1,5 +1,5 @@
 .hero-section {
-  background: linear-gradient(135deg, var(--primary-lighter) 0%, #ebf4ff 50%, #f0f7ff 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, #1A5C5E 100%);
   padding: 60px 0;
 }
 .search-group {
@@ -31,4 +31,57 @@
 .hotel-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg) !important;
+}
+
+/* ===== Division Pills ===== */
+.division-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.division-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.division-pill:hover {
+  border-color: var(--primary-light);
+  background: var(--primary-lighter);
+  color: var(--primary);
+}
+
+.division-pill.active {
+  background: var(--primary);
+  color: var(--text-on-primary);
+  border-color: var(--primary);
+}
+
+.division-icon {
+  font-size: 1.1rem;
+}
+
+.division-name {
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .division-grid {
+    gap: 8px;
+  }
+  .division-pill {
+    padding: 8px 14px;
+    font-size: 0.82rem;
+  }
 }

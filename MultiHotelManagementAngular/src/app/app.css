@@ -6,10 +6,12 @@
   width: 100%;
   background: var(--bg-page);
 }
+
 .page-content {
   flex: 1;
   padding: 24px;
 }
+
 @media (max-width: 768px) {
   .main-wrap {
     margin-left: 0;

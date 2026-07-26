@@ -1,13 +1,13 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, Router, NavigationEnd } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { NotificationDropdown } from '../notification-dropdown/notification-dropdown';
 import { filter, map } from 'rxjs';
 
 @Component({
   selector: 'app-header',
-  imports: [CommonModule, RouterLink, NotificationDropdown],
+  imports: [CommonModule, RouterLink, RouterLinkActive, NotificationDropdown],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
@@ -22,6 +22,7 @@ export class Header implements OnInit {
   userInitial = 'U';
   pageTitle = 'Dashboard';
   dashboardRoute = '/customer';
+  menuOpen = false;
 
   private pageTitles: Record<string, string> = {
     '/admin': 'Admin Dashboard',
@@ -32,6 +33,7 @@ export class Header implements OnInit {
     '/admin/payments': 'Payments',
     '/admin/notifications': 'Notifications',
     '/admin/support': 'Support Tickets',
+    '/admin/locations': 'Locations',
     '/owner': 'Owner Dashboard',
     '/owner/my-hotels': 'My Hotels',
     '/owner/hotel-details': 'Hotel Details',

@@ -1,6 +1,8 @@
 package com.MHM.MultiHotelManagement.repository;
 
 import com.MHM.MultiHotelManagement.entity.Location;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,21 +12,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface LocationRepository  extends JpaRepository<Location, Long> {
+public interface LocationRepository extends JpaRepository<Location, Long> {
 
-    // City দিয়ে খোঁজো
     List<Location> findByCity(String city);
 
-    // LocationName দিয়ে খোঁজো
     Optional<Location> findByLocationName(String locationName);
 
-    // City আছে কিনা check
     Boolean existsByCity(String city);
 
-    // LocationName আছে কিনা check
     Boolean existsByLocationName(String locationName);
 
-    // ID দিয়ে hotels সহ খোঁজো
     @Query("""
         SELECT DISTINCT l FROM Location l
         LEFT JOIN FETCH l.hotels h
@@ -32,7 +29,6 @@ public interface LocationRepository  extends JpaRepository<Location, Long> {
     """)
     Optional<Location> findByIdWithHotels(@Param("id") Long id);
 
-    // সব location hotels সহ
     @Query("""
         SELECT DISTINCT l FROM Location l
         LEFT JOIN FETCH l.hotels h
@@ -40,19 +36,23 @@ public interface LocationRepository  extends JpaRepository<Location, Long> {
     """)
     List<Location> findAllWithHotels();
 
-    // Keyword দিয়ে search করো
     @Query("""
         SELECT l FROM Location l
         WHERE LOWER(l.locationName)
         LIKE LOWER(CONCAT('%', :keyword, '%'))
         OR LOWER(l.city)
         LIKE LOWER(CONCAT('%', :keyword, '%'))
+        OR LOWER(l.district)
+        LIKE LOWER(CONCAT('%', :keyword, '%'))
+        OR LOWER(l.division)
+        LIKE LOWER(CONCAT('%', :keyword, '%'))
+        OR LOWER(l.upazila)
+        LIKE LOWER(CONCAT('%', :keyword, '%'))
     """)
     List<Location> searchByKeyword(
             @Param("keyword") String keyword
     );
 
-    // Hotel আছে এমন locations
     @Query("""
         SELECT DISTINCT l FROM Location l
         LEFT JOIN FETCH l.hotels h
@@ -60,4 +60,11 @@ public interface LocationRepository  extends JpaRepository<Location, Long> {
         ORDER BY SIZE(l.hotels) DESC
     """)
     List<Location> findLocationsWithHotels();
+
+    @Query(value = """
+        SELECT DISTINCT l FROM Location l
+        LEFT JOIN FETCH l.hotels
+        ORDER BY l.locationName ASC
+    """, countQuery = "SELECT COUNT(l) FROM Location l")
+    Page<Location> findAllPaginated(Pageable pageable);
 }
