@@ -57,6 +57,10 @@ public class Booking {
     // Extra charges added by hotel (food, minibar, damages)
     private BigDecimal extraCharges = BigDecimal.ZERO;
 
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+    private BigDecimal taxAmount = BigDecimal.ZERO;
+    private BigDecimal netAmount = BigDecimal.ZERO;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private BookingStatus status;

@@ -9,6 +9,7 @@ import com.MHM.MultiHotelManagement.dto.request.ResetPasswordRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.LoginResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Customer;
 import com.MHM.MultiHotelManagement.entity.HotelOwner;
+import com.MHM.MultiHotelManagement.entity.LoginAttempt;
 import com.MHM.MultiHotelManagement.entity.User;
 import com.MHM.MultiHotelManagement.enums.Role;
 import com.MHM.MultiHotelManagement.exception.AlreadyExistsException;
@@ -17,6 +18,7 @@ import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.exception.UnauthorizedException;
 import com.MHM.MultiHotelManagement.repository.CustomerRepository;
 import com.MHM.MultiHotelManagement.repository.HotelOwnerRepository;
+import com.MHM.MultiHotelManagement.repository.LoginAttemptRepository;
 import com.MHM.MultiHotelManagement.repository.UserRepository;
 import com.MHM.MultiHotelManagement.security.JwtUtil;
 import com.MHM.MultiHotelManagement.util.EmailService;
@@ -24,13 +26,14 @@ import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,31 +42,53 @@ public class AuthService {
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
     private static final int MIN_PASSWORD_LENGTH = 8;
 
-    private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final HotelOwnerRepository hotelOwnerRepository;
     private final CustomerRepository customerRepository;
+    private final LoginAttemptRepository loginAttemptRepository;
     private final JwtUtil jwtUtil;
     private final EmailService emailService;
     private final PasswordEncoder encoder;
 
+    private static final int MAX_ATTEMPTS = 5;
+    private static final int LOCKOUT_MINUTES = 15;
+
     @Transactional
     public LoginResponseDTO login(LoginRequestDTO dto) {
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            dto.getEmail(),
-                            dto.getPassword()
-                    )
-            );
-        } catch (DisabledException e) {
-            throw new UnauthorizedException("Your account is inactive. Please verify your email first.");
-        } catch (AuthenticationException e) {
-            throw new UnauthorizedException("Invalid email or password");
+        String email = dto.getEmail();
+        String password = dto.getPassword();
+
+        // Check if account is locked
+        Optional<LoginAttempt> attemptOpt = loginAttemptRepository.findByEmail(email);
+        if (attemptOpt.isPresent()) {
+            LoginAttempt attempt = attemptOpt.get();
+            if (attempt.getLockedUntil() != null && attempt.getLockedUntil().isAfter(LocalDateTime.now())) {
+                throw new UnauthorizedException("Account temporarily locked due to too many failed attempts. Please try again later.");
+            }
         }
 
-        User user = userRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
+        // Check if email is registered
+        User user = userRepository.findByEmail(email)
+                .orElse(null);
+
+        if (user == null) {
+            recordFailedAttempt(email, false);
+            throw new UnauthorizedException("This email is not registered.");
+        }
+
+        // Check password using BCrypt encoder
+        if (!encoder.matches(password, user.getPassword())) {
+            recordFailedAttempt(email, false);
+            throw new UnauthorizedException("Incorrect password.");
+        }
+
+        // Check if account is active
+        if (!user.isEnabled()) {
+            throw new UnauthorizedException("Your account is inactive. Please verify your email first.");
+        }
+
+        // Login successful — clear any previous attempts
+        loginAttemptRepository.findByEmail(email).ifPresent(a -> loginAttemptRepository.delete(a));
 
         String token = jwtUtil.generateToken(
                 user.getEmail(),
@@ -71,6 +96,7 @@ public class AuthService {
         );
 
         LoginResponseDTO response = new LoginResponseDTO();
+        response.setMessage("Login successful!");
         response.setToken(token);
         response.setTokenType("Bearer");
         response.setUserId(user.getId());
@@ -105,6 +131,51 @@ public class AuthService {
         }
 
         return response;
+    }
+
+    private void recordFailedAttempt(String email, boolean success) {
+        LoginAttempt attempt = loginAttemptRepository.findByEmail(email).orElse(new LoginAttempt());
+        attempt.setEmail(email);
+        attempt.setIpAddress(getClientIp());
+
+        if (success) {
+            attempt.setAttemptCount(0);
+            attempt.setLockedUntil(null);
+            attempt.setSuccess(true);
+        } else {
+            attempt.setSuccess(false);
+            int attempts = attempt.getAttemptCount() + 1;
+            attempt.setAttemptCount(attempts);
+            attempt.setLastAttemptAt(LocalDateTime.now());
+
+            if (attempts >= MAX_ATTEMPTS) {
+                attempt.setLockedUntil(LocalDateTime.now().plusMinutes(LOCKOUT_MINUTES));
+            }
+        }
+
+        loginAttemptRepository.save(attempt);
+    }
+
+    private String getClientIp() {
+        try {
+            ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attrs != null) {
+                String ip = attrs.getRequest().getHeader("X-Forwarded-For");
+                if (ip == null || ip.isEmpty()) {
+                    ip = attrs.getRequest().getHeader("Proxy-Client-IP");
+                }
+                if (ip == null || ip.isEmpty()) {
+                    ip = attrs.getRequest().getHeader("WL-Proxy-Client-IP");
+                }
+                if (ip == null || ip.isEmpty()) {
+                    ip = attrs.getRequest().getRemoteAddr();
+                }
+                return ip;
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return "unknown";
     }
 
     // ── Register new user ─────────────────────────────────────────

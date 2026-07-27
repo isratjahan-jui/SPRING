@@ -1,18 +1,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap } from 'rxjs';
+import { Observable, BehaviorSubject, tap, catchError, throwError } from 'rxjs';
 import { User } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private baseUrl = 'http://localhost:8080/api';
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  currentUser$ = this.currentUserSubject.asObservable();
+  private currentUser$ = new BehaviorSubject<User | null>(null);
+  currentUserSubject$ = this.currentUser$.asObservable();
 
   constructor(private http: HttpClient) {
     const stored = localStorage.getItem('currentUser');
     if (stored) {
-      this.currentUserSubject.next(JSON.parse(stored));
+      this.currentUser$.next(JSON.parse(stored));
     }
   }
 
@@ -22,7 +22,11 @@ export class AuthService {
         const user: User = { id: res.id, name: res.name, email: res.email, role: res.role };
         localStorage.setItem('currentUser', JSON.stringify(user));
         localStorage.setItem('token', res.token);
-        this.currentUserSubject.next(user);
+        this.currentUser$.next(user);
+      }),
+      catchError(err => {
+        const msg = err.error?.message || 'Login failed';
+        return throwError(() => new Error(msg));
       })
     );
   }
@@ -30,11 +34,11 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('currentUser');
     localStorage.removeItem('token');
-    this.currentUserSubject.next(null);
+    this.currentUser$.next(null);
   }
 
   get currentUser(): User | null {
-    return this.currentUserSubject.value;
+    return this.currentUser$.value;
   }
 
   get token(): string | null {

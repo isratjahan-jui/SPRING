@@ -59,3 +59,18 @@ export interface User {
   email: string;
   role: string;
 }
+
+export interface LoginResponseDTO {
+  message: string;
+  token: string;
+  tokenType: string;
+  userId: number;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  hotelId: number;
+  hotelName: string;
+  ownerId: number;
+  ownerName: string;
+}

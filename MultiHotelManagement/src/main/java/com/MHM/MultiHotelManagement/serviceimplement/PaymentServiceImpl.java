@@ -16,6 +16,7 @@ import com.MHM.MultiHotelManagement.repository.ExtraServiceRepository;
 import com.MHM.MultiHotelManagement.repository.InvoiceRepository;
 import com.MHM.MultiHotelManagement.repository.PaymentRepository;
 import com.MHM.MultiHotelManagement.repository.RoomRepository;
+import com.MHM.MultiHotelManagement.service.AuditTrailService;
 import com.MHM.MultiHotelManagement.service.PaymentService;
 import com.MHM.MultiHotelManagement.service.NotificationService;
 import com.MHM.MultiHotelManagement.service.ReceiptService;
@@ -34,6 +35,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
@@ -46,6 +52,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final InvoiceRepository invoiceRepository;
     private final NotificationService notificationService;
     private final ReceiptService receiptService;
+    private final AuditTrailService auditTrailService;
 
     public PaymentServiceImpl(PaymentRepository paymentRepository,
                               BookingRepository bookingRepository,
@@ -53,7 +60,8 @@ public class PaymentServiceImpl implements PaymentService {
                               RoomRepository roomRepository,
                               InvoiceRepository invoiceRepository,
                               NotificationService notificationService,
-                              ReceiptService receiptService) {
+                              ReceiptService receiptService,
+                              AuditTrailService auditTrailService) {
         this.paymentRepository = paymentRepository;
         this.bookingRepository = bookingRepository;
         this.extraServiceRepository = extraServiceRepository;
@@ -61,6 +69,7 @@ public class PaymentServiceImpl implements PaymentService {
         this.invoiceRepository = invoiceRepository;
         this.notificationService = notificationService;
         this.receiptService = receiptService;
+        this.auditTrailService = auditTrailService;
     }
 
     @Override
@@ -102,18 +111,14 @@ public class PaymentServiceImpl implements PaymentService {
         }
         bookingRepository.save(booking);
 
-        // Auto-generate invoice for PAID payments
+        // Auto-generate receipt for PAID payments
         if (saved.getStatus() == PaymentStatus.PAID) {
+            // Update existing ISSUED invoice to PAID
             try {
-                generateInvoice(booking, saved);
-                log.info("Invoice generated for payment {}, booking {}", saved.getId(), booking.getId());
-            } catch (Exception e) {
-                log.error("Invoice generation failed for payment {}: {}", saved.getId(), e.getMessage(), e);
-            }
-
-            // Update invoice status to PAID
-            try {
-                updateInvoiceToPaid(booking, saved);
+                updateInvoiceToPaid(saved);
+                log.info("Invoice updated to PAID for payment {}, booking {}", saved.getId(), booking.getId());
+                auditTrailService.logAction("INVOICE_PAID", "Invoice", saved.getId(),
+                        "Invoice updated to PAID for payment " + saved.getId(), "SYSTEM");
             } catch (Exception e) {
                 log.error("Invoice status update failed for payment {}: {}", saved.getId(), e.getMessage(), e);
             }
@@ -122,6 +127,8 @@ public class PaymentServiceImpl implements PaymentService {
             try {
                 receiptService.generateReceipt(saved.getId());
                 log.info("Receipt generated for payment {}", saved.getId());
+                auditTrailService.logAction("RECEIPT_GENERATED", "Receipt", saved.getId(),
+                        "Receipt generated for payment " + saved.getId(), "SYSTEM");
             } catch (Exception e) {
                 log.error("Receipt generation failed for payment {}: {}", saved.getId(), e.getMessage(), e);
             }
@@ -241,53 +248,15 @@ public class PaymentServiceImpl implements PaymentService {
         paymentRepository.deleteById(id);
     }
 
-    private void generateInvoice(Booking booking, Payment payment) {
-        if (booking.getCustomer() == null) return;
-
-        boolean alreadyExists = invoiceRepository.existsByBooking_IdAndPayment_Id(
-                booking.getId(), payment.getId());
-        if (alreadyExists) return;
-
-        // Reload booking with customer fetched
-        Booking loadedBooking = bookingRepository.findByIdWithDetails(booking.getId()).orElse(booking);
-
-        Invoice invoice = new Invoice();
-        invoice.setInvoiceNumber("INV-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
-        invoice.setBooking(loadedBooking);
-        invoice.setPayment(payment);
-        invoice.setCustomer(loadedBooking.getCustomer());
-
-        double total = loadedBooking.getTotalAmount() != null ? loadedBooking.getTotalAmount().doubleValue() : 0;
-        double discount = loadedBooking.getDiscountRate() != null && loadedBooking.getDiscountRate().compareTo(BigDecimal.ZERO) > 0
-                ? BigDecimal.valueOf(total)
-                    .multiply(loadedBooking.getDiscountRate())
-                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
-                    .doubleValue() : 0;
-        double tax = BigDecimal.valueOf(total - discount)
-                .multiply(BigDecimal.valueOf(0.15))
-                .setScale(2, RoundingMode.HALF_UP)
-                .doubleValue();
-
-        invoice.setTotalAmount(total);
-        invoice.setDiscountAmount(discount);
-        invoice.setTaxAmount(tax);
-        invoice.setNetAmount(BigDecimal.valueOf(total + tax - discount)
-                .setScale(2, RoundingMode.HALF_UP).doubleValue());
-        invoice.setStatus(InvoiceStatus.ISSUED);
-        invoice.setIssuedAt(LocalDateTime.now());
-
-        invoiceRepository.save(invoice);
-    }
-
-    private void updateInvoiceToPaid(Booking booking, Payment payment) {
+    private void updateInvoiceToPaid(Payment payment) {
+        Booking booking = payment.getBooking();
         List<Invoice> invoices = invoiceRepository.findByBooking_Id(booking.getId());
         for (Invoice invoice : invoices) {
-            if (invoice.getPayment() != null && invoice.getPayment().getId().equals(payment.getId())) {
-                if (invoice.getStatus() != InvoiceStatus.PAID) {
-                    invoice.setStatus(InvoiceStatus.PAID);
-                    invoiceRepository.save(invoice);
-                    log.info("Invoice {} updated to PAID for payment {}", invoice.getId(), payment.getId());
-                }
+            if (invoice.getStatus() != InvoiceStatus.PAID) {
+                invoice.setStatus(InvoiceStatus.PAID);
+                invoice.setPayment(payment);
+                invoiceRepository.save(invoice);
+                log.info("Invoice {} updated to PAID for payment {}", invoice.getId(), payment.getId());
             }
         }
     }

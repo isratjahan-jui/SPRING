@@ -24,6 +24,8 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.booking LEFT JOIN FETCH i.payment LEFT JOIN FETCH i.customer WHERE i.booking.id = :bookingId")
     List<Invoice> findByBookingIdWithDetails(@Param("bookingId") Long bookingId);
 
+    boolean existsByBooking_Id(Long bookingId);
+
     @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.booking LEFT JOIN FETCH i.payment LEFT JOIN FETCH i.customer WHERE i.booking.hotel.id = :hotelId ORDER BY i.issuedAt DESC")
     List<Invoice> findByHotelIdWithDetails(@Param("hotelId") Long hotelId);
 

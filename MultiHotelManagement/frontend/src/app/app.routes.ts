@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { LoginComponent } from './pages/login/login';
 import { AdminInvoicesComponent } from './pages/admin-invoices/admin-invoices';
 import { AdminReceiptsComponent } from './pages/admin-receipts/admin-receipts';
 import { AdminPaymentsComponent } from './pages/admin-payments/admin-payments';
@@ -8,7 +9,7 @@ import { CustomerInvoicesComponent } from './pages/customer-invoices/customer-in
 import { CustomerReceiptsComponent } from './pages/customer-receipts/customer-receipts';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'admin/invoices', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
   { path: 'admin/invoices', component: AdminInvoicesComponent },
   { path: 'admin/receipts', component: AdminReceiptsComponent },
   { path: 'admin/payments', component: AdminPaymentsComponent },
@@ -16,5 +17,6 @@ export const routes: Routes = [
   { path: 'owner/receipts', component: OwnerReceiptsComponent },
   { path: 'customer/invoices', component: CustomerInvoicesComponent },
   { path: 'customer/receipts', component: CustomerReceiptsComponent },
-  { path: '**', redirectTo: 'admin/invoices' }
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '**', redirectTo: 'login' }
 ];

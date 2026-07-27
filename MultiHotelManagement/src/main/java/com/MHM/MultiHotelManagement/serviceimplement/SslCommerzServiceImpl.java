@@ -11,9 +11,12 @@ import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.repository.BookingRepository;
 import com.MHM.MultiHotelManagement.repository.InvoiceRepository;
 import com.MHM.MultiHotelManagement.repository.PaymentRepository;
+import com.MHM.MultiHotelManagement.service.AuditTrailService;
 import com.MHM.MultiHotelManagement.service.ReceiptService;
 import com.MHM.MultiHotelManagement.service.SslCommerzService;
 import com.MHM.MultiHotelManagement.util.SslCommerzClient;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,7 @@ public class SslCommerzServiceImpl implements SslCommerzService {
     private final SslCommerzClient sslCommerzClient;
     private final InvoiceRepository invoiceRepository;
     private final ReceiptService receiptService;
+    private final AuditTrailService auditTrailService;
 
     @Override
     @Transactional
@@ -151,16 +155,11 @@ public class SslCommerzServiceImpl implements SslCommerzService {
             }
             bookingRepository.save(booking);
 
-            generateInvoice(booking, payment);
+            // Update existing ISSUED invoice to PAID
+            updateInvoiceToPaid(payment);
 
-            updateInvoiceToPaid(booking, payment);
-
-            try {
-                receiptService.generateReceipt(payment.getId());
-                log.info("Receipt generated for SSLCommerz payment {}", payment.getId());
-            } catch (Exception e) {
-                log.error("Receipt generation failed for payment {}: {}", payment.getId(), e.getMessage());
-            }
+            // Generate receipt
+            generateReceipt(payment);
         } catch (Exception e) {
             log.error("Error processing SSLCommerz success for tran_id: {}", transactionId, e);
             payment.setStatus(PaymentStatus.FAILED);
@@ -256,65 +255,36 @@ public class SslCommerzServiceImpl implements SslCommerzService {
         }
         bookingRepository.save(booking);
 
-        // Auto-generate invoice
-        generateInvoice(booking, payment);
-
-        // Update invoice status to PAID
-        updateInvoiceToPaid(booking, payment);
+        // Update existing ISSUED invoice to PAID
+        updateInvoiceToPaid(payment);
 
         // Generate receipt
-        try {
-            receiptService.generateReceipt(payment.getId());
-            log.info("Receipt generated for SSLCommerz IPN payment {}", payment.getId());
-        } catch (Exception e) {
-            log.error("Receipt generation failed for IPN payment {}: {}", payment.getId(), e.getMessage());
+        generateReceipt(payment);
+    }
+
+    private void updateInvoiceToPaid(Payment payment) {
+        Booking booking = payment.getBooking();
+        List<Invoice> invoices = invoiceRepository.findByBooking_Id(booking.getId());
+        for (Invoice invoice : invoices) {
+            if (invoice.getStatus() != InvoiceStatus.PAID) {
+                invoice.setStatus(InvoiceStatus.PAID);
+                invoice.setPayment(payment);
+                invoiceRepository.save(invoice);
+                log.info("Invoice {} updated to PAID for payment {}", invoice.getId(), payment.getId());
+                auditTrailService.logAction("INVOICE_PAID", "Invoice", invoice.getId(),
+                        "Invoice updated to PAID for payment " + payment.getId(), "SYSTEM");
+            }
         }
     }
 
-    private void generateInvoice(Booking booking, Payment payment) {
-        List<Invoice> existing = invoiceRepository.findByBooking_Id(booking.getId());
-        boolean alreadyExists = existing.stream()
-                .anyMatch(inv -> inv.getPayment() != null && inv.getPayment().getId().equals(payment.getId()));
-        if (alreadyExists) return;
-
-        Invoice invoice = new Invoice();
-        invoice.setInvoiceNumber("INV-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
-        invoice.setBooking(booking);
-        invoice.setPayment(payment);
-        invoice.setCustomer(booking.getCustomer());
-
-        double total = booking.getTotalAmount() != null ? booking.getTotalAmount().doubleValue() : 0;
-        double discount = booking.getDiscountRate() != null
-                ? BigDecimal.valueOf(total)
-                    .multiply(booking.getDiscountRate())
-                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
-                    .doubleValue() : 0;
-        double tax = BigDecimal.valueOf(total - discount)
-                .multiply(BigDecimal.valueOf(0.15))
-                .setScale(2, RoundingMode.HALF_UP)
-                .doubleValue();
-
-        invoice.setTotalAmount(total);
-        invoice.setDiscountAmount(discount);
-        invoice.setTaxAmount(tax);
-        invoice.setNetAmount(BigDecimal.valueOf(total + tax - discount)
-                .setScale(2, RoundingMode.HALF_UP).doubleValue());
-        invoice.setStatus(InvoiceStatus.ISSUED);
-        invoice.setIssuedAt(LocalDateTime.now());
-
-        invoiceRepository.save(invoice);
-    }
-
-    private void updateInvoiceToPaid(Booking booking, Payment payment) {
-        List<Invoice> invoices = invoiceRepository.findByBooking_Id(booking.getId());
-        for (Invoice invoice : invoices) {
-            if (invoice.getPayment() != null && invoice.getPayment().getId().equals(payment.getId())) {
-                if (invoice.getStatus() != InvoiceStatus.PAID) {
-                    invoice.setStatus(InvoiceStatus.PAID);
-                    invoiceRepository.save(invoice);
-                    log.info("Invoice {} updated to PAID for payment {}", invoice.getId(), payment.getId());
-                }
-            }
+    private void generateReceipt(Payment payment) {
+        try {
+            receiptService.generateReceipt(payment.getId());
+            log.info("Receipt generated for payment {}", payment.getId());
+            auditTrailService.logAction("RECEIPT_GENERATED", "Receipt", payment.getId(),
+                    "Receipt generated for payment " + payment.getId(), "SYSTEM");
+        } catch (Exception e) {
+            log.error("Receipt generation failed for payment {}: {}", payment.getId(), e.getMessage());
         }
     }
 }

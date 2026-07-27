@@ -6,6 +6,7 @@ import com.MHM.MultiHotelManagement.dto.response.BookingResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Booking;
 import com.MHM.MultiHotelManagement.entity.Customer;
 import com.MHM.MultiHotelManagement.entity.Hotel;
+import com.MHM.MultiHotelManagement.entity.Invoice;
 import com.MHM.MultiHotelManagement.entity.Room;
 import com.MHM.MultiHotelManagement.entity.FoodItem;
 import com.MHM.MultiHotelManagement.entity.ExtraService;
@@ -16,11 +17,13 @@ import com.MHM.MultiHotelManagement.entity.Commission;
 import com.MHM.MultiHotelManagement.entity.Wallet;
 import com.MHM.MultiHotelManagement.entity.WalletTransaction;
 import com.MHM.MultiHotelManagement.enums.BookingStatus;
+import com.MHM.MultiHotelManagement.enums.InvoiceStatus;
 import com.MHM.MultiHotelManagement.enums.PaymentStatus;
 import com.MHM.MultiHotelManagement.enums.ServiceStatus;
 import com.MHM.MultiHotelManagement.repository.BookingRepository;
 import com.MHM.MultiHotelManagement.repository.CustomerRepository;
 import com.MHM.MultiHotelManagement.repository.HotelRepository;
+import com.MHM.MultiHotelManagement.repository.InvoiceRepository;
 import com.MHM.MultiHotelManagement.repository.RoomRepository;
 import com.MHM.MultiHotelManagement.repository.FoodItemRepository;
 import com.MHM.MultiHotelManagement.repository.HotelExtraServiceRepository;
@@ -70,6 +73,7 @@ public class BookingServiceImple implements BookingService {
     private final CommissionRepository commissionRepository;
     private final WalletRepository walletRepository;
     private final WalletTransactionRepository walletTransactionRepository;
+    private final InvoiceRepository invoiceRepository;
     private final NotificationService notificationService;
 
     @Value("${image.upload.dir:uploads}")
@@ -86,6 +90,7 @@ public class BookingServiceImple implements BookingService {
                                CommissionRepository commissionRepository,
                                WalletRepository walletRepository,
                                WalletTransactionRepository walletTransactionRepository,
+                               InvoiceRepository invoiceRepository,
                                NotificationService notificationService) {
         this.bookingRepository = bookingRepository;
         this.customerRepository = customerRepository;
@@ -98,6 +103,7 @@ public class BookingServiceImple implements BookingService {
         this.commissionRepository = commissionRepository;
         this.walletRepository = walletRepository;
         this.walletTransactionRepository = walletTransactionRepository;
+        this.invoiceRepository = invoiceRepository;
         this.notificationService = notificationService;
     }
 
@@ -178,6 +184,14 @@ public class BookingServiceImple implements BookingService {
         }
 
         Booking saved = bookingRepository.save(booking);
+
+        // Auto-generate invoice at booking time (payment request)
+        try {
+            generateInvoiceAtBooking(saved);
+            log.info("Invoice generated at booking time for booking {}", saved.getId());
+        } catch (Exception e) {
+            log.error("Invoice generation failed for booking {}: {}", saved.getId(), e.getMessage(), e);
+        }
 
         // Update room availability counters
         room.setAvailableRooms(room.getAvailableRooms() - dto.getNumberOfRooms());
@@ -694,5 +708,37 @@ public class BookingServiceImple implements BookingService {
         dto.setChannel(NotificationChannel.WEB);
         dto.setMessage(message);
         notificationService.createNotification(dto);
+    }
+
+    private void generateInvoiceAtBooking(Booking booking) {
+        if (booking.getCustomer() == null) return;
+
+        boolean alreadyExists = invoiceRepository.existsByBooking_Id(booking.getId());
+        if (alreadyExists) return;
+
+        BigDecimal total = booking.getTotalAmount() != null ? booking.getTotalAmount() : BigDecimal.ZERO;
+        BigDecimal discountRate = booking.getDiscountRate() != null ? booking.getDiscountRate() : BigDecimal.ZERO;
+        BigDecimal discountAmount = total.multiply(discountRate).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        BigDecimal taxAmount = total.subtract(discountAmount).multiply(BigDecimal.valueOf(0.15)).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal netAmount = total.add(taxAmount).subtract(discountAmount);
+
+        booking.setDiscountAmount(discountAmount);
+        booking.setTaxAmount(taxAmount);
+        booking.setNetAmount(netAmount);
+        bookingRepository.save(booking);
+
+        Invoice invoice = new Invoice();
+        invoice.setInvoiceNumber("INV-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        invoice.setBooking(booking);
+        invoice.setCustomer(booking.getCustomer());
+        invoice.setStatus(InvoiceStatus.ISSUED);
+        invoice.setTotalAmount(total.doubleValue());
+        invoice.setDiscountAmount(discountAmount.doubleValue());
+        invoice.setTaxAmount(taxAmount.doubleValue());
+        invoice.setNetAmount(netAmount.doubleValue());
+        invoice.setIssuedAt(LocalDateTime.now());
+
+        invoiceRepository.save(invoice);
+        log.info("Invoice {} generated at booking time for booking {}", invoice.getInvoiceNumber(), booking.getId());
     }
 }

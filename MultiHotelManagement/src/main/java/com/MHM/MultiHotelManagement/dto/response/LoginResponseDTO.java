@@ -5,8 +5,9 @@ import lombok.Data;
 @Data
 public class LoginResponseDTO {
 
-    private String  token;
-    private String  tokenType = "Bearer";
+    private String message;
+    private String token;
+    private String tokenType = "Bearer";
 
     private Long    userId;
     private String  name;
@@ -19,5 +20,5 @@ public class LoginResponseDTO {
     private String  hotelName;
 
     private Long    ownerId;
-    private String ownerName;
+    private String  ownerName;
 }
