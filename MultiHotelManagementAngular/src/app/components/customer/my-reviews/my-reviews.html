@@ -24,7 +24,12 @@
               <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>
                   <h5 class="card-title mb-1">{{ review.hotelName }}</h5>
-                  <small class="text-muted">{{ review.createdAt | date: 'mediumDate' }}</small>
+                  <small class="text-muted">
+                    Booking #{{ review.bookingId }}
+                    @if (review.roomType) {
+                      &middot; {{ review.roomType }}
+                    }
+                  </small>
                 </div>
                 <div class="review-actions">
                   <button
@@ -42,6 +47,17 @@
                     &#128465;
                   </button>
                 </div>
+              </div>
+
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge" [ngClass]="{
+                  'bg-success': review.status === 'APPROVED',
+                  'bg-warning text-dark': review.status === 'PENDING',
+                  'bg-danger': review.status === 'REJECTED'
+                }">{{ review.status }}</span>
+                @if (review.editCount > 0) {
+                  <small class="text-muted">Edited {{ review.editCount }}x</small>
+                }
               </div>
 
               @if (editingReview?.id === review.id) {
@@ -93,6 +109,7 @@
                 </div>
                 <p class="card-text review-comment mb-0">{{ review.comment }}</p>
               }
+              <small class="text-muted d-block mt-2">{{ review.createdAt | date: 'medium' }}</small>
             </div>
           </div>
         </div>

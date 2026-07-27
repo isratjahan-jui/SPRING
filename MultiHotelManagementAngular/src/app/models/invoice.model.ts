@@ -10,6 +10,10 @@ export interface InvoiceResponse {
   paymentId: number;
   customerId: number;
   commissionId?: number;
+  hotelName?: string;
+  customerName?: string;
+  roomType?: string;
+  bookingStatus?: string;
   issuedAt: string;
   createdAt: string;
   updatedAt: string;

@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CustomerService } from '../../../services/customer.service';
 import { BookingService } from '../../../services/booking.service';
 import { PaymentService } from '../../../services/payment.service';
@@ -11,7 +11,7 @@ import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-customer-details',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './customer-details.html',
   styleUrl: './customer-details.css',
 })

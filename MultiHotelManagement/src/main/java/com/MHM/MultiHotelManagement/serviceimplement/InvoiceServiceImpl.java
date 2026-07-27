@@ -76,8 +76,29 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<InvoiceResponseDTO> getByBooking(Long bookingId) {
+        return invoiceRepository.findByBookingIdWithDetails(bookingId)
+                .stream().map(mapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<InvoiceResponseDTO> getByHotelId(Long hotelId) {
+        return invoiceRepository.findByHotelIdWithDetails(hotelId)
+                .stream().map(mapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<InvoiceResponseDTO> getByOwnerId(Long ownerId) {
+        return invoiceRepository.findByOwnerIdWithDetails(ownerId)
+                .stream().map(mapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<InvoiceResponseDTO> getAll() {
-        return invoiceRepository.findAll()
+        return invoiceRepository.findAllWithDetails()
                 .stream().map(mapper::toDTO).collect(Collectors.toList());
     }
 

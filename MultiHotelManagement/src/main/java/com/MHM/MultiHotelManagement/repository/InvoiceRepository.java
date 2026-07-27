@@ -17,5 +17,17 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
     @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.booking LEFT JOIN FETCH i.payment LEFT JOIN FETCH i.customer WHERE i.customer.id = :customerId ORDER BY i.issuedAt DESC")
     List<Invoice> findByCustomerIdWithDetails(@Param("customerId") Long customerId);
+
+    @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.booking LEFT JOIN FETCH i.payment LEFT JOIN FETCH i.customer ORDER BY i.issuedAt DESC")
+    List<Invoice> findAllWithDetails();
+
+    @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.booking LEFT JOIN FETCH i.payment LEFT JOIN FETCH i.customer WHERE i.booking.id = :bookingId")
+    List<Invoice> findByBookingIdWithDetails(@Param("bookingId") Long bookingId);
+
+    @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.booking LEFT JOIN FETCH i.payment LEFT JOIN FETCH i.customer WHERE i.booking.hotel.id = :hotelId ORDER BY i.issuedAt DESC")
+    List<Invoice> findByHotelIdWithDetails(@Param("hotelId") Long hotelId);
+
+    @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.booking LEFT JOIN FETCH i.payment LEFT JOIN FETCH i.customer WHERE i.booking.hotel.owner.id = :ownerId ORDER BY i.issuedAt DESC")
+    List<Invoice> findByOwnerIdWithDetails(@Param("ownerId") Long ownerId);
 }
 

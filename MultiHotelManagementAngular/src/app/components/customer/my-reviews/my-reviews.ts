@@ -92,6 +92,7 @@ export class MyReviews implements OnInit {
         comment: this.editComment,
         hotelId: this.editingReview.hotelId,
         customerId: this.customerId!,
+        bookingId: this.editingReview.bookingId,
       })
       .subscribe({
         next: (updated) => {

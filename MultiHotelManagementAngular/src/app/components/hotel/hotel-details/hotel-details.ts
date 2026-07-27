@@ -17,12 +17,14 @@ import { GalleryService } from '../../../services/gallery.service';
 import { ReviewService } from '../../../services/review.service';
 import { AuthService } from '../../../services/auth.service';
 import { CustomerService } from '../../../services/customer.service';
+import { BookingService } from '../../../services/booking.service';
 import { WishlistService } from '../../../services/wishlist.service';
 import { DealService } from '../../../services/deal.service';
 import { DealResponse } from '../../../models/deal.model';
 import { CouponService } from '../../../services/coupon.service';
 import { CouponResponse } from '../../../models/coupon.model';
 import { ReviewResponse } from '../../../models/review.model';
+import { Booking } from '../../../models/booking.model';
 import { HotelExtraService } from '../../../models/hotel-extra-service.model';
 import { HotelExtraServiceService } from '../../../services/hotel-extra-service.service';
 import { environment } from '../../../../environments/environments';
@@ -52,8 +54,13 @@ export class HotelDetails implements OnInit {
   reviewComment = '';
   submittingReview = false;
   reviewSubmitted = false;
+  reviewError = '';
   isCustomer = false;
   customerId: number | null = null;
+  existingReview: ReviewResponse | null = null;
+
+  reviewableBookings: Booking[] = [];
+  selectedBookingId: number | null = null;
 
   isInWishlist = false;
   wishlistId: number | null = null;
@@ -63,6 +70,7 @@ export class HotelDetails implements OnInit {
   private auth = inject(AuthService);
   private customerService = inject(CustomerService);
   private reviewService = inject(ReviewService);
+  private bookingService = inject(BookingService);
   private wishlistService = inject(WishlistService);
   private dealService = inject(DealService);
   private couponService = inject(CouponService);
@@ -102,6 +110,7 @@ export class HotelDetails implements OnInit {
           this.customerId = c.id ?? null;
           if (this.customerId) {
             this.checkWishlist();
+            this.loadReviewableBookings();
           }
           this.cdr.markForCheck();
         },
@@ -169,6 +178,7 @@ export class HotelDetails implements OnInit {
     this.reviewService.getByHotel(id).subscribe({
       next: (data) => {
         this.reviews = data;
+        this.checkExistingReview();
         this.cdr.markForCheck();
       },
       error: () => {},
@@ -199,30 +209,103 @@ export class HotelDetails implements OnInit {
     });
   }
 
+  loadReviewableBookings() {
+    if (!this.customerId) return;
+    this.bookingService.getByCustomer(this.customerId).subscribe({
+      next: (bookings) => {
+        const reviewableStatuses = ['CHECKED_OUT', 'CONFIRMED', 'NO_SHOW'];
+        const hotelBookings = bookings.filter(
+          (b) =>
+            b.hotelId === this.currentHotelId &&
+            reviewableStatuses.includes(b.status),
+        );
+
+        const reviewedBookingIds = new Set(this.reviews.map((r) => r.bookingId));
+        this.reviewableBookings = hotelBookings.filter(
+          (b) => !reviewedBookingIds.has(b.id),
+        );
+
+        if (this.reviewableBookings.length === 1) {
+          this.selectedBookingId = this.reviewableBookings[0].id;
+        }
+        this.cdr.markForCheck();
+      },
+      error: () => {},
+    });
+  }
+
   submitReview() {
     if (!this.reviewComment.trim() || !this.customerId || !this.hotel) return;
+    if (!this.selectedBookingId && !this.existingReview) return;
+
     this.submittingReview = true;
-    this.reviewService
-      .create({
-        rating: this.reviewRating,
-        comment: this.reviewComment,
-        hotelId: this.hotel.id,
-        customerId: this.customerId,
-      })
-      .subscribe({
-        next: (review) => {
-          this.reviews.unshift(review);
-          this.reviewComment = '';
-          this.reviewRating = 5;
-          this.reviewSubmitted = true;
-          this.submittingReview = false;
-          this.cdr.markForCheck();
-        },
-        error: () => {
-          this.submittingReview = false;
-          this.cdr.markForCheck();
-        },
-      });
+    this.reviewError = '';
+
+    if (this.existingReview) {
+      this.reviewService
+        .update(this.existingReview.id, {
+          rating: this.reviewRating,
+          comment: this.reviewComment,
+          hotelId: this.hotel.id,
+          customerId: this.customerId,
+          bookingId: this.existingReview.bookingId,
+        })
+        .subscribe({
+          next: (review) => {
+            const idx = this.reviews.findIndex((r) => r.id === review.id);
+            if (idx !== -1) this.reviews[idx] = review;
+            this.existingReview = review;
+            this.reviewComment = '';
+            this.reviewSubmitted = true;
+            this.submittingReview = false;
+            this.cdr.markForCheck();
+          },
+          error: (err) => {
+            this.reviewError = err.error?.message || 'Failed to update review.';
+            this.submittingReview = false;
+            this.cdr.markForCheck();
+          },
+        });
+    } else {
+      this.reviewService
+        .create({
+          rating: this.reviewRating,
+          comment: this.reviewComment,
+          hotelId: this.hotel.id,
+          customerId: this.customerId,
+          bookingId: this.selectedBookingId!,
+        })
+        .subscribe({
+          next: (review) => {
+            this.reviews.unshift(review);
+            this.existingReview = review;
+            this.reviewableBookings = this.reviewableBookings.filter(
+              (b) => b.id !== this.selectedBookingId,
+            );
+            this.selectedBookingId = null;
+            this.reviewComment = '';
+            this.reviewRating = 5;
+            this.reviewSubmitted = true;
+            this.submittingReview = false;
+            this.cdr.markForCheck();
+          },
+          error: (err) => {
+            this.reviewError = err.error?.message || 'Failed to submit review.';
+            this.submittingReview = false;
+            this.cdr.markForCheck();
+          },
+        });
+    }
+  }
+
+  checkExistingReview() {
+    if (!this.customerId || this.reviews.length === 0) return;
+    const found = this.reviews.find((r) => r.customerId === this.customerId);
+    if (found) {
+      this.existingReview = found;
+      this.reviewRating = found.rating;
+      this.reviewComment = found.comment;
+    }
   }
 
   checkWishlist() {
@@ -304,5 +387,9 @@ export class HotelDetails implements OnInit {
 
   getGalleryImageUrl(image: string): string {
     return image ? `${environment.imageBaseUrl}/${image}` : '';
+  }
+
+  canWriteReview(): boolean {
+    return this.isCustomer && !!this.customerId && (this.reviewableBookings.length > 0 || !!this.existingReview);
   }
 }

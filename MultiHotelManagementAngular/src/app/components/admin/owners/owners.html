@@ -72,6 +72,7 @@
                 }">{{ owner.gender || '—' }}</span>
               </td>
               <td>
+                <a class="btn btn-sm btn-outline-primary me-1" [routerLink]="['/admin/owners', owner.id]">View</a>
                 <button class="btn btn-sm btn-outline-danger" (click)="confirmDelete(owner)">
                   Delete
                 </button>

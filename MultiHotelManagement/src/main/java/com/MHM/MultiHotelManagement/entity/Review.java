@@ -32,6 +32,16 @@ public class Review {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id")
+    private Booking booking;
+
+    @Column(nullable = false)
+    private String status = "APPROVED"; // PENDING, APPROVED, REJECTED
+
+    private int editCount = 0;
+    private LocalDateTime editedAt;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -39,6 +49,7 @@ public class Review {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (status == null) status = "APPROVED";
     }
 
     @PreUpdate
@@ -46,4 +57,3 @@ public class Review {
         updatedAt = LocalDateTime.now();
     }
 }
-

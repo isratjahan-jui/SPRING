@@ -24,13 +24,16 @@ import { HotelDetails } from './components/hotel/hotel-details/hotel-details';
 
 import { AdminDashboard } from './components/admin/dashboard/dashboard';
 import { AdminOwners } from './components/admin/owners/owners';
+import { OwnerDetails } from './components/admin/owner-details/owner-details';
 import { AdminCustomers } from './components/admin/customers/customers';
+import { CustomerDetails } from './components/admin/customer-details/customer-details';
 import { AdminCommissions } from './components/admin/commissions/commissions';
 import { AdminPayments } from './components/admin/payments/payments';
 import { AdminBookings } from './components/admin/bookings/bookings';
 import { AdminNotifications } from './components/admin/notifications/notifications';
 import { AdminSupport } from './components/admin/support/support';
 import { AdminLocations } from './components/admin/locations/locations';
+import { AdminReviews } from './components/admin/reviews/reviews';
 import { CustomerPayments } from './components/customer/payments/payments';
 import { CustomerProfile } from './components/customer/profile/profile';
 import { CustomerSupport } from './components/customer/support/support';
@@ -99,11 +102,13 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard(['ADMIN'])],
   },
   { path: 'admin/owners', component: AdminOwners, canActivate: [authGuard, roleGuard(['ADMIN'])] },
+  { path: 'admin/owners/:id', component: OwnerDetails, canActivate: [authGuard, roleGuard(['ADMIN'])] },
   {
     path: 'admin/customers',
     component: AdminCustomers,
     canActivate: [authGuard, roleGuard(['ADMIN'])],
   },
+  { path: 'admin/customers/:id', component: CustomerDetails, canActivate: [authGuard, roleGuard(['ADMIN'])] },
   {
     path: 'admin/commissions',
     component: AdminCommissions,
@@ -132,6 +137,11 @@ export const routes: Routes = [
   {
     path: 'admin/locations',
     component: AdminLocations,
+    canActivate: [authGuard, roleGuard(['ADMIN'])],
+  },
+  {
+    path: 'admin/reviews',
+    component: AdminReviews,
     canActivate: [authGuard, roleGuard(['ADMIN'])],
   },
 

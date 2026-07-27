@@ -18,6 +18,7 @@ import com.MHM.MultiHotelManagement.repository.PaymentRepository;
 import com.MHM.MultiHotelManagement.repository.RoomRepository;
 import com.MHM.MultiHotelManagement.service.PaymentService;
 import com.MHM.MultiHotelManagement.service.NotificationService;
+import com.MHM.MultiHotelManagement.service.ReceiptService;
 import com.MHM.MultiHotelManagement.dto.request.NotificationRequestDTO;
 import com.MHM.MultiHotelManagement.enums.NotificationChannel;
 import com.MHM.MultiHotelManagement.enums.NotificationType;
@@ -44,19 +45,22 @@ public class PaymentServiceImpl implements PaymentService {
     private final RoomRepository roomRepository;
     private final InvoiceRepository invoiceRepository;
     private final NotificationService notificationService;
+    private final ReceiptService receiptService;
 
     public PaymentServiceImpl(PaymentRepository paymentRepository,
                               BookingRepository bookingRepository,
                               ExtraServiceRepository extraServiceRepository,
                               RoomRepository roomRepository,
                               InvoiceRepository invoiceRepository,
-                              NotificationService notificationService) {
+                              NotificationService notificationService,
+                              ReceiptService receiptService) {
         this.paymentRepository = paymentRepository;
         this.bookingRepository = bookingRepository;
         this.extraServiceRepository = extraServiceRepository;
         this.roomRepository = roomRepository;
         this.invoiceRepository = invoiceRepository;
         this.notificationService = notificationService;
+        this.receiptService = receiptService;
     }
 
     @Override
@@ -105,6 +109,21 @@ public class PaymentServiceImpl implements PaymentService {
                 log.info("Invoice generated for payment {}, booking {}", saved.getId(), booking.getId());
             } catch (Exception e) {
                 log.error("Invoice generation failed for payment {}: {}", saved.getId(), e.getMessage(), e);
+            }
+
+            // Update invoice status to PAID
+            try {
+                updateInvoiceToPaid(booking, saved);
+            } catch (Exception e) {
+                log.error("Invoice status update failed for payment {}: {}", saved.getId(), e.getMessage(), e);
+            }
+
+            // Generate receipt
+            try {
+                receiptService.generateReceipt(saved.getId());
+                log.info("Receipt generated for payment {}", saved.getId());
+            } catch (Exception e) {
+                log.error("Receipt generation failed for payment {}: {}", saved.getId(), e.getMessage(), e);
             }
 
             // Send payment notification
@@ -258,5 +277,18 @@ public class PaymentServiceImpl implements PaymentService {
         invoice.setIssuedAt(LocalDateTime.now());
 
         invoiceRepository.save(invoice);
+    }
+
+    private void updateInvoiceToPaid(Booking booking, Payment payment) {
+        List<Invoice> invoices = invoiceRepository.findByBooking_Id(booking.getId());
+        for (Invoice invoice : invoices) {
+            if (invoice.getPayment() != null && invoice.getPayment().getId().equals(payment.getId())) {
+                if (invoice.getStatus() != InvoiceStatus.PAID) {
+                    invoice.setStatus(InvoiceStatus.PAID);
+                    invoiceRepository.save(invoice);
+                    log.info("Invoice {} updated to PAID for payment {}", invoice.getId(), payment.getId());
+                }
+            }
+        }
     }
 }

@@ -8,4 +8,5 @@ public class ReviewRequestDTO {
     private String comment;
     private Long hotelId;
     private Long customerId;
+    private Long bookingId;
 }

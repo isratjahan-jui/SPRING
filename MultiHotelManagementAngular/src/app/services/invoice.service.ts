@@ -20,4 +20,8 @@ export class InvoiceService {
   getByCustomer(customerId: number) {
     return this.http.get<InvoiceResponse[]>(`${this.API_URL}/customer/${customerId}`);
   }
+
+  getByBooking(bookingId: number) {
+    return this.http.get<InvoiceResponse[]>(`${this.API_URL}/booking/${bookingId}`);
+  }
 }

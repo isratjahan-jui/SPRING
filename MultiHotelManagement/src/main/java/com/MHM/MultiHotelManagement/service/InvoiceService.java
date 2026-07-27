@@ -9,6 +9,9 @@ public interface InvoiceService {
     InvoiceResponseDTO create(InvoiceRequestDTO dto);
     InvoiceResponseDTO getById(Long id);
     List<InvoiceResponseDTO> getByCustomer(Long customerId);
+    List<InvoiceResponseDTO> getByBooking(Long bookingId);
+    List<InvoiceResponseDTO> getByHotelId(Long hotelId);
+    List<InvoiceResponseDTO> getByOwnerId(Long ownerId);
     List<InvoiceResponseDTO> getAll();
     void delete(Long id);
 }

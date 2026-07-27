@@ -72,6 +72,7 @@
                 }">{{ customer.gender || '—' }}</span>
               </td>
               <td>
+                <a class="btn btn-sm btn-outline-primary me-1" [routerLink]="['/admin/customers', customer.id]">View</a>
                 <button class="btn btn-sm btn-outline-danger" (click)="confirmDelete(customer)">
                   Delete
                 </button>

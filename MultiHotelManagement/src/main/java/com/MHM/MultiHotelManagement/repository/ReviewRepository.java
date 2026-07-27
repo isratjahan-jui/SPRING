@@ -14,19 +14,37 @@ public interface ReviewRepository
 
     List<Review> findByHotel_Id(Long hotelId);
 
+    Boolean existsByCustomer_IdAndBooking_Id(Long customerId, Long bookingId);
+
+    Optional<Review> findByCustomer_IdAndBooking_Id(Long customerId, Long bookingId);
+
     @Query("""
         SELECT r FROM Review r
         LEFT JOIN FETCH r.customer c
         LEFT JOIN FETCH c.user
         LEFT JOIN FETCH r.hotel
+        LEFT JOIN FETCH r.booking b
+        LEFT JOIN FETCH b.room
         WHERE c.id = :customerId
+        ORDER BY r.createdAt DESC
     """)
     List<Review> findByCustomerIdWithDetails(
             @Param("customerId") Long customerId
     );
 
-    Boolean existsByCustomer_IdAndHotel_Id(
-            Long customerId, Long hotelId
+    @Query("""
+        SELECT r FROM Review r
+        LEFT JOIN FETCH r.customer c
+        LEFT JOIN FETCH c.user
+        LEFT JOIN FETCH r.hotel
+        LEFT JOIN FETCH r.booking b
+        LEFT JOIN FETCH b.room
+        WHERE r.hotel.id = :hotelId AND r.status = :status
+        ORDER BY r.createdAt DESC
+    """)
+    List<Review> findByHotelIdWithDetails(
+            @Param("hotelId") Long hotelId,
+            @Param("status") String status
     );
 
     @Query("""
@@ -34,9 +52,12 @@ public interface ReviewRepository
         LEFT JOIN FETCH r.customer c
         LEFT JOIN FETCH c.user
         LEFT JOIN FETCH r.hotel
+        LEFT JOIN FETCH r.booking b
+        LEFT JOIN FETCH b.room
         WHERE r.hotel.id = :hotelId
+        ORDER BY r.createdAt DESC
     """)
-    List<Review> findByHotelIdWithDetails(
+    List<Review> findByHotelIdWithDetailsAll(
             @Param("hotelId") Long hotelId
     );
 
@@ -45,9 +66,50 @@ public interface ReviewRepository
         LEFT JOIN FETCH r.customer c
         LEFT JOIN FETCH c.user
         LEFT JOIN FETCH r.hotel
+        LEFT JOIN FETCH r.booking b
+        LEFT JOIN FETCH b.room
+        WHERE r.status = :status
+        ORDER BY r.createdAt DESC
+    """)
+    List<Review> findByStatusWithDetails(
+            @Param("status") String status
+    );
+
+    @Query("""
+        SELECT r FROM Review r
+        LEFT JOIN FETCH r.customer c
+        LEFT JOIN FETCH c.user
+        LEFT JOIN FETCH r.hotel
+        LEFT JOIN FETCH r.booking b
+        LEFT JOIN FETCH b.room
+        ORDER BY r.createdAt DESC
+    """)
+    List<Review> findAllWithDetails();
+
+    @Query("""
+        SELECT r FROM Review r
+        LEFT JOIN FETCH r.customer c
+        LEFT JOIN FETCH c.user
+        LEFT JOIN FETCH r.hotel
+        LEFT JOIN FETCH r.booking b
+        LEFT JOIN FETCH b.room
         WHERE r.id = :id
     """)
     Optional<Review> findByIdWithDetails(
             @Param("id") Long id
+    );
+
+    @Query("""
+        SELECT r FROM Review r
+        LEFT JOIN FETCH r.customer c
+        LEFT JOIN FETCH c.user
+        LEFT JOIN FETCH r.hotel
+        LEFT JOIN FETCH r.booking b
+        LEFT JOIN FETCH b.room
+        WHERE r.hotel.id = :hotelId
+        ORDER BY r.createdAt DESC
+    """)
+    List<Review> findByHotelIdWithDetailsOrderAll(
+            @Param("hotelId") Long hotelId
     );
 }

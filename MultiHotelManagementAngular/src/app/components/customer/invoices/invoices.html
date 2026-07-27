@@ -1,5 +1,5 @@
-<div class="container mt-4">
-  <h2>My Invoices</h2>
+<div class="container py-4">
+  <h2 class="mb-4">My Invoices</h2>
 
   @if (loading) {
     <div class="text-center py-5">
@@ -25,6 +25,7 @@
             <th>Invoice #</th>
             <th>Booking</th>
             <th>Hotel</th>
+            <th>Room</th>
             <th>Net Amount</th>
             <th>Status</th>
             <th>Date</th>
@@ -35,12 +36,13 @@
           @for (inv of invoices; track inv.id) {
             <tr>
               <td>
-                <strong>{{ inv.invoiceNumber }}</strong>
+                <strong class="invoice-num">{{ inv.invoiceNumber | slice:0:8 }}...</strong>
               </td>
               <td>#{{ inv.bookingId }}</td>
-              <td>{{ getBooking(inv.bookingId)?.hotelName || '...' }}</td>
+              <td>{{ inv.hotelName || 'N/A' }}</td>
+              <td>{{ inv.roomType || '—' }}</td>
               <td>
-                <strong>BDT {{ inv.netAmount }}</strong>
+                <strong>BDT {{ inv.netAmount.toFixed(2) }}</strong>
               </td>
               <td>
                 <span class="badge" [ngClass]="getStatusClass(inv.status)">
@@ -55,7 +57,7 @@
                   >View Booking</a
                 >
                 <button class="btn btn-sm btn-success" (click)="printInvoice(inv)">
-                  Print Invoice
+                  Print
                 </button>
               </td>
             </tr>

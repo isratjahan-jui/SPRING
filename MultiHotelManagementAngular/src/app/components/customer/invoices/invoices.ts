@@ -5,8 +5,6 @@ import { InvoiceService } from '../../../services/invoice.service';
 import { AuthService } from '../../../services/auth.service';
 import { CustomerService } from '../../../services/customer.service';
 import { InvoiceResponse } from '../../../models/invoice.model';
-import { BookingService } from '../../../services/booking.service';
-import { Booking } from '../../../models/booking.model';
 
 @Component({
   selector: 'app-customer-invoices',
@@ -21,9 +19,7 @@ export class CustomerInvoices implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   invoices: InvoiceResponse[] = [];
-  bookingCache: Map<number, Booking> = new Map();
   loading = true;
-  private bookingService = inject(BookingService);
 
   ngOnInit() {
     const userId = this.auth.getUser()?.userId;
@@ -36,7 +32,6 @@ export class CustomerInvoices implements OnInit {
                 this.invoices = data;
                 this.loading = false;
                 this.cdr.markForCheck();
-                data.forEach((inv) => this.loadBooking(inv.bookingId));
               },
               error: () => {
                 this.loading = false;
@@ -58,20 +53,6 @@ export class CustomerInvoices implements OnInit {
     }
   }
 
-  loadBooking(bookingId: number) {
-    if (this.bookingCache.has(bookingId)) return;
-    this.bookingService.getById(bookingId).subscribe({
-      next: (b) => {
-        this.bookingCache.set(bookingId, b);
-        this.cdr.markForCheck();
-      },
-    });
-  }
-
-  getBooking(bookingId: number): Booking | undefined {
-    return this.bookingCache.get(bookingId);
-  }
-
   getStatusClass(status: string): string {
     switch (status) {
       case 'PAID':
@@ -86,7 +67,6 @@ export class CustomerInvoices implements OnInit {
   }
 
   printInvoice(inv: InvoiceResponse) {
-    const b = this.bookingCache.get(inv.bookingId);
     const pw = window.open('', '_blank');
     if (!pw) return;
     pw.document.write(`
@@ -130,25 +110,16 @@ export class CustomerInvoices implements OnInit {
             </div>
           </div>
 
-          ${
-            b
-              ? `
           <div class="section">
             <h3>Booking Details</h3>
             <div class="details-grid">
-              <p><span class="label">Booking ID:</span> #${b.id}</p>
-              <p><span class="label">Hotel:</span> ${b.hotelName || 'N/A'}</p>
-              <p><span class="label">Room Type:</span> ${b.roomType || 'N/A'}</p>
-              <p><span class="label">Rooms:</span> ${b.numberOfRooms}</p>
-              <p><span class="label">Check-in:</span> ${b.checkInDate ? new Date(b.checkInDate).toLocaleDateString('en-BD', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</p>
-              <p><span class="label">Check-out:</span> ${b.checkOutDate ? new Date(b.checkOutDate).toLocaleDateString('en-BD', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</p>
-              <p><span class="label">Guests:</span> ${b.totalGuests}</p>
-              <p><span class="label">Booking Status:</span> ${b.status}</p>
+              <p><span class="label">Booking ID:</span> #${inv.bookingId}</p>
+              <p><span class="label">Hotel:</span> ${inv.hotelName || 'N/A'}</p>
+              <p><span class="label">Room Type:</span> ${inv.roomType || 'N/A'}</p>
+              <p><span class="label">Customer:</span> ${inv.customerName || 'N/A'}</p>
+              <p><span class="label">Booking Status:</span> ${inv.bookingStatus || 'N/A'}</p>
             </div>
           </div>
-          `
-              : ''
-          }
 
           <div class="section">
             <h3>Payment Summary</h3>

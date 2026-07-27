@@ -10,6 +10,12 @@ public interface ReviewService {
     ReviewResponseDTO updateReview(Long id, ReviewRequestDTO dto);
     ReviewResponseDTO getReviewById(Long id);
     List<ReviewResponseDTO> getReviewsByHotel(Long hotelId);
+    List<ReviewResponseDTO> getApprovedReviewsByHotel(Long hotelId);
     List<ReviewResponseDTO> getReviewsByCustomer(Long customerId);
+    List<ReviewResponseDTO> getAllReviews();
+    List<ReviewResponseDTO> getReviewsByStatus(String status);
+    ReviewResponseDTO approveReview(Long id);
+    ReviewResponseDTO rejectReview(Long id);
     void deleteReview(Long id);
+    boolean hasCustomerReviewedBooking(Long customerId, Long bookingId);
 }

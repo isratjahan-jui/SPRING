@@ -322,11 +322,29 @@
           <p class="text-muted">No reviews yet.</p>
         }
 
-        @if (isCustomer && customerId) {
+        @if (canWriteReview()) {
           <div class="card bg-light p-3">
-            <h6>Write a Review</h6>
+            <h6>{{ existingReview ? 'Edit Your Review' : 'Write a Review' }}</h6>
             @if (reviewSubmitted) {
-              <div class="alert alert-success">Review submitted successfully!</div>
+              <div class="alert alert-success">
+                {{ existingReview ? 'Review updated successfully!' : 'Review submitted successfully!' }}
+              </div>
+            }
+            @if (reviewError) {
+              <div class="alert alert-danger">{{ reviewError }}</div>
+            }
+            @if (!existingReview && reviewableBookings.length > 0) {
+              <div class="mb-2">
+                <label class="form-label">Select Booking to Review</label>
+                <select class="form-select" [(ngModel)]="selectedBookingId">
+                  <option [ngValue]="null" disabled>-- Choose a booking --</option>
+                  @for (b of reviewableBookings; track b.id) {
+                    <option [ngValue]="b.id">
+                      #{{ b.id }} - {{ b.roomType }} ({{ b.checkInDate | date:'mediumDate' }} - {{ b.checkOutDate | date:'mediumDate' }})
+                    </option>
+                  }
+                </select>
+              </div>
             }
             <div class="mb-2">
               <label class="form-label">Rating</label>
@@ -350,12 +368,12 @@
             <button
               class="btn btn-primary"
               (click)="submitReview()"
-              [disabled]="submittingReview || !reviewComment.trim()"
+              [disabled]="submittingReview || !reviewComment.trim() || (!existingReview && !selectedBookingId)"
             >
               @if (submittingReview) {
                 <span class="spinner-border spinner-border-sm me-1"></span>
               }
-              Submit Review
+              {{ existingReview ? 'Update Review' : 'Submit Review' }}
             </button>
           </div>
         }

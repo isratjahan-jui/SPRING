@@ -18,6 +18,10 @@ public class InvoiceResponseDTO {
     private Long paymentId;
     private Long customerId;
     private Long commissionId;
+    private String hotelName;
+    private String customerName;
+    private String roomType;
+    private String bookingStatus;
     private LocalDateTime issuedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

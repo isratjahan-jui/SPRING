@@ -1,13 +1,14 @@
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { HotelOwnerService } from '../../../services/hotel-owner.service';
 import { HotelOwner } from '../../../models/hotel-owner.model';
 import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-admin-owners',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './owners.html',
   styleUrl: './owners.css',
 })

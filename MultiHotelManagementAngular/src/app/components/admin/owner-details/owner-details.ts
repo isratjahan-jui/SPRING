@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HotelOwnerService } from '../../../services/hotel-owner.service';
 import { HotelService } from '../../../services/hotel.service';
 import { HotelOwner } from '../../../models/hotel-owner.model';
@@ -9,7 +9,7 @@ import { environment } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-owner-details',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './owner-details.html',
   styleUrl: './owner-details.css',
 })
