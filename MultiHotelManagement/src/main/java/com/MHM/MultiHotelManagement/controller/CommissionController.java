@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -89,18 +90,18 @@ public class CommissionController {
     // ── Get by Commission Rate ───────────────────────────────────
     @GetMapping("/rate/{rate}")
     public ResponseEntity<List<CommissionResponseDTO>> getByRate(@PathVariable Double rate) {
-        return ResponseEntity.ok(commissionService.getByCommissionRate(rate));
+        return ResponseEntity.ok(commissionService.getByCommissionRate(BigDecimal.valueOf(rate)));
     }
 
     // ── Admin Total Earnings ─────────────────────────────────────
     @GetMapping("/admin/total")
-    public ResponseEntity<Double> getAdminTotal() {
+    public ResponseEntity<BigDecimal> getAdminTotal() {
         return ResponseEntity.ok(commissionService.getTotalAdminEarnings());
     }
 
     // ── Owner Total Earnings ─────────────────────────────────────
     @GetMapping("/owner/{ownerId}/total")
-    public ResponseEntity<Double> getOwnerTotal(@PathVariable Long ownerId) {
+    public ResponseEntity<BigDecimal> getOwnerTotal(@PathVariable Long ownerId) {
         return ResponseEntity.ok(commissionService.getTotalOwnerEarnings(ownerId));
     }
 

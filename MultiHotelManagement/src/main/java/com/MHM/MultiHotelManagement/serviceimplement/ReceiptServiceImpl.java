@@ -63,8 +63,15 @@ public class ReceiptServiceImpl implements ReceiptService {
         receipt.setBooking(booking);
         receipt.setCustomer(customer);
         receipt.setAmount(payment.getAmount());
-        receipt.setTaxAmount(BigDecimal.ZERO);
-        receipt.setTotalAmount(payment.getAmount());
+
+        if (invoice != null) {
+            receipt.setTaxAmount(invoice.getTaxAmount() != null ? invoice.getTaxAmount() : BigDecimal.ZERO);
+            receipt.setTotalAmount(invoice.getNetAmount() != null ? invoice.getNetAmount() : payment.getAmount());
+        } else {
+            receipt.setTaxAmount(BigDecimal.ZERO);
+            receipt.setTotalAmount(payment.getAmount());
+        }
+
         receipt.setPaymentMethod(payment.getMethod());
         receipt.setTransactionId(payment.getTransactionId());
 
@@ -134,6 +141,15 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Transactional(readOnly = true)
     public BigDecimal sumReceiptsByHotelId(Long hotelId) {
         return receiptRepository.sumTotalAmountByHotelId(hotelId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReceiptResponseDTO> getAllReceipts() {
+        return receiptRepository.findAllWithDetails()
+                .stream()
+                .map(receiptMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     private String generateReceiptNumber() {

@@ -14,7 +14,7 @@
             <h6>Total Paid</h6>
             <p class="fs-4 fw-bold mb-0">
               BDT
-              {{ payments.filter((p) => p.status === 'PAID').reduce((s, p) => s + p.amount, 0) }}
+              {{ payments.filter((p) => p.status === 'PAID').reduce((s, p) => s + (p.amount ?? 0), 0) }}
             </p>
           </div>
         </div>
@@ -39,6 +39,7 @@
             <th>Amount</th>
             <th>Status</th>
             <th>Date</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -54,6 +55,12 @@
                 <span class="badge {{ getStatusClass(p.status) }}">{{ p.status }}</span>
               </td>
               <td>{{ p.transactionDate | date: 'dd MMM yyyy, h:mm a' }}</td>
+              <td>
+                @if (p.status === 'PAID' && getReceipt(p.id)) {
+                  <button class="btn btn-sm btn-success" (click)="printReceipt(getReceipt(p.id)!)">View Receipt</button>
+                }
+                <a [routerLink]="['/customer/booking', p.bookingId]" class="btn btn-sm btn-outline-primary ms-1">View Booking</a>
+              </td>
             </tr>
           }
         </tbody>

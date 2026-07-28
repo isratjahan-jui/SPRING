@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,9 +21,9 @@ public class Commission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Double commissionRate;
-    private Double adminEarnings;
-    private Double hotelOwnerEarnings;
+    private BigDecimal commissionRate;
+    private BigDecimal adminEarnings;
+    private BigDecimal hotelOwnerEarnings;
 
     @Column(nullable = false)
     private String commissionStatus = "ACTIVE";

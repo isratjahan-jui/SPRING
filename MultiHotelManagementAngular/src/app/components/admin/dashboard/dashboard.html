@@ -87,6 +87,41 @@
       </div>
     </div>
 
+    <!-- Invoices & Receipts Row -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-lg-3">
+        <a routerLink="/admin/invoices" class="text-decoration-none">
+          <div class="card border-0 shadow-sm h-100 overview-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-secondary bg-opacity-10 p-3">
+                  <span class="fs-4">&#128196;</span>
+                </div>
+              </div>
+              <h6 class="text-muted mb-1">Total Invoices</h6>
+              <h2 class="fw-bold mb-0 text-dark">{{ totalInvoices }}</h2>
+              <small class="text-success">{{ paidInvoices }} paid</small>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <a routerLink="/admin/receipts" class="text-decoration-none">
+          <div class="card border-0 shadow-sm h-100 overview-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                  <span class="fs-4">&#9989;</span>
+                </div>
+              </div>
+              <h6 class="text-muted mb-1">Total Receipts</h6>
+              <h2 class="fw-bold mb-0 text-dark">{{ totalReceipts }}</h2>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
     <!-- Hotels Row -->
     <div class="row g-3 mb-4">
       <div class="col-sm-6 col-lg-4">
@@ -138,6 +173,24 @@
 
     <!-- Finance & Support Row -->
     <div class="row g-3 mb-4">
+      <!-- Locations -->
+      <div class="col-sm-6 col-lg-3">
+        <a routerLink="/admin/locations" class="text-decoration-none">
+          <div class="card border-0 shadow-sm h-100 overview-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+                  <span class="fs-4">&#128205;</span>
+                </div>
+              </div>
+              <h6 class="text-muted mb-1">Total Locations</h6>
+              <h2 class="fw-bold mb-0 text-dark">{{ totalLocations }}</h2>
+              <small class="text-success">{{ totalLocations >= 64 ? 'All 64 districts' : totalLocations + '/64 districts' }}</small>
+            </div>
+          </div>
+        </a>
+      </div>
+
       <!-- Commission -->
       <div class="col-sm-6 col-lg-3">
         <a routerLink="/admin/commissions" class="text-decoration-none">
@@ -224,6 +277,12 @@
           </div>
           <div class="col-auto">
             <a routerLink="/admin/payments" class="btn btn-outline-info btn-sm">View Payments</a>
+          </div>
+          <div class="col-auto">
+            <a routerLink="/admin/invoices" class="btn btn-outline-secondary btn-sm">Invoices</a>
+          </div>
+          <div class="col-auto">
+            <a routerLink="/admin/receipts" class="btn btn-outline-success btn-sm">Receipts</a>
           </div>
           <div class="col-auto">
             <a routerLink="/admin/commissions" class="btn btn-outline-secondary btn-sm">Commissions</a>

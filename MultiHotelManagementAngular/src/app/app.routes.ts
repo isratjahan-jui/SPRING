@@ -16,6 +16,7 @@ import { BookingDetails } from './components/customer/booking-details/booking-de
 import { MakePayment } from './components/customer/make-payment/make-payment';
 import { PaymentResult } from './components/customer/payment-result/payment-result';
 import { CustomerInvoices } from './components/customer/invoices/invoices';
+import { CustomerReceipts } from './components/customer/receipts/receipts';
 
 import { HotelList } from './components/hotel/hotel-list/hotel-list';
 import { AddHotel } from './components/hotel/add-hotel/add-hotel';
@@ -29,6 +30,8 @@ import { AdminCustomers } from './components/admin/customers/customers';
 import { CustomerDetails } from './components/admin/customer-details/customer-details';
 import { AdminCommissions } from './components/admin/commissions/commissions';
 import { AdminPayments } from './components/admin/payments/payments';
+import { AdminInvoices } from './components/admin/invoices/invoices';
+import { AdminReceipts } from './components/admin/receipts/receipts';
 import { AdminBookings } from './components/admin/bookings/bookings';
 import { AdminNotifications } from './components/admin/notifications/notifications';
 import { AdminSupport } from './components/admin/support/support';
@@ -65,6 +68,8 @@ import { CustomerCoupons } from './components/customer/coupons/coupons';
 import { CustomerCheckinCheckout } from './components/customer/checkin-checkout/checkin-checkout';
 import { MyReviews } from './components/customer/my-reviews/my-reviews';
 import { Payments } from './components/hotelowner/payments/payments';
+import { OwnerInvoices } from './components/hotelowner/invoices/invoices';
+import { OwnerReceipts } from './components/hotelowner/receipts/receipts';
 import { RoleRedirect } from './components/auth/role-redirect/role-redirect';
 
 import { authGuard, roleGuard } from './guards/auth.guards';
@@ -122,6 +127,16 @@ export const routes: Routes = [
   {
     path: 'admin/payments',
     component: AdminPayments,
+    canActivate: [authGuard, roleGuard(['ADMIN'])],
+  },
+  {
+    path: 'admin/invoices',
+    component: AdminInvoices,
+    canActivate: [authGuard, roleGuard(['ADMIN'])],
+  },
+  {
+    path: 'admin/receipts',
+    component: AdminReceipts,
     canActivate: [authGuard, roleGuard(['ADMIN'])],
   },
   {
@@ -193,6 +208,16 @@ export const routes: Routes = [
   {
     path: 'owner/payments',
     component: Payments,
+    canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])],
+  },
+  {
+    path: 'owner/invoices',
+    component: OwnerInvoices,
+    canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])],
+  },
+  {
+    path: 'owner/receipts',
+    component: OwnerReceipts,
     canActivate: [authGuard, roleGuard(['HOTEL_OWNER'])],
   },
   {
@@ -274,6 +299,11 @@ export const routes: Routes = [
   {
     path: 'customer/invoices',
     component: CustomerInvoices,
+    canActivate: [authGuard, roleGuard(['CUSTOMER'])],
+  },
+  {
+    path: 'customer/receipts',
+    component: CustomerReceipts,
     canActivate: [authGuard, roleGuard(['CUSTOMER'])],
   },
   {

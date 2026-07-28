@@ -24,4 +24,12 @@ export class InvoiceService {
   getByBooking(bookingId: number) {
     return this.http.get<InvoiceResponse[]>(`${this.API_URL}/booking/${bookingId}`);
   }
+
+  getByHotelId(hotelId: number) {
+    return this.http.get<InvoiceResponse[]>(`${this.API_URL}/hotel/${hotelId}`);
+  }
+
+  getByOwnerId(ownerId: number) {
+    return this.http.get<InvoiceResponse[]>(`${this.API_URL}/owner/${ownerId}`);
+  }
 }

@@ -31,4 +31,7 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
 
     @Query("SELECT COALESCE(SUM(r.totalAmount), 0) FROM Receipt r WHERE r.booking.hotel.id = :hotelId")
     BigDecimal sumTotalAmountByHotelId(@Param("hotelId") Long hotelId);
+
+    @Query("SELECT r FROM Receipt r LEFT JOIN FETCH r.payment LEFT JOIN FETCH r.invoice LEFT JOIN FETCH r.booking LEFT JOIN FETCH r.customer ORDER BY r.issuedAt DESC")
+    List<Receipt> findAllWithDetails();
 }

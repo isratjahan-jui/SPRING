@@ -8,6 +8,7 @@ import com.MHM.MultiHotelManagement.exception.AlreadyExistsException;
 import com.MHM.MultiHotelManagement.exception.BadRequestException;
 import com.MHM.MultiHotelManagement.exception.ResourceNotFoundException;
 import com.MHM.MultiHotelManagement.repository.LocationRepository;
+import com.MHM.MultiHotelManagement.service.AuditTrailService;
 import com.MHM.MultiHotelManagement.service.LocationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 public class LocationServiceImpl implements LocationService {
 
     private final LocationRepository locationRepo;
+    private final AuditTrailService auditTrailService;
 
     @Value("${image.upload.dir:uploads}")
     private String uploadDir;
@@ -60,6 +62,9 @@ public class LocationServiceImpl implements LocationService {
         }
 
         Location saved = locationRepo.save(location);
+        logAudit("LOCATION_CREATED", "Location", saved.getId(),
+                "Location '" + saved.getLocationName() + "' created in " + saved.getCity()
+                        + ", district: " + saved.getDistrict() + ", division: " + saved.getDivision());
         return LocationMapper.toDTO(saved);
     }
 
@@ -171,6 +176,8 @@ public class LocationServiceImpl implements LocationService {
         }
 
         Location saved = locationRepo.save(location);
+        logAudit("LOCATION_UPDATED", "Location", saved.getId(),
+                "Location '" + saved.getLocationName() + "' updated");
         return LocationMapper.toDTO(saved);
     }
 
@@ -184,6 +191,15 @@ public class LocationServiceImpl implements LocationService {
             );
         }
         locationRepo.deleteById(id);
+        logAudit("LOCATION_DELETED", "Location", id,
+                "Location with id " + id + " deleted");
+    }
+
+    // ── Audit Trail Helper ───────────────────────────────────────
+    private void logAudit(String action, String entityType, Long entityId, String details) {
+        try {
+            auditTrailService.logAction(action, entityType, entityId, details, "ADMIN");
+        } catch (Exception ignored) {}
     }
 
     // ── Image Upload Helper ──────────────────────────────────────

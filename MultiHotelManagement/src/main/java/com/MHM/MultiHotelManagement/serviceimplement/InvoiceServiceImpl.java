@@ -53,7 +53,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setTotalAmount(dto.getTotalAmount());
         invoice.setTaxAmount(dto.getTaxAmount());
         invoice.setDiscountAmount(dto.getDiscountAmount());
-        invoice.setNetAmount(dto.getTotalAmount() + dto.getTaxAmount() - dto.getDiscountAmount());
+        invoice.setNetAmount(dto.getTotalAmount().add(dto.getTaxAmount()).subtract(dto.getDiscountAmount()));
         invoice.setStatus(InvoiceStatus.ISSUED);
         invoice.setIssuedAt(LocalDateTime.now());
 

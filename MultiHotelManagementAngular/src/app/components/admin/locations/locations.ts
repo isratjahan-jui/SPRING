@@ -16,6 +16,8 @@ export class AdminLocations implements OnInit {
   private locationService = inject(LocationService);
   private cdr = inject(ChangeDetectorRef);
 
+  Math = Math;
+
   locations: Location[] = [];
   loading = true;
 
@@ -66,6 +68,20 @@ export class AdminLocations implements OnInit {
     if (page < 0 || page >= this.totalPages) return;
     this.currentPage = page;
     this.loadLocations();
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisible = 5;
+    let start = Math.max(0, this.currentPage - Math.floor(maxVisible / 2));
+    let end = Math.min(this.totalPages, start + maxVisible);
+    if (end - start < maxVisible) {
+      start = Math.max(0, end - maxVisible);
+    }
+    for (let i = start; i < end; i++) {
+      pages.push(i);
+    }
+    return pages;
   }
 
   openCreate() {

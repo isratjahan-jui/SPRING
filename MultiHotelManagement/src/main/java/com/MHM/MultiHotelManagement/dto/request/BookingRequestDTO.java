@@ -1,5 +1,6 @@
 package com.MHM.MultiHotelManagement.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -21,9 +22,11 @@ public class BookingRequestDTO {
     private Long roomId;
 
     @NotNull(message = "Check-in date is required")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date checkInDate;
 
     @NotNull(message = "Check-out date is required")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date checkOutDate;
 
     @Min(value = 1, message = "Number of rooms must be at least 1")

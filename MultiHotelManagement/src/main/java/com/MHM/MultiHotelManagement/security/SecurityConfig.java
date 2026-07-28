@@ -200,10 +200,13 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-        // Permissive rule — SSLCommerz gateway callbacks (no credentials)
-        // Must be registered BEFORE the catch-all /** rule
+        // Strict rule — SSLCommerz gateway callbacks (restricted to known SSLCommerz domains)
         CorsConfiguration sslCommerz = new CorsConfiguration();
-        sslCommerz.setAllowedOriginPatterns(List.of("*"));
+        sslCommerz.setAllowedOriginPatterns(List.of(
+                "https://sandbox.sslcommerz.com",
+                "https://securepay.sslcommerz.com",
+                "https://www.sslcommerz.com"
+        ));
         sslCommerz.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
         sslCommerz.setAllowedHeaders(List.of("*"));
         sslCommerz.setAllowCredentials(false);

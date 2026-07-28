@@ -69,4 +69,10 @@ public class ReceiptController {
     public ResponseEntity<java.math.BigDecimal> sumReceiptsByHotelId(@PathVariable Long hotelId) {
         return ResponseEntity.ok(receiptService.sumReceiptsByHotelId(hotelId));
     }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<ReceiptResponseDTO>> getAllReceipts() {
+        return ResponseEntity.ok(receiptService.getAllReceipts());
+    }
 }

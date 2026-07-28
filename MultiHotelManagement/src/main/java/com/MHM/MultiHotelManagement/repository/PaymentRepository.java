@@ -30,7 +30,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
         SELECT COALESCE(SUM(p.amount), 0) FROM Payment p
         JOIN p.booking b
         WHERE b.hotel.id = :hotelId
-        AND p.status = 'SUCCESS'
+        AND p.status = 'PAID'
         AND p.createdAt BETWEEN :start AND :end
     """)
     BigDecimal sumRevenueByHotelAndDateRange(
@@ -44,7 +44,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
         JOIN p.booking b
         JOIN b.hotel h
         WHERE h.owner.id = :ownerId
-        AND p.status = 'SUCCESS'
+        AND p.status = 'PAID'
         AND p.createdAt BETWEEN :start AND :end
     """)
     BigDecimal sumRevenueByOwnerAndDateRange(

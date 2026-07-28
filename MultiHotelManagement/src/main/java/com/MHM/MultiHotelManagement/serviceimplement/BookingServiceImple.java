@@ -14,8 +14,6 @@ import com.MHM.MultiHotelManagement.entity.HotelExtraService;
 import com.MHM.MultiHotelManagement.entity.HotelDetails;
 import com.MHM.MultiHotelManagement.entity.Payment;
 import com.MHM.MultiHotelManagement.entity.Commission;
-import com.MHM.MultiHotelManagement.entity.Wallet;
-import com.MHM.MultiHotelManagement.entity.WalletTransaction;
 import com.MHM.MultiHotelManagement.enums.BookingStatus;
 import com.MHM.MultiHotelManagement.enums.InvoiceStatus;
 import com.MHM.MultiHotelManagement.enums.PaymentStatus;
@@ -30,10 +28,10 @@ import com.MHM.MultiHotelManagement.repository.HotelExtraServiceRepository;
 import com.MHM.MultiHotelManagement.repository.HotelDetailsRepository;
 import com.MHM.MultiHotelManagement.repository.PaymentRepository;
 import com.MHM.MultiHotelManagement.repository.CommissionRepository;
-import com.MHM.MultiHotelManagement.repository.WalletRepository;
-import com.MHM.MultiHotelManagement.repository.WalletTransactionRepository;
 import com.MHM.MultiHotelManagement.service.BookingService;
 import com.MHM.MultiHotelManagement.service.NotificationService;
+import com.MHM.MultiHotelManagement.service.AuditTrailService;
+import com.MHM.MultiHotelManagement.service.WalletService;
 import com.MHM.MultiHotelManagement.dto.request.NotificationRequestDTO;
 import com.MHM.MultiHotelManagement.enums.NotificationChannel;
 import com.MHM.MultiHotelManagement.enums.NotificationType;
@@ -43,6 +41,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
@@ -71,10 +71,10 @@ public class BookingServiceImple implements BookingService {
     private final HotelDetailsRepository hotelDetailsRepository;
     private final PaymentRepository paymentRepository;
     private final CommissionRepository commissionRepository;
-    private final WalletRepository walletRepository;
-    private final WalletTransactionRepository walletTransactionRepository;
+    private final WalletService walletService;
     private final InvoiceRepository invoiceRepository;
     private final NotificationService notificationService;
+    private final AuditTrailService auditTrailService;
 
     @Value("${image.upload.dir:uploads}")
     private String uploadDir;
@@ -88,10 +88,10 @@ public class BookingServiceImple implements BookingService {
                                HotelDetailsRepository hotelDetailsRepository,
                                PaymentRepository paymentRepository,
                                CommissionRepository commissionRepository,
-                               WalletRepository walletRepository,
-                               WalletTransactionRepository walletTransactionRepository,
+                               WalletService walletService,
                                InvoiceRepository invoiceRepository,
-                               NotificationService notificationService) {
+                               NotificationService notificationService,
+                               AuditTrailService auditTrailService) {
         this.bookingRepository = bookingRepository;
         this.customerRepository = customerRepository;
         this.hotelRepository = hotelRepository;
@@ -101,10 +101,10 @@ public class BookingServiceImple implements BookingService {
         this.hotelDetailsRepository = hotelDetailsRepository;
         this.paymentRepository = paymentRepository;
         this.commissionRepository = commissionRepository;
-        this.walletRepository = walletRepository;
-        this.walletTransactionRepository = walletTransactionRepository;
+        this.walletService = walletService;
         this.invoiceRepository = invoiceRepository;
         this.notificationService = notificationService;
+        this.auditTrailService = auditTrailService;
     }
 
     @Override
@@ -183,15 +183,17 @@ public class BookingServiceImple implements BookingService {
             booking.setDueAmount(totalAmount.subtract(dto.getAdvanceAmount()).add(extraServicesTotal));
         }
 
-        Booking saved = bookingRepository.save(booking);
+        // Calculate and set discount/tax/net amounts NOW (before save)
+        BigDecimal finalTotal = booking.getTotalAmount();
+        BigDecimal discountRate = booking.getDiscountRate() != null ? booking.getDiscountRate() : BigDecimal.ZERO;
+        BigDecimal discountAmt = finalTotal.multiply(discountRate).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        BigDecimal taxAmt = finalTotal.subtract(discountAmt).multiply(BigDecimal.valueOf(0.15)).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal netAmt = finalTotal.add(taxAmt).subtract(discountAmt);
+        booking.setDiscountAmount(discountAmt);
+        booking.setTaxAmount(taxAmt);
+        booking.setNetAmount(netAmt);
 
-        // Auto-generate invoice at booking time (payment request)
-        try {
-            generateInvoiceAtBooking(saved);
-            log.info("Invoice generated at booking time for booking {}", saved.getId());
-        } catch (Exception e) {
-            log.error("Invoice generation failed for booking {}: {}", saved.getId(), e.getMessage(), e);
-        }
+        Booking saved = bookingRepository.save(booking);
 
         // Update room availability counters
         room.setAvailableRooms(room.getAvailableRooms() - dto.getNumberOfRooms());
@@ -201,22 +203,42 @@ public class BookingServiceImple implements BookingService {
         }
         roomRepository.save(room);
 
-        // Send notifications
-        try {
-            NotificationRequestDTO customerNotification = new NotificationRequestDTO();
-            customerNotification.setUserId(customer.getUser().getId());
-            customerNotification.setType(NotificationType.BOOKING_CONFIRMED);
-            customerNotification.setChannel(NotificationChannel.WEB);
-            customerNotification.setMessage("Booking request submitted at " + hotel.getHotelName() + ". Awaiting confirmation. Booking ID: #" + saved.getId());
-            notificationService.createNotification(customerNotification);
+        // Capture values for lambda
+        final Long customerId = customer.getUser().getId();
+        final Long ownerUserId = hotel.getOwner().getUser().getId();
+        final String hotelName = hotel.getHotelName();
+        final String customerName = customer.getCustomerName();
 
-            NotificationRequestDTO ownerNotification = new NotificationRequestDTO();
-            ownerNotification.setUserId(hotel.getOwner().getUser().getId());
-            ownerNotification.setType(NotificationType.BOOKING_CONFIRMED);
-            ownerNotification.setChannel(NotificationChannel.WEB);
-            ownerNotification.setMessage("New booking request from " + customer.getCustomerName() + " at " + hotel.getHotelName() + ". Booking ID: #" + saved.getId());
-            notificationService.createNotification(ownerNotification);
-        } catch (Exception ignored) {}
+        // Schedule invoice generation + notifications AFTER transaction commits successfully
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                // Auto-generate invoice at booking time
+                try {
+                    generateInvoiceAtBooking(saved);
+                    log.info("Invoice generated at booking time for booking {}", saved.getId());
+                } catch (Exception e) {
+                    log.error("Invoice generation failed for booking {}: {}", saved.getId(), e.getMessage(), e);
+                }
+
+                // Send notifications
+                try {
+                    NotificationRequestDTO customerNotification = new NotificationRequestDTO();
+                    customerNotification.setUserId(customerId);
+                    customerNotification.setType(NotificationType.BOOKING_CONFIRMED);
+                    customerNotification.setChannel(NotificationChannel.WEB);
+                    customerNotification.setMessage("Booking request submitted at " + hotelName + ". Awaiting confirmation. Booking ID: #" + saved.getId());
+                    notificationService.createNotification(customerNotification);
+
+                    NotificationRequestDTO ownerNotification = new NotificationRequestDTO();
+                    ownerNotification.setUserId(ownerUserId);
+                    ownerNotification.setType(NotificationType.BOOKING_CONFIRMED);
+                    ownerNotification.setChannel(NotificationChannel.WEB);
+                    ownerNotification.setMessage("New booking request from " + customerName + " at " + hotelName + ". Booking ID: #" + saved.getId());
+                    notificationService.createNotification(ownerNotification);
+                } catch (Exception ignored) {}
+            }
+        });
 
         return BookingMapperDTO.toResponseDTO(saved);
     }
@@ -614,32 +636,21 @@ public class BookingServiceImple implements BookingService {
         if (commissionRetained.compareTo(BigDecimal.ZERO) > 0) {
             Commission retainedCommission = new Commission();
             retainedCommission.setBooking(booking);
-            retainedCommission.setCommissionRate(10.0);
-            retainedCommission.setAdminEarnings(commissionRetained.doubleValue());
-            retainedCommission.setHotelOwnerEarnings(0.0);
+            retainedCommission.setCommissionRate(BigDecimal.valueOf(10.0));
+            retainedCommission.setAdminEarnings(commissionRetained);
+            retainedCommission.setHotelOwnerEarnings(BigDecimal.ZERO);
             paymentOpt.ifPresent(retainedCommission::setPayment);
             commissionRepository.save(retainedCommission);
         }
 
         // Credit refund to customer wallet
         if (refundAmount.compareTo(BigDecimal.ZERO) > 0 && booking.getCustomer() != null) {
-            Wallet wallet = walletRepository.findByUser_Id(booking.getCustomer().getUser().getId())
-                    .orElseGet(() -> {
-                        Wallet newWallet = new Wallet();
-                        newWallet.setUser(booking.getCustomer().getUser());
-                        return walletRepository.save(newWallet);
-                    });
-
-            wallet.setBalance(wallet.getBalance().add(refundAmount));
-            walletRepository.save(wallet);
-
-            WalletTransaction transaction = new WalletTransaction();
-            transaction.setWallet(wallet);
-            transaction.setAmount(refundAmount);
-            transaction.setType("CREDIT");
-            transaction.setDescription("Refund for cancelled booking #" + bookingId + " - " + refundNote);
-            transaction.setReferenceId(bookingId);
-            walletTransactionRepository.save(transaction);
+            walletService.credit(
+                    booking.getCustomer().getUser().getId(),
+                    refundAmount,
+                    "Refund for cancelled booking #" + bookingId + " - " + refundNote,
+                    bookingId
+            );
         }
 
         booking.setAdvanceAmount(advancePaid.subtract(refundAmount));
@@ -717,28 +728,28 @@ public class BookingServiceImple implements BookingService {
         if (alreadyExists) return;
 
         BigDecimal total = booking.getTotalAmount() != null ? booking.getTotalAmount() : BigDecimal.ZERO;
-        BigDecimal discountRate = booking.getDiscountRate() != null ? booking.getDiscountRate() : BigDecimal.ZERO;
-        BigDecimal discountAmount = total.multiply(discountRate).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-        BigDecimal taxAmount = total.subtract(discountAmount).multiply(BigDecimal.valueOf(0.15)).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal netAmount = total.add(taxAmount).subtract(discountAmount);
-
-        booking.setDiscountAmount(discountAmount);
-        booking.setTaxAmount(taxAmount);
-        booking.setNetAmount(netAmount);
-        bookingRepository.save(booking);
+        BigDecimal discountAmount = booking.getDiscountAmount() != null ? booking.getDiscountAmount() : BigDecimal.ZERO;
+        BigDecimal taxAmount = booking.getTaxAmount() != null ? booking.getTaxAmount() : BigDecimal.ZERO;
+        BigDecimal netAmount = booking.getNetAmount() != null ? booking.getNetAmount() : BigDecimal.ZERO;
 
         Invoice invoice = new Invoice();
         invoice.setInvoiceNumber("INV-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         invoice.setBooking(booking);
         invoice.setCustomer(booking.getCustomer());
         invoice.setStatus(InvoiceStatus.ISSUED);
-        invoice.setTotalAmount(total.doubleValue());
-        invoice.setDiscountAmount(discountAmount.doubleValue());
-        invoice.setTaxAmount(taxAmount.doubleValue());
-        invoice.setNetAmount(netAmount.doubleValue());
+        invoice.setTotalAmount(total);
+        invoice.setDiscountAmount(discountAmount);
+        invoice.setTaxAmount(taxAmount);
+        invoice.setNetAmount(netAmount);
         invoice.setIssuedAt(LocalDateTime.now());
 
         invoiceRepository.save(invoice);
         log.info("Invoice {} generated at booking time for booking {}", invoice.getInvoiceNumber(), booking.getId());
+
+        try {
+            auditTrailService.logAction("INVOICE_CREATED", "Invoice", invoice.getId(),
+                    "Invoice " + invoice.getInvoiceNumber() + " generated for booking #" + booking.getId() + ", amount: " + netAmount,
+                    "SYSTEM");
+        } catch (Exception ignored) {}
     }
 }

@@ -32,7 +32,7 @@ public class CommissionServiceImpl implements CommissionService {
     private final PaymentRepository paymentRepo;
     private final ExtraServiceRepository extraServiceRepo;
 
-    private static final Double DEFAULT_RATE = 10.0;
+    private static final BigDecimal DEFAULT_RATE = BigDecimal.valueOf(10.0);
 
     // ── Booking থেকে Commission তৈরি ─────────────────────────────
     @Override
@@ -45,18 +45,16 @@ public class CommissionServiceImpl implements CommissionService {
             throw new AlreadyExistsException("Commission already exists for booking id: " + dto.getBookingId());
         }
 
-        Double rate = dto.getCommissionRate() != null ? dto.getCommissionRate() : DEFAULT_RATE;
+        BigDecimal rate = dto.getCommissionRate() != null ? dto.getCommissionRate() : DEFAULT_RATE;
         BigDecimal totalPrice = booking.getTotalPrice();
-        BigDecimal adminEarningsBd = totalPrice.multiply(BigDecimal.valueOf(rate)).divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
+        BigDecimal adminEarningsBd = totalPrice.multiply(rate).divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
         BigDecimal ownerEarningsBd = totalPrice.subtract(adminEarningsBd);
-        Double adminEarnings = adminEarningsBd.doubleValue();
-        Double ownerEarnings = ownerEarningsBd.doubleValue();
 
         Commission commission = new Commission();
         commission.setBooking(booking);
         commission.setCommissionRate(rate);
-        commission.setAdminEarnings(adminEarnings);
-        commission.setHotelOwnerEarnings(ownerEarnings);
+        commission.setAdminEarnings(adminEarningsBd);
+        commission.setHotelOwnerEarnings(ownerEarningsBd);
 
         Commission saved = commissionRepo.save(commission);
         return CommissionMapper.toDTO(commissionRepo.findByIdWithDetails(saved.getId()).orElse(saved));
@@ -164,7 +162,7 @@ public class CommissionServiceImpl implements CommissionService {
     // ── Commission Rate দিয়ে খোঁজো ───────────────────────────────
     @Override
     @Transactional(readOnly = true)
-    public List<CommissionResponseDTO> getByCommissionRate(Double commissionRate) {
+    public List<CommissionResponseDTO> getByCommissionRate(BigDecimal commissionRate) {
         return commissionRepo.findByCommissionRate(commissionRate)
                 .stream()
                 .map(CommissionMapper::toDTO)
@@ -181,15 +179,15 @@ public class CommissionServiceImpl implements CommissionService {
     // ── Admin এর মোট আয় ──────────────────────────────────────────
     @Override
     @Transactional(readOnly = true)
-    public Double getTotalAdminEarnings() {
-        return commissionRepo.getTotalAdminEarnings();
+    public BigDecimal getTotalAdminEarnings() {
+        return BigDecimal.valueOf(commissionRepo.getTotalAdminEarnings());
     }
 
     // ── Owner এর মোট আয় ──────────────────────────────────────────
     @Override
     @Transactional(readOnly = true)
-    public Double getTotalOwnerEarnings(Long ownerId) {
-        return commissionRepo.getTotalOwnerEarnings(ownerId);
+    public BigDecimal getTotalOwnerEarnings(Long ownerId) {
+        return BigDecimal.valueOf(commissionRepo.getTotalOwnerEarnings(ownerId));
     }
 
     // ── Date Range দিয়ে খোঁজো ────────────────────────────────────
