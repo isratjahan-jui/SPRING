@@ -97,6 +97,14 @@ public class PaymentServiceImpl implements PaymentService {
 
         Payment saved = paymentRepository.save(payment);
 
+        // Audit trail for payment creation
+        try {
+            auditTrailService.logAction("PAYMENT_CREATED", "Payment", saved.getId(),
+                    "Payment of " + saved.getAmount() + " created for booking #" + booking.getId()
+                            + ", status: " + saved.getStatus() + ", method: " + saved.getMethod(),
+                    "SYSTEM");
+        } catch (Exception ignored) {}
+
         // Auto-update booking due amount using BigDecimal
         BigDecimal paid = saved.getAmount() != null ? saved.getAmount() : BigDecimal.ZERO;
         BigDecimal currentAdvance = booking.getAdvanceAmount() != null ? booking.getAdvanceAmount() : BigDecimal.ZERO;
@@ -223,6 +231,13 @@ public class PaymentServiceImpl implements PaymentService {
 
         payment.setStatus(PaymentStatus.REFUNDED);
         Payment saved = paymentRepository.save(payment);
+
+        // Audit trail for refund
+        try {
+            auditTrailService.logAction("PAYMENT_REFUNDED", "Payment", saved.getId(),
+                    "Refund of " + saved.getAmount() + " processed for booking #" + bookingId,
+                    "SYSTEM");
+        } catch (Exception ignored) {}
 
         // Send refund notification
         try {

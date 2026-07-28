@@ -6,11 +6,13 @@ import { AuthService } from '../../../services/auth.service';
 import { CustomerService } from '../../../services/customer.service';
 import { BookingService } from '../../../services/booking.service';
 import { InvoiceService } from '../../../services/invoice.service';
+import { ReceiptService } from '../../../services/receipt.service';
 import { HotelService } from '../../../services/hotel.service';
 import { Customer } from '../../../models/customer.model';
 import { Booking } from '../../../models/booking.model';
 import { Hotel } from '../../../models/hotel.model';
 import { InvoiceResponse } from '../../../models/invoice.model';
+import { ReceiptResponse } from '../../../models/receipt.model';
 import { StorageService } from '../../../services/storage.service';
 import { LoginResponse } from '../../../models/auth.model';
 import { environment } from '../../../../environments/environments';
@@ -26,6 +28,7 @@ export class CustomerDashboard implements OnInit {
   private customerService = inject(CustomerService);
   private bookingService = inject(BookingService);
   private invoiceService = inject(InvoiceService);
+  private receiptService = inject(ReceiptService);
   private hotelService = inject(HotelService);
   private storage = inject(StorageService);
   private cdr = inject(ChangeDetectorRef);
@@ -35,6 +38,7 @@ export class CustomerDashboard implements OnInit {
   customer?: Customer;
   bookings: Booking[] = [];
   invoices: InvoiceResponse[] = [];
+  receipts: ReceiptResponse[] = [];
   loading = true;
 
   imageBaseUrl = environment.imageBaseUrl;
@@ -64,6 +68,7 @@ export class CustomerDashboard implements OnInit {
           if (data.id) {
             this.loadBookings(data.id);
             this.loadInvoices(data.id);
+            this.loadReceipts(data.id);
           } else {
             this.loading = false;
             this.cdr.markForCheck();
@@ -101,6 +106,16 @@ export class CustomerDashboard implements OnInit {
         this.totalSpent = data
           .filter((i) => i.status === 'PAID')
           .reduce((sum, i) => sum + (i.netAmount || 0), 0);
+        this.cdr.markForCheck();
+      },
+      error: () => {},
+    });
+  }
+
+  private loadReceipts(customerId: number) {
+    this.receiptService.getByCustomer(customerId).subscribe({
+      next: (data) => {
+        this.receipts = data;
         this.cdr.markForCheck();
       },
       error: () => {},

@@ -137,6 +137,30 @@
     </div>
   </div>
 
+  <!-- Invoice & Receipt Cards -->
+  <div class="row mt-2">
+    <div class="col-md-3 mb-3">
+      <a routerLink="/owner/invoices" class="text-decoration-none">
+        <div class="card shadow border-0 bg-primary text-white">
+          <div class="card-body text-center">
+            <h2>{{ invoices.length }}</h2>
+            <h6 class="text-white fw-bold">Invoices</h6>
+            <small class="text-white-50">{{ invoices.filter((i) => i.status === 'PAID').length }} paid</small>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3 mb-3">
+      <a routerLink="/owner/receipts" class="text-decoration-none">
+        <div class="card shadow border-0 bg-success text-white">
+          <div class="card-body text-center">
+            <h2>{{ receipts.length }}</h2>
+            <h6 class="text-white fw-bold">Receipts</h6>
+          </div>
+        </div>
+      </a>
+    </div>
+
   <!-- Booking Status Cards -->
   <div class="row mt-2">
     <div class="col-md-3 mb-3">

@@ -1,50 +1,30 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { PaymentService } from '../../../services/payment.service';
 import { ReceiptService } from '../../../services/receipt.service';
-import { PaymentRequest, PaymentResponse } from '../../../models/payment.model';
 import { ReceiptResponse } from '../../../models/receipt.model';
 
 @Component({
-  selector: 'app-admin-payments',
-  imports: [CommonModule, FormsModule],
-  templateUrl: './payments.html',
-  styleUrl: './payments.css',
+  selector: 'app-admin-receipts',
+  imports: [CommonModule],
+  templateUrl: './receipts.html',
+  styleUrl: './receipts.css',
 })
-export class AdminPayments implements OnInit {
-  private paymentService = inject(PaymentService);
+export class AdminReceipts implements OnInit {
   private receiptService = inject(ReceiptService);
   private cdr = inject(ChangeDetectorRef);
 
-  payments: PaymentResponse[] = [];
-  receipts: Map<number, ReceiptResponse> = new Map();
+  receipts: ReceiptResponse[] = [];
   loading = true;
 
-  showForm = false;
-  editing = false;
-  selectedId: number | null = null;
-  form: PaymentRequest = {
-    method: '',
-    amount: 0,
-    status: 'PENDING',
-    bookingId: 0,
-    customerId: undefined,
-    extraServiceId: undefined,
-  };
-
-  refundingId: number | null = null;
-
   ngOnInit() {
-    this.loadPayments();
+    this.loadReceipts();
   }
 
-  loadPayments() {
+  loadReceipts() {
     this.loading = true;
-    this.paymentService.getAll().subscribe({
+    this.receiptService.getAll().subscribe({
       next: (data) => {
-        this.payments = data;
-        this.loadReceiptsForPayments(data);
+        this.receipts = data;
         this.loading = false;
         this.cdr.markForCheck();
       },
@@ -53,123 +33,6 @@ export class AdminPayments implements OnInit {
         this.cdr.markForCheck();
       },
     });
-  }
-
-  openCreate() {
-    this.editing = false;
-    this.selectedId = null;
-    this.form = {
-      method: '',
-      amount: 0,
-      status: 'PAID',
-      bookingId: 0,
-      customerId: undefined,
-      extraServiceId: undefined,
-    };
-    this.showForm = true;
-    this.cdr.markForCheck();
-  }
-
-  openEdit(p: PaymentResponse) {
-    this.editing = true;
-    this.selectedId = p.id;
-    this.form = {
-      method: p.method,
-      amount: p.amount,
-      status: p.status,
-      bookingId: p.bookingId,
-      customerId: p.customerId,
-      extraServiceId: p.extraServiceId,
-    };
-    this.showForm = true;
-    this.cdr.markForCheck();
-  }
-
-  closeForm() {
-    this.showForm = false;
-    this.cdr.markForCheck();
-  }
-
-  save() {
-    if (this.editing && this.selectedId) {
-      this.paymentService.update(this.selectedId, this.form).subscribe({
-        next: () => {
-          this.closeForm();
-          this.loadPayments();
-        },
-        error: (err) => {
-          console.error('Update failed', err);
-        },
-      });
-    } else {
-      this.paymentService.create(this.form).subscribe({
-        next: () => {
-          this.closeForm();
-          this.loadPayments();
-        },
-        error: (err) => {
-          console.error('Create failed', err);
-        },
-      });
-    }
-  }
-
-  confirmRefund(p: PaymentResponse) {
-    if (!confirm(`Refund payment BDT ${p.amount} for booking #${p.bookingId}?`)) return;
-    this.refundingId = p.id;
-    this.paymentService.refund(p.bookingId).subscribe({
-      next: () => {
-        this.refundingId = null;
-        this.loadPayments();
-      },
-      error: () => {
-        this.refundingId = null;
-        this.cdr.markForCheck();
-      },
-    });
-  }
-
-  confirmDelete(id: number) {
-    if (!confirm('Are you sure you want to delete this payment?')) return;
-    this.paymentService.delete(id).subscribe({
-      next: () => this.loadPayments(),
-      error: (err) => console.error('Delete failed', err),
-    });
-  }
-
-  getStatusClass(status: string): string {
-    switch (status) {
-      case 'PAID':
-        return 'bg-success';
-      case 'PENDING':
-        return 'bg-warning text-dark';
-      case 'FAILED':
-        return 'bg-danger';
-      case 'REFUNDED':
-        return 'bg-info text-dark';
-      case 'UNPAID':
-        return 'bg-secondary';
-      default:
-        return 'bg-secondary';
-    }
-  }
-
-  private loadReceiptsForPayments(payments: PaymentResponse[]) {
-    for (const p of payments) {
-      if (p.status === 'PAID') {
-        this.receiptService.getByPayment(p.id).subscribe({
-          next: (receipt) => {
-            this.receipts.set(p.id, receipt);
-            this.cdr.markForCheck();
-          },
-          error: () => {},
-        });
-      }
-    }
-  }
-
-  getReceipt(paymentId: number): ReceiptResponse | undefined {
-    return this.receipts.get(paymentId);
   }
 
   printReceipt(r: ReceiptResponse) {
@@ -185,6 +48,7 @@ export class AdminPayments implements OnInit {
         .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #16a34a; padding-bottom: 20px; margin-bottom: 25px; }
         .header h1 { font-size: 28px; color: #16a34a; }
         .header .rcp-meta { text-align: right; }
+        .header .rcp-meta p { margin: 2px 0; font-size: 14px; }
         .header .rcp-meta .rcp-num { font-size: 18px; font-weight: bold; color: #16a34a; }
         .section { margin-bottom: 20px; }
         .section h3 { font-size: 14px; text-transform: uppercase; color: #666; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
@@ -202,7 +66,10 @@ export class AdminPayments implements OnInit {
       <body>
         <div class="receipt-box">
           <div class="header">
-            <div><h1>RECEIPT</h1><p style="color:#666; font-size:14px;">Multi Hotel Management System</p></div>
+            <div>
+              <h1>RECEIPT</h1>
+              <p style="color:#666; font-size:14px;">Multi Hotel Management System</p>
+            </div>
             <div class="rcp-meta">
               <p class="rcp-num">${r.receiptNumber}</p>
               <p>Date: ${r.issuedAt ? new Date(r.issuedAt).toLocaleDateString('en-BD', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</p>
@@ -214,10 +81,12 @@ export class AdminPayments implements OnInit {
               <p><span class="label">Transaction ID:</span> ${r.transactionId || 'N/A'}</p>
               <p><span class="label">Payment Method:</span> ${r.paymentMethod || 'N/A'}</p>
               <p><span class="label">Booking ID:</span> #${r.bookingId}</p>
+              <p><span class="label">Invoice:</span> ${r.invoiceNumber || 'N/A'}</p>
               <p><span class="label">Customer:</span> ${r.customerName || 'N/A'}</p>
             </div>
           </div>
           <div class="section">
+            <h3>Amount Summary</h3>
             <table>
               <thead><tr><th>Description</th><th class="text-right">Amount (BDT)</th></tr></thead>
               <tbody>
@@ -227,7 +96,9 @@ export class AdminPayments implements OnInit {
               </tbody>
             </table>
           </div>
-          <div class="footer"><p>Multi Hotel Management System &copy; ${new Date().getFullYear()}</p></div>
+          <div class="footer">
+            <p>Multi Hotel Management System &copy; ${new Date().getFullYear()}</p>
+          </div>
         </div>
         <script>window.onload = function() { window.print(); }</script>
       </body></html>

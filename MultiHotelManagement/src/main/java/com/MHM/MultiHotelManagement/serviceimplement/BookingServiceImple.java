@@ -34,6 +34,7 @@ import com.MHM.MultiHotelManagement.repository.WalletRepository;
 import com.MHM.MultiHotelManagement.repository.WalletTransactionRepository;
 import com.MHM.MultiHotelManagement.service.BookingService;
 import com.MHM.MultiHotelManagement.service.NotificationService;
+import com.MHM.MultiHotelManagement.service.AuditTrailService;
 import com.MHM.MultiHotelManagement.dto.request.NotificationRequestDTO;
 import com.MHM.MultiHotelManagement.enums.NotificationChannel;
 import com.MHM.MultiHotelManagement.enums.NotificationType;
@@ -43,6 +44,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
@@ -75,6 +78,7 @@ public class BookingServiceImple implements BookingService {
     private final WalletTransactionRepository walletTransactionRepository;
     private final InvoiceRepository invoiceRepository;
     private final NotificationService notificationService;
+    private final AuditTrailService auditTrailService;
 
     @Value("${image.upload.dir:uploads}")
     private String uploadDir;
@@ -91,7 +95,8 @@ public class BookingServiceImple implements BookingService {
                                WalletRepository walletRepository,
                                WalletTransactionRepository walletTransactionRepository,
                                InvoiceRepository invoiceRepository,
-                               NotificationService notificationService) {
+                               NotificationService notificationService,
+                               AuditTrailService auditTrailService) {
         this.bookingRepository = bookingRepository;
         this.customerRepository = customerRepository;
         this.hotelRepository = hotelRepository;
@@ -105,6 +110,7 @@ public class BookingServiceImple implements BookingService {
         this.walletTransactionRepository = walletTransactionRepository;
         this.invoiceRepository = invoiceRepository;
         this.notificationService = notificationService;
+        this.auditTrailService = auditTrailService;
     }
 
     @Override
@@ -183,15 +189,17 @@ public class BookingServiceImple implements BookingService {
             booking.setDueAmount(totalAmount.subtract(dto.getAdvanceAmount()).add(extraServicesTotal));
         }
 
-        Booking saved = bookingRepository.save(booking);
+        // Calculate and set discount/tax/net amounts NOW (before save)
+        BigDecimal finalTotal = booking.getTotalAmount();
+        BigDecimal discountRate = booking.getDiscountRate() != null ? booking.getDiscountRate() : BigDecimal.ZERO;
+        BigDecimal discountAmt = finalTotal.multiply(discountRate).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        BigDecimal taxAmt = finalTotal.subtract(discountAmt).multiply(BigDecimal.valueOf(0.15)).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal netAmt = finalTotal.add(taxAmt).subtract(discountAmt);
+        booking.setDiscountAmount(discountAmt);
+        booking.setTaxAmount(taxAmt);
+        booking.setNetAmount(netAmt);
 
-        // Auto-generate invoice at booking time (payment request)
-        try {
-            generateInvoiceAtBooking(saved);
-            log.info("Invoice generated at booking time for booking {}", saved.getId());
-        } catch (Exception e) {
-            log.error("Invoice generation failed for booking {}: {}", saved.getId(), e.getMessage(), e);
-        }
+        Booking saved = bookingRepository.save(booking);
 
         // Update room availability counters
         room.setAvailableRooms(room.getAvailableRooms() - dto.getNumberOfRooms());
@@ -201,22 +209,42 @@ public class BookingServiceImple implements BookingService {
         }
         roomRepository.save(room);
 
-        // Send notifications
-        try {
-            NotificationRequestDTO customerNotification = new NotificationRequestDTO();
-            customerNotification.setUserId(customer.getUser().getId());
-            customerNotification.setType(NotificationType.BOOKING_CONFIRMED);
-            customerNotification.setChannel(NotificationChannel.WEB);
-            customerNotification.setMessage("Booking request submitted at " + hotel.getHotelName() + ". Awaiting confirmation. Booking ID: #" + saved.getId());
-            notificationService.createNotification(customerNotification);
+        // Capture values for lambda
+        final Long customerId = customer.getUser().getId();
+        final Long ownerUserId = hotel.getOwner().getUser().getId();
+        final String hotelName = hotel.getHotelName();
+        final String customerName = customer.getCustomerName();
 
-            NotificationRequestDTO ownerNotification = new NotificationRequestDTO();
-            ownerNotification.setUserId(hotel.getOwner().getUser().getId());
-            ownerNotification.setType(NotificationType.BOOKING_CONFIRMED);
-            ownerNotification.setChannel(NotificationChannel.WEB);
-            ownerNotification.setMessage("New booking request from " + customer.getCustomerName() + " at " + hotel.getHotelName() + ". Booking ID: #" + saved.getId());
-            notificationService.createNotification(ownerNotification);
-        } catch (Exception ignored) {}
+        // Schedule invoice generation + notifications AFTER transaction commits successfully
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                // Auto-generate invoice at booking time
+                try {
+                    generateInvoiceAtBooking(saved);
+                    log.info("Invoice generated at booking time for booking {}", saved.getId());
+                } catch (Exception e) {
+                    log.error("Invoice generation failed for booking {}: {}", saved.getId(), e.getMessage(), e);
+                }
+
+                // Send notifications
+                try {
+                    NotificationRequestDTO customerNotification = new NotificationRequestDTO();
+                    customerNotification.setUserId(customerId);
+                    customerNotification.setType(NotificationType.BOOKING_CONFIRMED);
+                    customerNotification.setChannel(NotificationChannel.WEB);
+                    customerNotification.setMessage("Booking request submitted at " + hotelName + ". Awaiting confirmation. Booking ID: #" + saved.getId());
+                    notificationService.createNotification(customerNotification);
+
+                    NotificationRequestDTO ownerNotification = new NotificationRequestDTO();
+                    ownerNotification.setUserId(ownerUserId);
+                    ownerNotification.setType(NotificationType.BOOKING_CONFIRMED);
+                    ownerNotification.setChannel(NotificationChannel.WEB);
+                    ownerNotification.setMessage("New booking request from " + customerName + " at " + hotelName + ". Booking ID: #" + saved.getId());
+                    notificationService.createNotification(ownerNotification);
+                } catch (Exception ignored) {}
+            }
+        });
 
         return BookingMapperDTO.toResponseDTO(saved);
     }
@@ -717,15 +745,9 @@ public class BookingServiceImple implements BookingService {
         if (alreadyExists) return;
 
         BigDecimal total = booking.getTotalAmount() != null ? booking.getTotalAmount() : BigDecimal.ZERO;
-        BigDecimal discountRate = booking.getDiscountRate() != null ? booking.getDiscountRate() : BigDecimal.ZERO;
-        BigDecimal discountAmount = total.multiply(discountRate).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-        BigDecimal taxAmount = total.subtract(discountAmount).multiply(BigDecimal.valueOf(0.15)).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal netAmount = total.add(taxAmount).subtract(discountAmount);
-
-        booking.setDiscountAmount(discountAmount);
-        booking.setTaxAmount(taxAmount);
-        booking.setNetAmount(netAmount);
-        bookingRepository.save(booking);
+        BigDecimal discountAmount = booking.getDiscountAmount() != null ? booking.getDiscountAmount() : BigDecimal.ZERO;
+        BigDecimal taxAmount = booking.getTaxAmount() != null ? booking.getTaxAmount() : BigDecimal.ZERO;
+        BigDecimal netAmount = booking.getNetAmount() != null ? booking.getNetAmount() : BigDecimal.ZERO;
 
         Invoice invoice = new Invoice();
         invoice.setInvoiceNumber("INV-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
@@ -740,5 +762,11 @@ public class BookingServiceImple implements BookingService {
 
         invoiceRepository.save(invoice);
         log.info("Invoice {} generated at booking time for booking {}", invoice.getInvoiceNumber(), booking.getId());
+
+        try {
+            auditTrailService.logAction("INVOICE_CREATED", "Invoice", invoice.getId(),
+                    "Invoice " + invoice.getInvoiceNumber() + " generated for booking #" + booking.getId() + ", amount: " + netAmount,
+                    "SYSTEM");
+        } catch (Exception ignored) {}
     }
 }

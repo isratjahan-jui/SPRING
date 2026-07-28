@@ -24,4 +24,6 @@ public interface ReceiptService {
     long countReceiptsByHotelId(Long hotelId);
 
     BigDecimal sumReceiptsByHotelId(Long hotelId);
+
+    List<ReceiptResponseDTO> getAllReceipts();
 }

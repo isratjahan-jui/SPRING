@@ -8,7 +8,10 @@ import { HotelService } from '../../../services/hotel.service';
 import { BookingService } from '../../../services/booking.service';
 import { PaymentService } from '../../../services/payment.service';
 import { CommissionService } from '../../../services/commission.service';
+import { InvoiceService } from '../../../services/invoice.service';
+import { ReceiptService } from '../../../services/receipt.service';
 import { CustomerSupportService } from '../../../services/customer-support.service';
+import { LocationService } from '../../../services/location.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -26,12 +29,16 @@ export class AdminDashboard implements OnInit {
   private bookingService = inject(BookingService);
   private paymentService = inject(PaymentService);
   private commissionService = inject(CommissionService);
+  private invoiceService = inject(InvoiceService);
+  private receiptService = inject(ReceiptService);
   private supportService = inject(CustomerSupportService);
+  private locationService = inject(LocationService);
   private cdr = inject(ChangeDetectorRef);
 
   userName = '';
   ownerCount = 0;
   customerCount = 0;
+  totalLocations = 0;
   approvedHotelCount = 0;
   pendingHotelCount = 0;
   rejectedHotelCount = 0;
@@ -40,6 +47,9 @@ export class AdminDashboard implements OnInit {
   totalPayments = 0;
   paidPayments = 0;
   totalCommission = 0;
+  totalInvoices = 0;
+  paidInvoices = 0;
+  totalReceipts = 0;
   totalTickets = 0;
   openTickets = 0;
   loading = true;
@@ -55,11 +65,15 @@ export class AdminDashboard implements OnInit {
       bookings: this.bookingService.getAll().pipe(catchError(() => of([]))),
       payments: this.paymentService.getAll().pipe(catchError(() => of([]))),
       commission: this.commissionService.getAdminTotal().pipe(catchError(() => of(0))),
+      invoices: this.invoiceService.getAll().pipe(catchError(() => of([]))),
+      receipts: this.receiptService.getAll().pipe(catchError(() => of([]))),
       tickets: this.supportService.getAll().pipe(catchError(() => of([]))),
+      locations: this.locationService.getAll().pipe(catchError(() => of([]))),
     }).subscribe({
       next: (r) => {
         this.ownerCount = r.owners.length;
         this.customerCount = r.customers.length;
+        this.totalLocations = r.locations.length;
         this.approvedHotelCount = r.hotels.filter((h: any) => h.status === 'APPROVED').length;
         this.pendingHotelCount = r.hotels.filter(
           (h: any) => h.status === 'PENDING_APPROVAL',
@@ -73,6 +87,9 @@ export class AdminDashboard implements OnInit {
         this.totalPayments = r.payments.length;
         this.paidPayments = r.payments.filter((p: any) => p.status === 'PAID').length;
         this.totalCommission = r.commission;
+        this.totalInvoices = r.invoices.length;
+        this.paidInvoices = r.invoices.filter((i: any) => i.status === 'PAID').length;
+        this.totalReceipts = r.receipts.length;
         this.totalTickets = r.tickets.length;
         this.openTickets = r.tickets.filter(
           (t: any) =>

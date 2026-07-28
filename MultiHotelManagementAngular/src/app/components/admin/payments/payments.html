@@ -79,6 +79,9 @@
               </td>
               <td>{{ p.transactionDate | date: 'dd MMM yyyy, h:mm a' }}</td>
               <td>
+                @if (p.status === 'PAID' && getReceipt(p.id)) {
+                  <button class="btn btn-sm btn-success me-1" (click)="printReceipt(getReceipt(p.id)!)">Receipt</button>
+                }
                 <button class="btn btn-sm btn-outline-primary me-1" (click)="openEdit(p)" [disabled]="p.status === 'REFUNDED'">
                   Edit
                 </button>

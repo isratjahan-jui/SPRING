@@ -1,52 +1,31 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { PaymentService } from '../../../services/payment.service';
 import { ReceiptService } from '../../../services/receipt.service';
 import { AuthService } from '../../../services/auth.service';
-import { CustomerService } from '../../../services/customer.service';
-import { PaymentResponse } from '../../../models/payment.model';
 import { ReceiptResponse } from '../../../models/receipt.model';
 
 @Component({
-  selector: 'app-customer-payments',
-  imports: [CommonModule, RouterLink],
-  templateUrl: './payments.html',
-  styleUrl: './payments.css',
+  selector: 'app-owner-receipts',
+  imports: [CommonModule],
+  templateUrl: './receipts.html',
+  styleUrl: './receipts.css',
 })
-export class CustomerPayments implements OnInit {
-  private paymentService = inject(PaymentService);
+export class OwnerReceipts implements OnInit {
   private receiptService = inject(ReceiptService);
   private auth = inject(AuthService);
-  private customerService = inject(CustomerService);
   private cdr = inject(ChangeDetectorRef);
 
-  payments: PaymentResponse[] = [];
-  receipts: Map<number, ReceiptResponse> = new Map();
+  receipts: ReceiptResponse[] = [];
   loading = true;
 
   ngOnInit() {
-    const userId = this.auth.getUser()?.userId;
-    if (userId) {
-      this.customerService.getCustomerByUserId(userId).subscribe({
-        next: (customer) => {
-          if (customer.id) {
-            this.paymentService.getByCustomer(customer.id).subscribe({
-              next: (data) => {
-                this.payments = data;
-                this.loadReceiptsForPayments(data);
-                this.loading = false;
-                this.cdr.markForCheck();
-              },
-              error: () => {
-                this.loading = false;
-                this.cdr.markForCheck();
-              },
-            });
-          } else {
-            this.loading = false;
-            this.cdr.markForCheck();
-          }
+    const ownerId = this.auth.getUser()?.ownerId;
+    if (ownerId) {
+      this.receiptService.getByOwner(ownerId).subscribe({
+        next: (data) => {
+          this.receipts = data;
+          this.loading = false;
+          this.cdr.markForCheck();
         },
         error: () => {
           this.loading = false;
@@ -56,41 +35,6 @@ export class CustomerPayments implements OnInit {
     } else {
       this.loading = false;
     }
-  }
-
-  getStatusClass(status: string): string {
-    switch (status) {
-      case 'PAID':
-        return 'bg-success';
-      case 'PENDING':
-        return 'bg-warning text-dark';
-      case 'FAILED':
-        return 'bg-danger';
-      case 'REFUNDED':
-        return 'bg-info text-dark';
-      case 'UNPAID':
-        return 'bg-secondary';
-      default:
-        return 'bg-secondary';
-    }
-  }
-
-  private loadReceiptsForPayments(payments: PaymentResponse[]) {
-    for (const p of payments) {
-      if (p.status === 'PAID') {
-        this.receiptService.getByPayment(p.id).subscribe({
-          next: (receipt) => {
-            this.receipts.set(p.id, receipt);
-            this.cdr.markForCheck();
-          },
-          error: () => {},
-        });
-      }
-    }
-  }
-
-  getReceipt(paymentId: number): ReceiptResponse | undefined {
-    return this.receipts.get(paymentId);
   }
 
   printReceipt(r: ReceiptResponse) {
@@ -106,6 +50,7 @@ export class CustomerPayments implements OnInit {
         .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #16a34a; padding-bottom: 20px; margin-bottom: 25px; }
         .header h1 { font-size: 28px; color: #16a34a; }
         .header .rcp-meta { text-align: right; }
+        .header .rcp-meta p { margin: 2px 0; font-size: 14px; }
         .header .rcp-meta .rcp-num { font-size: 18px; font-weight: bold; color: #16a34a; }
         .section { margin-bottom: 20px; }
         .section h3 { font-size: 14px; text-transform: uppercase; color: #666; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
@@ -123,7 +68,10 @@ export class CustomerPayments implements OnInit {
       <body>
         <div class="receipt-box">
           <div class="header">
-            <div><h1>RECEIPT</h1><p style="color:#666; font-size:14px;">Multi Hotel Management System</p></div>
+            <div>
+              <h1>RECEIPT</h1>
+              <p style="color:#666; font-size:14px;">Multi Hotel Management System</p>
+            </div>
             <div class="rcp-meta">
               <p class="rcp-num">${r.receiptNumber}</p>
               <p>Date: ${r.issuedAt ? new Date(r.issuedAt).toLocaleDateString('en-BD', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</p>
@@ -135,10 +83,12 @@ export class CustomerPayments implements OnInit {
               <p><span class="label">Transaction ID:</span> ${r.transactionId || 'N/A'}</p>
               <p><span class="label">Payment Method:</span> ${r.paymentMethod || 'N/A'}</p>
               <p><span class="label">Booking ID:</span> #${r.bookingId}</p>
+              <p><span class="label">Invoice:</span> ${r.invoiceNumber || 'N/A'}</p>
               <p><span class="label">Customer:</span> ${r.customerName || 'N/A'}</p>
             </div>
           </div>
           <div class="section">
+            <h3>Amount Summary</h3>
             <table>
               <thead><tr><th>Description</th><th class="text-right">Amount (BDT)</th></tr></thead>
               <tbody>
@@ -148,7 +98,9 @@ export class CustomerPayments implements OnInit {
               </tbody>
             </table>
           </div>
-          <div class="footer"><p>Thank you for your payment!</p></div>
+          <div class="footer">
+            <p>Multi Hotel Management System &copy; ${new Date().getFullYear()}</p>
+          </div>
         </div>
         <script>window.onload = function() { window.print(); }</script>
       </body></html>

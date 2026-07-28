@@ -6,8 +6,12 @@ import { KEYS, StorageService } from '../../../services/storage.service';
 import { HotelOwnerService } from '../../../services/hotel-owner.service';
 import { OwnerDashboardService } from '../../../services/owner-dashboard.service';
 import { BookingService } from '../../../services/booking.service';
+import { InvoiceService } from '../../../services/invoice.service';
+import { ReceiptService } from '../../../services/receipt.service';
 import { OwnerDashboardStats } from '../../../models/owner-dashboard.model';
 import { Booking } from '../../../models/booking.model';
+import { InvoiceResponse } from '../../../models/invoice.model';
+import { ReceiptResponse } from '../../../models/receipt.model';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../../environments/environments';
 import { RouterLink } from '@angular/router';
@@ -27,11 +31,15 @@ export class OwnerDashboard implements OnInit {
   owner: HotelOwner | null = null;
   stats: OwnerDashboardStats | null = null;
   todaysArrivals: Booking[] = [];
+  invoices: InvoiceResponse[] = [];
+  receipts: ReceiptResponse[] = [];
 
   private auth = inject(AuthService);
   private ownerService = inject(HotelOwnerService);
   private dashboardService = inject(OwnerDashboardService);
   private bookingService = inject(BookingService);
+  private invoiceService = inject(InvoiceService);
+  private receiptService = inject(ReceiptService);
   private storage = inject(StorageService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -53,6 +61,8 @@ export class OwnerDashboard implements OnInit {
         if (this.ownerId) {
           this.loadStats();
           this.loadTodaysArrivals();
+          this.loadInvoices();
+          this.loadReceipts();
         }
       },
       error: (err) => console.error(err),
@@ -86,6 +96,26 @@ export class OwnerDashboard implements OnInit {
         this.todaysArrivals = [];
         this.cdr.markForCheck();
       },
+    });
+  }
+
+  loadInvoices(): void {
+    this.invoiceService.getByOwnerId(this.ownerId).subscribe({
+      next: (data) => {
+        this.invoices = data;
+        this.cdr.markForCheck();
+      },
+      error: () => {},
+    });
+  }
+
+  loadReceipts(): void {
+    this.receiptService.getByOwner(this.ownerId).subscribe({
+      next: (data) => {
+        this.receipts = data;
+        this.cdr.markForCheck();
+      },
+      error: () => {},
     });
   }
 }

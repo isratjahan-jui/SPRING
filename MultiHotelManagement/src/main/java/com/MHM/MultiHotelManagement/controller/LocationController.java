@@ -115,4 +115,5 @@ public class LocationController {
         locationService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
 }
