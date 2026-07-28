@@ -82,11 +82,11 @@ public class DatabaseMigration implements CommandLineRunner {
                     .setScale(2, RoundingMode.HALF_UP)
                     .doubleValue();
 
-            invoice.setTotalAmount(total);
-            invoice.setDiscountAmount(discount);
-            invoice.setTaxAmount(tax);
+            invoice.setTotalAmount(BigDecimal.valueOf(total));
+            invoice.setDiscountAmount(BigDecimal.valueOf(discount));
+            invoice.setTaxAmount(BigDecimal.valueOf(tax));
             invoice.setNetAmount(BigDecimal.valueOf(total + tax - discount)
-                    .setScale(2, RoundingMode.HALF_UP).doubleValue());
+                    .setScale(2, RoundingMode.HALF_UP));
             invoice.setStatus(InvoiceStatus.ISSUED);
             invoice.setIssuedAt(LocalDateTime.now());
 

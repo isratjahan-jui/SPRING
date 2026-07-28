@@ -3,6 +3,7 @@ package com.MHM.MultiHotelManagement.service;
 import com.MHM.MultiHotelManagement.dto.request.CommissionRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.CommissionResponseDTO;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -42,16 +43,16 @@ public interface CommissionService {
     List<CommissionResponseDTO> getByHotelId(Long hotelId);
 
     // Commission Rate দিয়ে খোঁজো
-    List<CommissionResponseDTO> getByCommissionRate(Double commissionRate);
+    List<CommissionResponseDTO> getByCommissionRate(BigDecimal commissionRate);
 
     // Commission exists check
     boolean existsByBookingId(Long bookingId);
 
     // Admin এর মোট আয়
-    Double getTotalAdminEarnings();
+    BigDecimal getTotalAdminEarnings();
 
     // Owner এর মোট আয়
-    Double getTotalOwnerEarnings(Long ownerId);
+    BigDecimal getTotalOwnerEarnings(Long ownerId);
 
     // Date range দিয়ে খোঁজো
     List<CommissionResponseDTO> getByDateRange(LocalDateTime startDate, LocalDateTime endDate);

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -19,6 +19,7 @@ import { environment } from '../../../../environments/environments';
 export class HomeComponent implements OnInit {
   private hotelService = inject(HotelService);
   private dealService = inject(DealService);
+  private cdr = inject(ChangeDetectorRef);
   hotels: Hotel[] = [];
   deals: DealResponse[] = [];
   searchKeyword = '';
@@ -26,7 +27,7 @@ export class HomeComponent implements OnInit {
   imageBaseUrl = environment.imageBaseUrl;
 
   activeDivision = '';
-  loadingHotels = false;
+  loadingHotels = true;
 
   divisions = [
     { name: 'Dhaka', icon: '🏙️' },
@@ -41,13 +42,30 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
     this.loadHotels();
-    this.dealService.getAll().subscribe((data) => (this.deals = data));
+    this.dealService.getAll().subscribe({
+      next: (data) => {
+        this.deals = data;
+        this.cdr.markForCheck();
+      },
+      error: () => {},
+    });
   }
 
   loadHotels() {
-    this.hotelService.getAllApproved().subscribe((data) => {
-      this.hotels = data;
-      this.searchActive = false;
+    this.loadingHotels = true;
+    this.cdr.markForCheck();
+    this.hotelService.getAllApproved().subscribe({
+      next: (data) => {
+        this.hotels = data;
+        this.searchActive = false;
+        this.loadingHotels = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.hotels = [];
+        this.loadingHotels = false;
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -58,9 +76,21 @@ export class HomeComponent implements OnInit {
       return;
     }
     this.activeDivision = '';
-    this.hotelService.search(q).subscribe((data) => {
-      this.hotels = data;
-      this.searchActive = true;
+    this.loadingHotels = true;
+    this.cdr.markForCheck();
+    this.hotelService.search(q).subscribe({
+      next: (data) => {
+        this.hotels = data;
+        this.searchActive = true;
+        this.loadingHotels = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.hotels = [];
+        this.searchActive = true;
+        this.loadingHotels = false;
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -78,14 +108,17 @@ export class HomeComponent implements OnInit {
     this.searchActive = false;
     this.activeDivision = division;
     this.loadingHotels = true;
+    this.cdr.markForCheck();
     this.hotelService.getByCity(division).subscribe({
       next: (data) => {
         this.hotels = data;
         this.loadingHotels = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.hotels = [];
         this.loadingHotels = false;
+        this.cdr.markForCheck();
       },
     });
   }

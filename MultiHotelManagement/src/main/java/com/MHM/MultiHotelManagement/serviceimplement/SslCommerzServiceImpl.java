@@ -17,8 +17,6 @@ import com.MHM.MultiHotelManagement.service.SslCommerzService;
 import com.MHM.MultiHotelManagement.util.SslCommerzClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,6 +103,11 @@ public class SslCommerzServiceImpl implements SslCommerzService {
         String transactionId = params.get("tran_id");
         if (transactionId == null) {
             log.warn("SSLCommerz success callback missing tran_id");
+            return;
+        }
+
+        if (!sslCommerzClient.verifyCallbackSignature(params)) {
+            log.error("SSLCommerz callback HMAC verification failed for tran_id: {}", transactionId);
             return;
         }
 
@@ -198,6 +201,11 @@ public class SslCommerzServiceImpl implements SslCommerzService {
         String transactionId = params.get("tran_id");
         if (transactionId == null) {
             log.warn("SSLCommerz IPN missing tran_id");
+            return;
+        }
+
+        if (!sslCommerzClient.verifyCallbackSignature(params)) {
+            log.error("SSLCommerz IPN HMAC verification failed for tran_id: {}", transactionId);
             return;
         }
 

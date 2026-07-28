@@ -51,6 +51,9 @@ public class Payment {
     private String bankTransactionId;
     private String validationId;
 
+    @Version
+    private Long version;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

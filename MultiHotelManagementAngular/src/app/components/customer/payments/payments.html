@@ -14,7 +14,7 @@
             <h6>Total Paid</h6>
             <p class="fs-4 fw-bold mb-0">
               BDT
-              {{ payments.filter((p) => p.status === 'PAID').reduce((s, p) => s + p.amount, 0) }}
+              {{ payments.filter((p) => p.status === 'PAID').reduce((s, p) => s + (p.amount ?? 0), 0) }}
             </p>
           </div>
         </div>

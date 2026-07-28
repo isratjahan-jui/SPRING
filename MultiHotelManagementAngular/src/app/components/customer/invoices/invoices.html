@@ -42,7 +42,7 @@
               <td>{{ inv.hotelName || 'N/A' }}</td>
               <td>{{ inv.roomType || '—' }}</td>
               <td>
-                <strong>BDT {{ inv.netAmount.toFixed(2) }}</strong>
+                <strong>BDT {{ (inv.netAmount ?? 0).toFixed(2) }}</strong>
               </td>
               <td>
                 <span class="badge" [ngClass]="getStatusClass(inv.status)">

@@ -1,6 +1,7 @@
 package com.MHM.MultiHotelManagement.dto.response;
 
 import lombok.Data;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -9,15 +10,15 @@ public class CommissionResponseDTO {
     private Long id;
 
     // Commission info
-    private Double commissionRate;
-    private Double adminEarnings;
-    private Double hotelOwnerEarnings;
+    private BigDecimal commissionRate;
+    private BigDecimal adminEarnings;
+    private BigDecimal hotelOwnerEarnings;
     private String commissionStatus; // Optional Enum: CALCULATED, PENDING, PAID
 
     // Booking info
     private Long bookingId;
     private String bookingReference;
-    private Double bookingTotalPrice;
+    private BigDecimal bookingTotalPrice;
     private String bookingStatus;
 
     // Hotel info
@@ -39,7 +40,7 @@ public class CommissionResponseDTO {
     // ExtraService info
     private Long extraServiceId;
     private String serviceType;   // Laundry, Transport ইত্যাদি
-    private Double extraServicePrice;
+    private BigDecimal extraServicePrice;
 
     // Audit info
     private String createdBy;

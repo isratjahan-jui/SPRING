@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,10 +21,10 @@ public class Invoice {
     private Long id;
 
     private String invoiceNumber;
-    private Double totalAmount;
-    private Double taxAmount;
-    private Double discountAmount;
-    private Double netAmount;
+    private BigDecimal totalAmount;
+    private BigDecimal taxAmount;
+    private BigDecimal discountAmount;
+    private BigDecimal netAmount;
 
     @Enumerated(EnumType.STRING)
     private InvoiceStatus status;

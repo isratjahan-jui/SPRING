@@ -6,8 +6,6 @@ import com.MHM.MultiHotelManagement.entity.Commission;
 import com.MHM.MultiHotelManagement.entity.HotelDetails;
 import com.MHM.MultiHotelManagement.entity.Payment;
 import com.MHM.MultiHotelManagement.entity.Room;
-import com.MHM.MultiHotelManagement.entity.Wallet;
-import com.MHM.MultiHotelManagement.entity.WalletTransaction;
 import com.MHM.MultiHotelManagement.enums.BookingStatus;
 import com.MHM.MultiHotelManagement.enums.NotificationChannel;
 import com.MHM.MultiHotelManagement.enums.NotificationType;
@@ -17,9 +15,8 @@ import com.MHM.MultiHotelManagement.repository.CommissionRepository;
 import com.MHM.MultiHotelManagement.repository.HotelDetailsRepository;
 import com.MHM.MultiHotelManagement.repository.PaymentRepository;
 import com.MHM.MultiHotelManagement.repository.RoomRepository;
-import com.MHM.MultiHotelManagement.repository.WalletRepository;
-import com.MHM.MultiHotelManagement.repository.WalletTransactionRepository;
 import com.MHM.MultiHotelManagement.service.NotificationService;
+import com.MHM.MultiHotelManagement.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +40,12 @@ public class BookingExpiryService {
     private final RoomRepository roomRepository;
     private final CommissionRepository commissionRepository;
     private final PaymentRepository paymentRepository;
+
     private final WalletRepository walletRepository;
     private final WalletTransactionRepository walletTransactionRepository;
+
+    private final WalletService walletService;
+
     private final HotelDetailsRepository hotelDetailsRepository;
     private final NotificationService notificationService;
 
@@ -146,6 +147,7 @@ public class BookingExpiryService {
             }
 
             Long customerUserId = b.getCustomer().getUser().getId();
+
             Wallet wallet = walletRepository.findByUser_Id(customerUserId)
                     .orElseGet(() -> {
                         Wallet newWallet = new Wallet();
@@ -164,6 +166,15 @@ public class BookingExpiryService {
                     + " - Owner did not confirm. ৳" + advancePaid + " credited to wallet.");
             transaction.setReferenceId(b.getId());
             walletTransactionRepository.save(transaction);
+
+            walletService.credit(
+                    customerUserId,
+                    advancePaid,
+                    "Full refund for expired booking #" + b.getId()
+                            + " - Owner did not confirm. ৳" + advancePaid + " credited to wallet.",
+                    b.getId()
+            );
+
 
             b.setAdvanceAmount(BigDecimal.ZERO);
             b.setCancellationPolicyText("Full refund: Owner did not confirm. Advance ৳" + advancePaid + " refunded to wallet.");
@@ -214,6 +225,7 @@ public class BookingExpiryService {
                     paymentRepository.save(paymentOpt.get());
                 }
 
+
                 Wallet wallet = walletRepository.findByUser_Id(b.getCustomer().getUser().getId())
                         .orElseGet(() -> {
                             Wallet newWallet = new Wallet();
@@ -230,6 +242,14 @@ public class BookingExpiryService {
                 tx.setDescription(refundNote + " Booking #" + b.getId() + ". ৳" + refundAmount + " credited.");
                 tx.setReferenceId(b.getId());
                 walletTransactionRepository.save(tx);
+
+                walletService.credit(
+                        b.getCustomer().getUser().getId(),
+                        refundAmount,
+                        refundNote + " Booking #" + b.getId() + ". ৳" + refundAmount + " credited.",
+                        b.getId()
+                );
+
             }
 
             b.setAdvanceAmount(advancePaid.subtract(refundAmount));

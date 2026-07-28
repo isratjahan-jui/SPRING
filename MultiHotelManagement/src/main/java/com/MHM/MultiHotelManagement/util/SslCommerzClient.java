@@ -6,6 +6,8 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -37,7 +39,11 @@ public class SslCommerzClient {
     @Value("${app.backend-url:http://localhost:8085}")
     private String backendUrl;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+
+    public SslCommerzClient(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     public Map<String, Object> initiateSession(String transactionId, BigDecimal amount,
                                                 String currency, String customerName,
@@ -85,7 +91,8 @@ public class SslCommerzClient {
 
             HttpEntity<String> request = new HttpEntity<>(formBody.toString(), headers);
 
-            ResponseEntity<Map> response = restTemplate.exchange(apiUrl, HttpMethod.POST, request, Map.class);
+            String url = sandbox ? "https://sandbox.sslcommerz.com/gwprocess/v4/api.php" : "https://securepay.sslcommerz.com/gwprocess/v4/api.php";
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, request, Map.class);
 
             Map<String, Object> responseBody = response.getBody();
             if (responseBody != null && "SUCCESS".equals(responseBody.get("status"))) {
@@ -115,7 +122,7 @@ public class SslCommerzClient {
             HttpEntity<String> request = new HttpEntity<>(formBody, headers);
 
             ResponseEntity<Map> response = restTemplate.exchange(
-                    validationUrl, HttpMethod.POST, request, Map.class);
+                    (sandbox ? "https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php" : "https://securepay.sslcommerz.com/validator/api/validationserverAPI.php"), HttpMethod.POST, request, Map.class);
 
             Map<String, Object> responseBody = response.getBody();
             if (responseBody != null) {
@@ -125,6 +132,55 @@ public class SslCommerzClient {
         } catch (Exception e) {
             log.error("SSLCommerz validation error", e);
             throw new RuntimeException("Payment validation error: " + e.getMessage());
+        }
+    }
+
+    public boolean verifyCallbackSignature(Map<String, String> params) {
+        String verifySign = params.get("verify_sign");
+        if (verifySign == null || storePassword == null || storePassword.isEmpty()) {
+            log.warn("Missing verify_sign or store password for HMAC verification");
+            return false;
+        }
+
+        // Build the string to sign: key=value pairs sorted alphabetically, excluding verify_sign and verify_key
+        StringBuilder dataToSign = new StringBuilder();
+        params.entrySet().stream()
+                .filter(e -> !"verify_sign".equals(e.getKey()) && !"verify_key".equals(e.getKey())
+                        && e.getValue() != null && !e.getValue().isEmpty())
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(e -> {
+                    if (dataToSign.length() > 0) dataToSign.append("&");
+                    try {
+                        dataToSign.append(URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8));
+                        dataToSign.append("=");
+                        dataToSign.append(URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8));
+                    } catch (Exception ex) {
+                        log.error("URL encoding failed for HMAC: {}", ex.getMessage());
+                    }
+                });
+
+        try {
+            Mac mac = Mac.getInstance("HmacMD5");
+            SecretKeySpec secretKey = new SecretKeySpec(storePassword.getBytes(StandardCharsets.UTF_8), "HmacMD5");
+            mac.init(secretKey);
+            byte[] rawHmac = mac.doFinal(dataToSign.toString().getBytes(StandardCharsets.UTF_8));
+
+            // Convert to hex string
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : rawHmac) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            String computedSign = hexString.toString();
+            boolean valid = computedSign.equalsIgnoreCase(verifySign);
+            if (!valid) {
+                log.error("HMAC signature mismatch: expected={}, computed={}", verifySign, computedSign);
+            }
+            return valid;
+        } catch (Exception e) {
+            log.error("HMAC verification failed: {}", e.getMessage(), e);
+            return false;
         }
     }
 }

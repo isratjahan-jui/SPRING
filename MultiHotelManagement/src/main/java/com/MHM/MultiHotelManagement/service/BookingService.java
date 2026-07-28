@@ -2,6 +2,7 @@ package com.MHM.MultiHotelManagement.service;
 
 import com.MHM.MultiHotelManagement.dto.request.BookingRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.BookingResponseDTO;
+import com.MHM.MultiHotelManagement.dto.response.CheckInCheckOutResponseDTO;
 
 import java.util.List;
 
@@ -28,4 +29,5 @@ public interface BookingService {
     BookingResponseDTO addExtraCharges(Long bookingId, double amount);
     BookingResponseDTO cancelBooking(Long bookingId);
     BookingResponseDTO rebook(Long oldBookingId, BookingRequestDTO dto);
+    List<CheckInCheckOutResponseDTO> getCheckInCheckOutDetails(Long customerId, int page, int size);
 }

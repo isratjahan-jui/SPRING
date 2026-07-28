@@ -3,6 +3,8 @@ package com.MHM.MultiHotelManagement.dto.mapper;
 import com.MHM.MultiHotelManagement.dto.response.CommissionResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Commission;
 
+import java.math.BigDecimal;
+
 public class CommissionMapper {
 
     // Entity → ResponseDTO
@@ -21,7 +23,7 @@ public class CommissionMapper {
             dto.setBookingId(commission.getBooking().getId());
             dto.setBookingReference("BOOK-" + commission.getBooking().getId());
             dto.setBookingTotalPrice(commission.getBooking().getTotalPrice() != null
-                    ? commission.getBooking().getTotalPrice().doubleValue() : null);
+                    ? commission.getBooking().getTotalPrice() : null);
             dto.setBookingStatus( commission.getBooking().getStatus() != null
                             ? commission.getBooking().getStatus().name() : null );
 
@@ -66,7 +68,8 @@ public class CommissionMapper {
         if (commission.getExtraService() != null) {
             dto.setExtraServiceId(commission.getExtraService().getId());
             dto.setServiceType(commission.getExtraService().getServiceType());
-            dto.setExtraServicePrice(commission.getExtraService().getPrice());
+            dto.setExtraServicePrice(commission.getExtraService().getPrice() != null
+                    ? BigDecimal.valueOf(commission.getExtraService().getPrice()) : null);
         }
 
         // Audit info (যদি entity তে থাকে)

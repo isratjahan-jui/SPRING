@@ -5,6 +5,7 @@ import com.MHM.MultiHotelManagement.dto.response.PaymentResponseDTO;
 import com.MHM.MultiHotelManagement.service.PaymentService;
 import com.MHM.MultiHotelManagement.service.SslCommerzService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,10 +22,13 @@ public class PaymentController {
 
     private final PaymentService paymentService;
     private final SslCommerzService sslCommerzService;
+    private final String frontendUrl;
 
-    public PaymentController(PaymentService paymentService, SslCommerzService sslCommerzService) {
+    public PaymentController(PaymentService paymentService, SslCommerzService sslCommerzService,
+                             @Value("${app.frontend-url:http://localhost:4200}") String frontendUrl) {
         this.paymentService = paymentService;
         this.sslCommerzService = sslCommerzService;
+        this.frontendUrl = frontendUrl;
     }
 
     @PostMapping
@@ -91,7 +95,7 @@ public class PaymentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    @PreAuthorize("hasRole('CUSTOMER')")
+
     @RequestMapping(value = "/sslcommerz/success", method = {RequestMethod.POST, RequestMethod.GET})
     public void sslCommerzSuccess(jakarta.servlet.http.HttpServletRequest request,
                                   jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
@@ -102,7 +106,7 @@ public class PaymentController {
         } catch (Exception e) {
             log.error("SSLCommerz success handler error: {}", e.getMessage());
         }
-        response.sendRedirect("http://localhost:4200/customer/payment-result?status=success&tran_id=" + tranId);
+        response.sendRedirect(frontendUrl + "/customer/payment-result?status=success&tran_id=" + tranId);
     }
 
     @RequestMapping(value = "/sslcommerz/fail", method = {RequestMethod.POST, RequestMethod.GET})
@@ -115,7 +119,7 @@ public class PaymentController {
         } catch (Exception e) {
             log.error("SSLCommerz fail handler error: {}", e.getMessage());
         }
-        response.sendRedirect("http://localhost:4200/customer/payment-result?status=fail&tran_id=" + tranId);
+        response.sendRedirect(frontendUrl + "/customer/payment-result?status=fail&tran_id=" + tranId);
     }
 
     @RequestMapping(value = "/sslcommerz/cancel", method = {RequestMethod.POST, RequestMethod.GET})
@@ -128,7 +132,7 @@ public class PaymentController {
         } catch (Exception e) {
             log.error("SSLCommerz cancel handler error: {}", e.getMessage());
         }
-        response.sendRedirect("http://localhost:4200/customer/payment-result?status=cancel&tran_id=" + tranId);
+        response.sendRedirect(frontendUrl + "/customer/payment-result?status=cancel&tran_id=" + tranId);
     }
 
     @RequestMapping(value = "/sslcommerz/ipn", method = {RequestMethod.POST, RequestMethod.GET})

@@ -65,8 +65,13 @@ public class ReceiptServiceImpl implements ReceiptService {
         receipt.setAmount(payment.getAmount());
 
         if (invoice != null) {
+
             receipt.setTaxAmount(BigDecimal.valueOf(invoice.getTaxAmount()));
             receipt.setTotalAmount(BigDecimal.valueOf(invoice.getNetAmount()));
+
+            receipt.setTaxAmount(invoice.getTaxAmount() != null ? invoice.getTaxAmount() : BigDecimal.ZERO);
+            receipt.setTotalAmount(invoice.getNetAmount() != null ? invoice.getNetAmount() : payment.getAmount());
+
         } else {
             receipt.setTaxAmount(BigDecimal.ZERO);
             receipt.setTotalAmount(payment.getAmount());

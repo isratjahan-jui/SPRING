@@ -3,6 +3,7 @@ package com.MHM.MultiHotelManagement.serviceimplement;
 import com.MHM.MultiHotelManagement.dto.mapper.BookingMapperDTO;
 import com.MHM.MultiHotelManagement.dto.request.BookingRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.BookingResponseDTO;
+import com.MHM.MultiHotelManagement.dto.response.CheckInCheckOutResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Booking;
 import com.MHM.MultiHotelManagement.entity.Customer;
 import com.MHM.MultiHotelManagement.entity.Hotel;
@@ -14,8 +15,6 @@ import com.MHM.MultiHotelManagement.entity.HotelExtraService;
 import com.MHM.MultiHotelManagement.entity.HotelDetails;
 import com.MHM.MultiHotelManagement.entity.Payment;
 import com.MHM.MultiHotelManagement.entity.Commission;
-import com.MHM.MultiHotelManagement.entity.Wallet;
-import com.MHM.MultiHotelManagement.entity.WalletTransaction;
 import com.MHM.MultiHotelManagement.enums.BookingStatus;
 import com.MHM.MultiHotelManagement.enums.InvoiceStatus;
 import com.MHM.MultiHotelManagement.enums.PaymentStatus;
@@ -30,11 +29,13 @@ import com.MHM.MultiHotelManagement.repository.HotelExtraServiceRepository;
 import com.MHM.MultiHotelManagement.repository.HotelDetailsRepository;
 import com.MHM.MultiHotelManagement.repository.PaymentRepository;
 import com.MHM.MultiHotelManagement.repository.CommissionRepository;
-import com.MHM.MultiHotelManagement.repository.WalletRepository;
-import com.MHM.MultiHotelManagement.repository.WalletTransactionRepository;
 import com.MHM.MultiHotelManagement.service.BookingService;
 import com.MHM.MultiHotelManagement.service.NotificationService;
 import com.MHM.MultiHotelManagement.service.AuditTrailService;
+
+
+import com.MHM.MultiHotelManagement.service.WalletService;
+
 import com.MHM.MultiHotelManagement.dto.request.NotificationRequestDTO;
 import com.MHM.MultiHotelManagement.enums.NotificationChannel;
 import com.MHM.MultiHotelManagement.enums.NotificationType;
@@ -43,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -54,7 +56,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Calendar;
+import java.util.stream.Collectors;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -74,8 +78,7 @@ public class BookingServiceImple implements BookingService {
     private final HotelDetailsRepository hotelDetailsRepository;
     private final PaymentRepository paymentRepository;
     private final CommissionRepository commissionRepository;
-    private final WalletRepository walletRepository;
-    private final WalletTransactionRepository walletTransactionRepository;
+    private final WalletService walletService;
     private final InvoiceRepository invoiceRepository;
     private final NotificationService notificationService;
     private final AuditTrailService auditTrailService;
@@ -92,8 +95,7 @@ public class BookingServiceImple implements BookingService {
                                HotelDetailsRepository hotelDetailsRepository,
                                PaymentRepository paymentRepository,
                                CommissionRepository commissionRepository,
-                               WalletRepository walletRepository,
-                               WalletTransactionRepository walletTransactionRepository,
+                               WalletService walletService,
                                InvoiceRepository invoiceRepository,
                                NotificationService notificationService,
                                AuditTrailService auditTrailService) {
@@ -106,8 +108,7 @@ public class BookingServiceImple implements BookingService {
         this.hotelDetailsRepository = hotelDetailsRepository;
         this.paymentRepository = paymentRepository;
         this.commissionRepository = commissionRepository;
-        this.walletRepository = walletRepository;
-        this.walletTransactionRepository = walletTransactionRepository;
+        this.walletService = walletService;
         this.invoiceRepository = invoiceRepository;
         this.notificationService = notificationService;
         this.auditTrailService = auditTrailService;
@@ -642,32 +643,21 @@ public class BookingServiceImple implements BookingService {
         if (commissionRetained.compareTo(BigDecimal.ZERO) > 0) {
             Commission retainedCommission = new Commission();
             retainedCommission.setBooking(booking);
-            retainedCommission.setCommissionRate(10.0);
-            retainedCommission.setAdminEarnings(commissionRetained.doubleValue());
-            retainedCommission.setHotelOwnerEarnings(0.0);
+            retainedCommission.setCommissionRate(BigDecimal.valueOf(10.0));
+            retainedCommission.setAdminEarnings(commissionRetained);
+            retainedCommission.setHotelOwnerEarnings(BigDecimal.ZERO);
             paymentOpt.ifPresent(retainedCommission::setPayment);
             commissionRepository.save(retainedCommission);
         }
 
         // Credit refund to customer wallet
         if (refundAmount.compareTo(BigDecimal.ZERO) > 0 && booking.getCustomer() != null) {
-            Wallet wallet = walletRepository.findByUser_Id(booking.getCustomer().getUser().getId())
-                    .orElseGet(() -> {
-                        Wallet newWallet = new Wallet();
-                        newWallet.setUser(booking.getCustomer().getUser());
-                        return walletRepository.save(newWallet);
-                    });
-
-            wallet.setBalance(wallet.getBalance().add(refundAmount));
-            walletRepository.save(wallet);
-
-            WalletTransaction transaction = new WalletTransaction();
-            transaction.setWallet(wallet);
-            transaction.setAmount(refundAmount);
-            transaction.setType("CREDIT");
-            transaction.setDescription("Refund for cancelled booking #" + bookingId + " - " + refundNote);
-            transaction.setReferenceId(bookingId);
-            walletTransactionRepository.save(transaction);
+            walletService.credit(
+                    booking.getCustomer().getUser().getId(),
+                    refundAmount,
+                    "Refund for cancelled booking #" + bookingId + " - " + refundNote,
+                    bookingId
+            );
         }
 
         booking.setAdvanceAmount(advancePaid.subtract(refundAmount));
@@ -683,7 +673,7 @@ public class BookingServiceImple implements BookingService {
 
             String customerMsg = "Your booking at " + hotelName + " has been cancelled. Booking ID: #" + bookingId;
             if (refundAmount.compareTo(BigDecimal.ZERO) > 0) {
-                customerMsg += " Refund of ৳" + refundAmount + " has been credited to your wallet.";
+                customerMsg += " Refund of Ã Â§Â³" + refundAmount + " has been credited to your wallet.";
             }
             sendNotificationToUser(customerUserId, NotificationType.BOOKING_CANCELLED, customerMsg);
             sendNotificationToUser(ownerUserId, NotificationType.BOOKING_CANCELLED,
@@ -754,10 +744,10 @@ public class BookingServiceImple implements BookingService {
         invoice.setBooking(booking);
         invoice.setCustomer(booking.getCustomer());
         invoice.setStatus(InvoiceStatus.ISSUED);
-        invoice.setTotalAmount(total.doubleValue());
-        invoice.setDiscountAmount(discountAmount.doubleValue());
-        invoice.setTaxAmount(taxAmount.doubleValue());
-        invoice.setNetAmount(netAmount.doubleValue());
+        invoice.setTotalAmount(total);
+        invoice.setDiscountAmount(discountAmount);
+        invoice.setTaxAmount(taxAmount);
+        invoice.setNetAmount(netAmount);
         invoice.setIssuedAt(LocalDateTime.now());
 
         invoiceRepository.save(invoice);
@@ -769,4 +759,36 @@ public class BookingServiceImple implements BookingService {
                     "SYSTEM");
         } catch (Exception ignored) {}
     }
-}
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CheckInCheckOutResponseDTO> getCheckInCheckOutDetails(Long customerId, int page, int size) {
+        List<Booking> bookings;
+        if (customerId != null) {
+            bookings = bookingRepository.findUpcomingBookingsByCustomer(customerId);
+        } else {
+            Date now = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DAY_OF_YEAR, 30);
+            bookings = bookingRepository.findBookingsByCheckInDateBetween(now, cal.getTime());
+        }
+        return bookings.stream().map(this::mapToCheckInCheckOutDTO).collect(Collectors.toList());
+    }
+
+    private CheckInCheckOutResponseDTO mapToCheckInCheckOutDTO(Booking booking) {
+        CheckInCheckOutResponseDTO dto = new CheckInCheckOutResponseDTO();
+        dto.setBookingId(booking.getId());
+        dto.setHotelName(booking.getHotel() != null ? booking.getHotel().getHotelName() : "");
+        dto.setRoomType(booking.getRoom() != null ? booking.getRoom().getRoomType() : "");
+        dto.setCustomerName(booking.getCustomer() != null ? booking.getCustomer().getCustomerName() : "");
+        dto.setCustomerEmail(booking.getCustomer() != null && booking.getCustomer().getUser() != null
+                ? booking.getCustomer().getUser().getEmail() : "");
+        dto.setCustomerPhone(booking.getCustomer() != null && booking.getCustomer().getPhone() != null
+                ? booking.getCustomer().getPhone() : "");
+        dto.setCheckInDate(booking.getCheckInDate());
+        dto.setCheckOutDate(booking.getCheckOutDate());
+        dto.setBookingStatus(booking.getStatus() != null ? booking.getStatus().name() : "");
+        dto.setTotalAmount(booking.getTotalAmount());
+        dto.setDueAmount(booking.getDueAmount());
+        return dto;
+    }}

@@ -35,11 +35,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
@@ -78,6 +73,12 @@ public class PaymentServiceImpl implements PaymentService {
         Booking booking = bookingRepository.findById(dto.getBookingId())
                 .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
 
+        java.util.Optional<Payment> existingPayment = paymentRepository.findByBooking_Id(dto.getBookingId());
+        if (existingPayment.isPresent() && existingPayment.get().getStatus() == PaymentStatus.PENDING) {
+            throw new IllegalStateException("A pending payment already exists for booking #" + dto.getBookingId()
+                    + ". Complete or cancel it before creating a new one.");
+        }
+
         Payment payment = PaymentMapper.toEntity(dto);
         payment.setBooking(booking);
         payment.setCustomerId(dto.getCustomerId() != null ? dto.getCustomerId()
@@ -86,7 +87,7 @@ public class PaymentServiceImpl implements PaymentService {
         if (dto.getStatus() != null) {
             payment.setStatus(PaymentStatus.valueOf(dto.getStatus()));
         } else {
-            payment.setStatus(PaymentStatus.PAID);
+            payment.setStatus(PaymentStatus.PENDING);
         }
 
         if (dto.getExtraServiceId() != null) {
@@ -103,7 +104,13 @@ public class PaymentServiceImpl implements PaymentService {
                     "Payment of " + saved.getAmount() + " created for booking #" + booking.getId()
                             + ", status: " + saved.getStatus() + ", method: " + saved.getMethod(),
                     "SYSTEM");
+
         } catch (Exception ignored) {}
+
+        } catch (Exception e) {
+            log.error("Audit trail log failed for payment creation: {}", e.getMessage(), e);
+        }
+
 
         // Auto-update booking due amount using BigDecimal
         BigDecimal paid = saved.getAmount() != null ? saved.getAmount() : BigDecimal.ZERO;
@@ -159,7 +166,9 @@ public class PaymentServiceImpl implements PaymentService {
                     ownerNotification.setMessage("Payment of ৳" + saved.getAmount() + " received for booking #" + booking.getId() + " at " + booking.getHotel().getHotelName());
                     notificationService.createNotification(ownerNotification);
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                log.error("Payment notification failed for payment {}: {}", saved.getId(), e.getMessage(), e);
+            }
         }
 
         return PaymentMapper.toResponseDTO(saved);
@@ -237,7 +246,13 @@ public class PaymentServiceImpl implements PaymentService {
             auditTrailService.logAction("PAYMENT_REFUNDED", "Payment", saved.getId(),
                     "Refund of " + saved.getAmount() + " processed for booking #" + bookingId,
                     "SYSTEM");
+
         } catch (Exception ignored) {}
+
+        } catch (Exception e) {
+            log.error("Audit trail log failed for refund: {}", e.getMessage(), e);
+        }
+
 
         // Send refund notification
         try {
@@ -249,7 +264,9 @@ public class PaymentServiceImpl implements PaymentService {
                 customerNotification.setMessage("Refund of ৳" + saved.getAmount() + " processed for booking #" + bookingId + ". Amount credited to your wallet.");
                 notificationService.createNotification(customerNotification);
             }
-        } catch (Exception ignored) {}
+            } catch (Exception e) {
+                log.error("Refund notification failed for booking {}: {}", bookingId, e.getMessage(), e);
+            }
 
         return PaymentMapper.toResponseDTO(saved);
     }
