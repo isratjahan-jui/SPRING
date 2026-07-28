@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -45,19 +45,19 @@ export class MakePayment implements OnInit {
     {
       id: 'SSLCOMMERZ',
       label: 'SSLCommerz',
-      icon: '🔒',
+      icon: 'payment',
       description: 'Pay via SSLCommerz secure gateway (bKash, Nagad, Rocket, Cards)',
     },
     // {
     //   id: 'BKASH',
     //   label: 'bKash',
-    //   icon: '💳',
+    //   icon: 'payment',
     //   description: 'Send money to our bKash merchant number',
     // },
     // {
     //   id: 'NAGAD',
     //   label: 'Nagad',
-    //   icon: '💳',
+    //   icon: 'payment',
     //   description: 'Send money to our Nagad merchant number',
     // },
   ];

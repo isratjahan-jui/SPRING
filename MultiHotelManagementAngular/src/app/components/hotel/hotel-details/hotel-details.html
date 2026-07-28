@@ -300,26 +300,53 @@
         }
 
         <hr />
-        <h5>Reviews</h5>
-        @if (reviews.length > 0) {
-          <div class="mb-3">
-            @for (r of reviews; track r.id) {
-              <div class="border rounded p-3 mb-2">
-                <div class="d-flex justify-content-between">
-                  <strong>{{ r.customerName }}</strong>
-                  <span class="text-warning">
-                    @for (s of [1, 2, 3, 4, 5]; track s) {
-                      <span [class.text-muted]="s > r.rating">&#9733;</span>
-                    }
-                  </span>
+        @if (isCustomer && customerId) {
+          <h5>Reviews</h5>
+          @if (reviews.length > 0) {
+            <div class="mb-3">
+              @for (r of reviews; track r.id) {
+                <div class="border rounded p-3 mb-2">
+                  <div class="d-flex justify-content-between">
+                    <strong>{{ r.customerName }}</strong>
+                    <span class="text-warning">
+                      @for (s of [1, 2, 3, 4, 5]; track s) {
+                        <span [class.text-muted]="s > r.rating">&#9733;</span>
+                      }
+                    </span>
+                  </div>
+                  <p class="mb-1">{{ r.comment }}</p>
+                  <small class="text-muted">{{ r.createdAt | date: 'medium' }}</small>
                 </div>
-                <p class="mb-1">{{ r.comment }}</p>
-                <small class="text-muted">{{ r.createdAt | date: 'medium' }}</small>
-              </div>
-            }
-          </div>
+              }
+            </div>
+          } @else {
+            <p class="text-muted">No reviews yet.</p>
+          }
+        } @else if (!isCustomer && customerId) {
+          <h5>Reviews (Admin View)</h5>
+          @if (reviews.length > 0) {
+            <div class="mb-3">
+              @for (r of reviews; track r.id) {
+                <div class="border rounded p-3 mb-2">
+                  <div class="d-flex justify-content-between">
+                    <strong>{{ r.customerName }}</strong>
+                    <span class="text-warning">
+                      @for (s of [1, 2, 3, 4, 5]; track s) {
+                        <span [class.text-muted]="s > r.rating">&#9733;</span>
+                      }
+                    </span>
+                  </div>
+                  <p class="mb-1">{{ r.comment }}</p>
+                  <small class="text-muted">{{ r.createdAt | date: 'medium' }}</small>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="text-muted">No reviews yet.</p>
+          }
         } @else {
-          <p class="text-muted">No reviews yet.</p>
+          <h5>Reviews</h5>
+          <p class="text-muted">Please log in to view reviews.</p>
         }
 
         @if (canWriteReview()) {

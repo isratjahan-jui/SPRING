@@ -67,6 +67,7 @@ import { CustomerDeals } from './components/customer/deals/deals';
 import { CustomerCoupons } from './components/customer/coupons/coupons';
 import { CustomerCheckinCheckout } from './components/customer/checkin-checkout/checkin-checkout';
 import { MyReviews } from './components/customer/my-reviews/my-reviews';
+import { WriteReview } from './components/customer/write-review/write-review';
 import { Payments } from './components/hotelowner/payments/payments';
 import { OwnerInvoices } from './components/hotelowner/invoices/invoices';
 import { OwnerReceipts } from './components/hotelowner/receipts/receipts';
@@ -349,6 +350,11 @@ export const routes: Routes = [
   {
     path: 'customer/my-reviews',
     component: MyReviews,
+    canActivate: [authGuard, roleGuard(['CUSTOMER'])],
+  },
+  {
+    path: 'customer/write-review/:bookingId',
+    component: WriteReview,
     canActivate: [authGuard, roleGuard(['CUSTOMER'])],
   },
 

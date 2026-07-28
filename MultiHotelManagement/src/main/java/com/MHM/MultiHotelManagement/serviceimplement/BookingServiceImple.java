@@ -3,6 +3,7 @@ package com.MHM.MultiHotelManagement.serviceimplement;
 import com.MHM.MultiHotelManagement.dto.mapper.BookingMapperDTO;
 import com.MHM.MultiHotelManagement.dto.request.BookingRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.BookingResponseDTO;
+import com.MHM.MultiHotelManagement.dto.response.CheckInCheckOutResponseDTO;
 import com.MHM.MultiHotelManagement.entity.Booking;
 import com.MHM.MultiHotelManagement.entity.Customer;
 import com.MHM.MultiHotelManagement.entity.Hotel;
@@ -40,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -51,7 +53,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Calendar;
+import java.util.stream.Collectors;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -666,7 +670,7 @@ public class BookingServiceImple implements BookingService {
 
             String customerMsg = "Your booking at " + hotelName + " has been cancelled. Booking ID: #" + bookingId;
             if (refundAmount.compareTo(BigDecimal.ZERO) > 0) {
-                customerMsg += " Refund of ৳" + refundAmount + " has been credited to your wallet.";
+                customerMsg += " Refund of Ã Â§Â³" + refundAmount + " has been credited to your wallet.";
             }
             sendNotificationToUser(customerUserId, NotificationType.BOOKING_CANCELLED, customerMsg);
             sendNotificationToUser(ownerUserId, NotificationType.BOOKING_CANCELLED,
@@ -752,4 +756,36 @@ public class BookingServiceImple implements BookingService {
                     "SYSTEM");
         } catch (Exception ignored) {}
     }
-}
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CheckInCheckOutResponseDTO> getCheckInCheckOutDetails(Long customerId, int page, int size) {
+        List<Booking> bookings;
+        if (customerId != null) {
+            bookings = bookingRepository.findUpcomingBookingsByCustomer(customerId);
+        } else {
+            Date now = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DAY_OF_YEAR, 30);
+            bookings = bookingRepository.findBookingsByCheckInDateBetween(now, cal.getTime());
+        }
+        return bookings.stream().map(this::mapToCheckInCheckOutDTO).collect(Collectors.toList());
+    }
+
+    private CheckInCheckOutResponseDTO mapToCheckInCheckOutDTO(Booking booking) {
+        CheckInCheckOutResponseDTO dto = new CheckInCheckOutResponseDTO();
+        dto.setBookingId(booking.getId());
+        dto.setHotelName(booking.getHotel() != null ? booking.getHotel().getHotelName() : "");
+        dto.setRoomType(booking.getRoom() != null ? booking.getRoom().getRoomType() : "");
+        dto.setCustomerName(booking.getCustomer() != null ? booking.getCustomer().getCustomerName() : "");
+        dto.setCustomerEmail(booking.getCustomer() != null && booking.getCustomer().getUser() != null
+                ? booking.getCustomer().getUser().getEmail() : "");
+        dto.setCustomerPhone(booking.getCustomer() != null && booking.getCustomer().getPhone() != null
+                ? booking.getCustomer().getPhone() : "");
+        dto.setCheckInDate(booking.getCheckInDate());
+        dto.setCheckOutDate(booking.getCheckOutDate());
+        dto.setBookingStatus(booking.getStatus() != null ? booking.getStatus().name() : "");
+        dto.setTotalAmount(booking.getTotalAmount());
+        dto.setDueAmount(booking.getDueAmount());
+        return dto;
+    }}

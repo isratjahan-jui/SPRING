@@ -46,7 +46,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        // ── Public endpoints (no token needed) ────────────
+                        //  Public endpoints (no token needed) 
                         .requestMatchers(
                                 //  auth_api
                                 "/api/auth/login",
@@ -85,23 +85,23 @@ public class SecurityConfig {
                         .requestMatchers("/checkin-id/**").permitAll()
                         .requestMatchers("/location/**").permitAll()
 
-                        // ── Admin only endpoints ──────────────────────────
+                        // Ã¢â€â‚¬Ã¢â€â‚¬ Admin only endpoints Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
                         .requestMatchers("/api/admins/**").hasRole("ADMIN")
 
-                        // ── Public read for hotel sub-resources ─────────
+                        // Ã¢â€â‚¬Ã¢â€â‚¬ Public read for hotel sub-resources Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
                         .requestMatchers(HttpMethod.GET, "/api/hotel-details/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/rooms/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/facilities/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/gallery/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/food-items/**").permitAll()
 
-                        // ── Admin hotel management (approve/reject) ──────
+                        // Ã¢â€â‚¬Ã¢â€â‚¬ Admin hotel management (approve/reject) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
                         .requestMatchers(HttpMethod.PUT, "/api/hotels/*/approve").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/hotels/*/reject").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/hotels/all").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/hotels/pending").hasRole("ADMIN")
 
-                        // ── SSLCommerz callbacks (public - no auth) ─────
+                        // Ã¢â€â‚¬Ã¢â€â‚¬ SSLCommerz callbacks (public - no auth) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
                         .requestMatchers("/api/payments/sslcommerz/success").permitAll()
                         .requestMatchers("/api/payments/sslcommerz/fail").permitAll()
                         .requestMatchers("/api/payments/sslcommerz/cancel").permitAll()
@@ -111,7 +111,7 @@ public class SecurityConfig {
                         .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/.well-known/**").permitAll()
 
-                        // ── Hotel Owner endpoints ─────────────────────────
+                        // Ã¢â€â‚¬Ã¢â€â‚¬ Hotel Owner endpoints Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
                         .requestMatchers(HttpMethod.POST, "/api/hotels").hasRole("HOTEL_OWNER")
                         .requestMatchers(HttpMethod.PUT, "/api/hotels/**").hasRole("HOTEL_OWNER")
                         .requestMatchers(HttpMethod.DELETE, "/api/hotels/**").hasRole("HOTEL_OWNER")
@@ -144,7 +144,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/coupons/**").hasRole("HOTEL_OWNER")
                         .requestMatchers("/api/reports/**").hasRole("HOTEL_OWNER")
 
-                        // ── Customer endpoints ────────────────────────────
+                        // Ã¢â€â‚¬Ã¢â€â‚¬ Customer endpoints Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
                         .requestMatchers(HttpMethod.POST, "/api/customers").permitAll()
                         .requestMatchers("/api/customers/**").hasAnyRole("CUSTOMER", "ADMIN")
                         .requestMatchers("/api/bookings/**").hasAnyRole("CUSTOMER", "ADMIN", "HOTEL_OWNER")
@@ -156,13 +156,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/hotel-extra-services/**").hasRole("HOTEL_OWNER")
                         .requestMatchers("/api/extra-services/**").hasAnyRole("CUSTOMER", "ADMIN", "HOTEL_OWNER")
 
-                        // ── Admin + Owner endpoints ───────────────────────
+                        // Ã¢â€â‚¬Ã¢â€â‚¬ Admin + Owner endpoints Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
                         .requestMatchers("/api/commissions/**").hasAnyRole("ADMIN", "HOTEL_OWNER")
                         .requestMatchers("/api/support/**").hasAnyRole("ADMIN", "CUSTOMER", "HOTEL_OWNER")
                         .requestMatchers("/api/support-replies/**").hasAnyRole("ADMIN", "CUSTOMER", "HOTEL_OWNER")
                         .requestMatchers("/api/notifications/**").hasAnyRole("ADMIN", "CUSTOMER", "HOTEL_OWNER")
 
-                        // ── All other requests need authentication ────────
+                        // Ã¢â€â‚¬Ã¢â€â‚¬ All other requests need authentication Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
                         .anyRequest().authenticated()
 
                 ).authenticationProvider(authenticationProvider())
@@ -200,19 +200,18 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-        // Strict rule — SSLCommerz gateway callbacks (restricted to known SSLCommerz domains)
+        // Strict rule Ã¢â‚¬â€ SSLCommerz gateway callbacks (restricted to known SSLCommerz domains)
         CorsConfiguration sslCommerz = new CorsConfiguration();
         sslCommerz.setAllowedOriginPatterns(List.of(
                 "https://sandbox.sslcommerz.com",
                 "https://securepay.sslcommerz.com",
-                "https://www.sslcommerz.com"
-        ));
+                "https://www.sslcommerz.com", "http://localhost:4200"));
         sslCommerz.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
         sslCommerz.setAllowedHeaders(List.of("*"));
-        sslCommerz.setAllowCredentials(false);
+        sslCommerz.setAllowCredentials(true);
         source.registerCorsConfiguration("/api/payments/sslcommerz/**", sslCommerz);
 
-        // Strict rule — Angular frontend only (credentialed)
+        // Strict rule Ã¢â‚¬â€ Angular frontend only (credentialed)
         CorsConfiguration strict = new CorsConfiguration();
         strict.setAllowedOrigins(List.of(
                 "http://localhost:4200",

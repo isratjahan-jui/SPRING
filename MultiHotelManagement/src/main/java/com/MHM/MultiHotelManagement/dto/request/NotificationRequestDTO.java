@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class NotificationRequestDTO {
+    private String subject;
     private String message;
     private NotificationType type;
     private NotificationChannel channel;

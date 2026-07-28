@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Data
 public class NotificationResponseDTO {
     private Long id;
+    private String subject;
     private String message;
     private NotificationType type;
     private NotificationChannel channel;

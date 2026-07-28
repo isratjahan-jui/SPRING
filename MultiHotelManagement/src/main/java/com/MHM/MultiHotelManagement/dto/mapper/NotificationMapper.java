@@ -7,6 +7,7 @@ public class NotificationMapper {
     public static NotificationResponseDTO toDTO(Notification notification) {
         NotificationResponseDTO dto = new NotificationResponseDTO();
         dto.setId(notification.getId());
+        dto.setSubject(notification.getSubject());
         dto.setMessage(notification.getMessage());
         dto.setType(notification.getType());
         dto.setChannel(notification.getChannel());

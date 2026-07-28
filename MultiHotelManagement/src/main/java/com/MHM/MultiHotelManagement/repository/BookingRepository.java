@@ -173,4 +173,52 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         LEFT JOIN FETCH b.room
     """)
     List<Booking> findAllWithDetails();
+
+    @Query("""
+        SELECT b FROM Booking b
+        LEFT JOIN FETCH b.customer c
+        LEFT JOIN FETCH c.user
+        LEFT JOIN FETCH b.hotel h
+        LEFT JOIN FETCH b.room r
+        WHERE b.checkInDate BETWEEN :startDate AND :endDate
+        AND b.status != 'CANCELLED'
+        ORDER BY b.checkInDate ASC
+    """)
+    List<Booking> findBookingsByCheckInDateBetween(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+    @Query("""
+        SELECT b FROM Booking b
+        LEFT JOIN FETCH b.customer c
+        LEFT JOIN FETCH c.user
+        LEFT JOIN FETCH b.hotel h
+        LEFT JOIN FETCH b.room r
+        WHERE b.checkOutDate BETWEEN :startDate AND :endDate
+        AND b.status != 'CANCELLED'
+        ORDER BY b.checkOutDate ASC
+    """)
+    List<Booking> findBookingsByCheckOutDateBetween(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+    @Query("""
+        SELECT b FROM Booking b
+        LEFT JOIN FETCH b.customer c
+        LEFT JOIN FETCH c.user
+        LEFT JOIN FETCH b.hotel h
+        LEFT JOIN FETCH b.room r
+        WHERE b.checkInDate <= :date
+        AND b.checkOutDate >= :date
+        AND b.status != 'CANCELLED'
+        ORDER BY b.checkInDate ASC
+    """)
+    List<Booking> findActiveBookingsOnDate(@Param("date") Date date);
+
+    @Query("""
+        SELECT b FROM Booking b
+        LEFT JOIN FETCH b.customer c
+        LEFT JOIN FETCH c.user
+        LEFT JOIN FETCH b.hotel h
+        WHERE b.customer.id = :customerId
+        AND b.status NOT IN ('CANCELLED')
+        ORDER BY b.checkInDate ASC
+    """)
+    List<Booking> findUpcomingBookingsByCustomer(@Param("customerId") Long customerId);
 }

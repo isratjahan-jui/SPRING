@@ -180,6 +180,11 @@
                     Cancel
                   </button>
                 }
+                @if (b.status === 'CHECKED_OUT') {
+                  <a [routerLink]="['/customer/write-review', b.id]" class="btn btn-success btn-sm">
+                    Write Review
+                  </a>
+                }
                 @if (b.status === 'NO_SHOW' || b.status === 'EXPIRED' || b.status === 'CANCELLED') {
                   <a
                     [routerLink]="['/book-hotel', b.hotelId, b.roomId]"

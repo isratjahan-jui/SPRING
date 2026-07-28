@@ -91,7 +91,8 @@ public class SslCommerzClient {
 
             HttpEntity<String> request = new HttpEntity<>(formBody.toString(), headers);
 
-            ResponseEntity<Map> response = restTemplate.exchange(apiUrl, HttpMethod.POST, request, Map.class);
+            String url = sandbox ? "https://sandbox.sslcommerz.com/gwprocess/v4/api.php" : "https://securepay.sslcommerz.com/gwprocess/v4/api.php";
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, request, Map.class);
 
             Map<String, Object> responseBody = response.getBody();
             if (responseBody != null && "SUCCESS".equals(responseBody.get("status"))) {
@@ -121,7 +122,7 @@ public class SslCommerzClient {
             HttpEntity<String> request = new HttpEntity<>(formBody, headers);
 
             ResponseEntity<Map> response = restTemplate.exchange(
-                    validationUrl, HttpMethod.POST, request, Map.class);
+                    (sandbox ? "https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php" : "https://securepay.sslcommerz.com/validator/api/validationserverAPI.php"), HttpMethod.POST, request, Map.class);
 
             Map<String, Object> responseBody = response.getBody();
             if (responseBody != null) {

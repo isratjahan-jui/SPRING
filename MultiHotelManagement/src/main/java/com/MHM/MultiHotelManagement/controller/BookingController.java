@@ -2,6 +2,8 @@ package com.MHM.MultiHotelManagement.controller;
 
 import com.MHM.MultiHotelManagement.dto.request.BookingRequestDTO;
 import com.MHM.MultiHotelManagement.dto.response.BookingResponseDTO;
+import com.MHM.MultiHotelManagement.dto.response.CheckInCheckOutResponseDTO;
+import org.springframework.security.access.prepost.PreAuthorize;
 import com.MHM.MultiHotelManagement.service.BookingService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -122,4 +124,12 @@ public class BookingController {
             @RequestBody BookingRequestDTO dto) {
         return ResponseEntity.ok(bookingService.rebook(id, dto));
     }
-}
+
+    @GetMapping("/checkin-checkout")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
+    public ResponseEntity<List<CheckInCheckOutResponseDTO>> getCheckInCheckOut(
+            @RequestParam(required = false) Long customerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(bookingService.getCheckInCheckOutDetails(customerId, page, size));
+    }}
