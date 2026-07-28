@@ -1,0 +1,45 @@
+<div class="container mt-4">
+  <h2 class="mb-4">Available Deals & Offers</h2>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+      <p class="text-muted mt-2">Loading deals...</p>
+    </div>
+  } @else if (deals.length === 0) {
+    <p class="text-muted">No active deals available right now. Check back later!</p>
+  } @else {
+    <div class="row">
+      @for (deal of deals; track deal.id) {
+        <div class="col-md-4 mb-3">
+          <div class="card h-100 border-primary">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="card-title mb-0">{{ deal.dealTitle }}</h5>
+                <span class="badge bg-danger fs-6">
+                  @if (deal.discountPercent) {
+                    {{ deal.discountPercent }}% OFF
+                  } @else if (deal.discountAmount) {
+                    BDT {{ deal.discountAmount }} OFF
+                  }
+                </span>
+              </div>
+              @if (deal.description) {
+                <p class="card-text text-muted">{{ deal.description }}</p>
+              }
+              <p class="card-text small mb-1"><strong>Hotel:</strong> {{ deal.hotelName }}</p>
+              @if (deal.roomType) {
+                <p class="card-text small mb-1"><strong>Room:</strong> {{ deal.roomType }}</p>
+              }
+              <p class="card-text small text-muted">
+                Valid: {{ deal.startDate | date: 'mediumDate' }} -
+                {{ deal.endDate | date: 'mediumDate' }}
+              </p>
+              <a [routerLink]="['/hotels']" class="btn btn-sm btn-outline-primary">Browse Hotels</a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

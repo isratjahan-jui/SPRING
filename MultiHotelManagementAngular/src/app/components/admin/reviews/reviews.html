@@ -1,0 +1,103 @@
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Review Moderation</h3>
+    <span class="badge bg-info fs-6">{{ filteredReviews.length }} reviews</span>
+  </div>
+
+  <div class="row mb-3 g-2">
+    <div class="col-md-3">
+      <select class="form-select" [(ngModel)]="filterStatus" (change)="onSearch()">
+        <option value="ALL">All Status</option>
+        <option value="APPROVED">Approved</option>
+        <option value="PENDING">Pending</option>
+        <option value="REJECTED">Rejected</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Search by customer, hotel, comment..."
+        [(ngModel)]="searchTerm"
+        (input)="onSearch()"
+      />
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted mt-2">Loading reviews...</p>
+    </div>
+  } @else if (filteredReviews.length === 0) {
+    <div class="text-center py-5">
+      <p class="text-muted fs-5">No reviews found.</p>
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>#</th>
+            <th>Customer</th>
+            <th>Hotel</th>
+            <th>Booking</th>
+            <th>Rating</th>
+            <th>Comment</th>
+            <th>Status</th>
+            <th>Edited</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (review of filteredReviews; track review.id) {
+            <tr>
+              <td>{{ review.id }}</td>
+              <td><strong>{{ review.customerName }}</strong></td>
+              <td>{{ review.hotelName }}</td>
+              <td>#{{ review.bookingId }}</td>
+              <td>
+                <span class="text-warning">
+                  @for (s of [1, 2, 3, 4, 5]; track s) {
+                    <span [class.text-muted]="s > review.rating">&#9733;</span>
+                  }
+                </span>
+                <small class="text-muted">{{ review.rating }}/5</small>
+              </td>
+              <td>
+                <span class="d-inline-block text-truncate" style="max-width: 200px;" title="{{ review.comment }}">
+                  {{ review.comment }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getStatusBadge(review.status)">{{ review.status }}</span>
+              </td>
+              <td>
+                @if (review.editCount > 0) {
+                  <small class="text-muted">{{ review.editCount }}x</small>
+                } @else {
+                  <small class="text-muted">—</small>
+                }
+              </td>
+              <td>{{ review.createdAt | date: 'short' }}</td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  @if (review.status !== 'APPROVED') {
+                    <button class="btn btn-outline-success" (click)="approveReview(review)" title="Approve">✓</button>
+                  }
+                  @if (review.status !== 'REJECTED') {
+                    <button class="btn btn-outline-warning" (click)="rejectReview(review)" title="Reject">✗</button>
+                  }
+                  <button class="btn btn-outline-danger" (click)="deleteReview(review)" title="Delete">🗑</button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

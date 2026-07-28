@@ -1,0 +1,143 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Coupons</h2>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label fw-bold">Select Hotel</label>
+    <select [(ngModel)]="selectedHotelId" (change)="onHotelChange()" class="form-select">
+      <option [ngValue]="0" disabled>-- Choose a hotel --</option>
+      @for (h of hotels; track h.id) {
+        <option [ngValue]="h.id">{{ h.hotelName }}</option>
+      }
+    </select>
+  </div>
+
+  @if (selectedHotelId && !showForm) {
+    <button class="btn btn-primary mb-3" (click)="openCreate()">+ Add Coupon</button>
+  }
+
+  @if (showForm) {
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5>Add Coupon</h5>
+        @if (formError) {
+          <div class="alert alert-danger">{{ formError }}</div>
+        }
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label">Coupon Code *</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="form.code"
+              placeholder="e.g. SUMMER20"
+            />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Discount %</label>
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="form.discountPercent"
+              min="0"
+              max="100"
+              step="0.01"
+            />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Discount Amount (BDT)</label>
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="form.discountAmount"
+              min="0"
+              step="0.01"
+            />
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Valid From *</label>
+            <input type="datetime-local" class="form-control" [(ngModel)]="form.validFrom" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Valid Until *</label>
+            <input type="datetime-local" class="form-control" [(ngModel)]="form.validUntil" />
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-success" (click)="submitForm()" [disabled]="submitting">
+            @if (submitting) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            Create
+          </button>
+          <button class="btn btn-secondary" (click)="cancelForm()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+    </div>
+  } @else if (!selectedHotelId) {
+    <p class="text-muted">Select a hotel to manage its coupons.</p>
+  } @else if (coupons.length === 0) {
+    <p class="text-muted">No coupons yet. Click "+ Add Coupon" to create one.</p>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Discount</th>
+            <th>Valid From</th>
+            <th>Valid Until</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of coupons; track c.id) {
+            <tr>
+              <td>
+                <strong>{{ c.code }}</strong>
+              </td>
+              <td>
+                @if (c.discountPercent) {
+                  {{ c.discountPercent }}%
+                }
+                @if (c.discountPercent && c.discountAmount) {
+                  +
+                }
+                @if (c.discountAmount) {
+                  BDT {{ c.discountAmount }}
+                }
+                @if (!c.discountPercent && !c.discountAmount) {
+                  -
+                }
+              </td>
+              <td>{{ c.validFrom | date: 'mediumDate' }}</td>
+              <td>{{ c.validUntil | date: 'mediumDate' }}</td>
+              <td>
+                <span class="badge" [class.bg-success]="c.active" [class.bg-secondary]="!c.active">
+                  {{ c.active ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td>
+                @if (c.active) {
+                  <button class="btn btn-sm btn-outline-warning" (click)="deactivate(c.id)">
+                    Deactivate
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
