@@ -1,0 +1,104 @@
+<div class="container py-4">
+  <a routerLink="/customer/my-reviews" class="btn btn-outline-secondary btn-sm mb-3">
+    &larr; Back to My Reviews
+  </a>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted mt-2">Loading booking details...</p>
+    </div>
+  } @else if (success) {
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <div class="text-success mb-3" style="font-size: 4rem">&#10003;</div>
+        <h3>Review Submitted!</h3>
+        <p class="text-muted">Thank you for sharing your experience. Your review will appear publicly once approved by our team. Redirecting to your reviews...</p>
+      </div>
+    </div>
+  } @else if (alreadyReviewed) {
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <div class="mb-3" style="font-size: 3rem">&#9733;</div>
+        <h5>Already Reviewed</h5>
+        <p class="text-muted">You have already submitted a review for this booking.</p>
+        <a routerLink="/customer/my-reviews" class="btn btn-primary">View My Reviews</a>
+      </div>
+    </div>
+  } @else {
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Write a Review</h5>
+          </div>
+          <div class="card-body">
+            <!-- Booking Info -->
+            <div class="booking-info mb-4 p-3 bg-light rounded">
+              <h6 class="mb-1">{{ hotelName }}</h6>
+              <small class="text-muted">
+                Booking #{{ bookingId }} &middot; {{ roomType }}
+              </small>
+            </div>
+
+            @if (error) {
+              <div class="alert alert-danger">{{ error }}</div>
+            }
+
+            <!-- Rating -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">Your Rating *</label>
+              <div class="star-rating d-flex gap-2">
+                @for (star of getStarArray(rating); track star) {
+                  <button
+                    type="button"
+                    class="btn p-0 border-0 bg-transparent star-input"
+                    (click)="setRating(star)"
+                    (mouseenter)="setHoverRating(star)"
+                    (mouseleave)="clearHover()"
+                    [class.star-active]="star <= (hoverRating || rating)"
+                  >
+                    &#9733;
+                  </button>
+                }
+                <span class="ms-2 text-muted align-self-center">
+                  {{ rating }}/5
+                </span>
+              </div>
+            </div>
+
+            <!-- Comment -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">Your Review *</label>
+              <textarea
+                class="form-control"
+                rows="5"
+                placeholder="Share your experience at this hotel..."
+                [(ngModel)]="comment"
+              ></textarea>
+              <small class="text-muted">{{ comment.length }} characters</small>
+            </div>
+
+            <!-- Submit -->
+            <div class="d-grid">
+              <button
+                class="btn btn-primary btn-lg"
+                (click)="submitReview()"
+                [disabled]="submitting || !comment.trim() || rating < 1"
+              >
+                @if (submitting) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                  Submitting...
+                } @else {
+                  Submit Review
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

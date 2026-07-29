@@ -1,0 +1,67 @@
+@if (isDashboard) {
+  <header class="dashboard-header">
+    <div class="header-left">
+      <h6 class="page-title mb-0">{{ pageTitle }}</h6>
+    </div>
+    <div class="header-right">
+      @if (isLoggedIn) {
+        <app-notification-dropdown />
+        <div class="user-menu">
+          <div class="user-avatar">{{ userInitial }}</div>
+          <div class="dropdown">
+            <button class="user-info dropdown-toggle" data-bs-toggle="dropdown">
+              <span class="user-name">{{ userName }}</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <span class="dropdown-item-text small" style="color: var(--text-muted);">{{ role }}</span>
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li><a class="dropdown-item" style="color: var(--danger);" href="#" (click)="logout()">Logout</a></li>
+            </ul>
+          </div>
+        </div>
+      }
+    </div>
+  </header>
+} @else {
+  <nav class="tn-navbar">
+    <div class="tn-navbar-inner">
+      <div class="tn-nav-left">
+        <a class="tn-brand" routerLink="/">
+          <span class="tn-brand-icon">T</span>
+          <span class="tn-brand-text">Trip<span class="tn-brand-accent">Nest</span></span>
+        </a>
+        <ul class="tn-nav-links">
+          <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a></li>
+          <li><a routerLink="/hotels" routerLinkActive="active">Hotels</a></li>
+          <li><a routerLink="/deals" routerLinkActive="active">Deals</a></li>
+        </ul>
+      </div>
+      <div class="tn-nav-right">
+        @if (isLoggedIn) {
+          <a class="tn-btn tn-btn-outline-light btn-sm" [routerLink]="dashboardRoute">Dashboard</a>
+          <app-notification-dropdown />
+          <div class="dropdown">
+            <button class="tn-user-pill dropdown-toggle" data-bs-toggle="dropdown">
+              <div class="tn-user-avatar">{{ userInitial }}</div>
+              <span class="tn-user-name">{{ userName }}</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <span class="dropdown-item-text small" style="color: var(--text-muted);">{{ role }}</span>
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li><a class="dropdown-item" [routerLink]="dashboardRoute">Dashboard</a></li>
+              <li><hr class="dropdown-divider" /></li>
+              <li><a class="dropdown-item" style="color: var(--danger);" href="#" (click)="logout()">Logout</a></li>
+            </ul>
+          </div>
+        } @else {
+          <a routerLink="/login" class="tn-btn tn-btn-ghost btn-sm">Log in</a>
+          <a routerLink="/register" class="tn-btn tn-btn-accent btn-sm">Sign up</a>
+        }
+      </div>
+    </div>
+  </nav>
+}

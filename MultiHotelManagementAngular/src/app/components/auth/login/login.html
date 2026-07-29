@@ -1,0 +1,113 @@
+<div class="auth-page">
+  <div class="auth-left">
+    <div class="auth-brand">
+      <span class="auth-brand-icon">T</span>
+      <span class="auth-brand-text">Trip<span>Nest</span></span>
+    </div>
+    <div class="auth-hero-content">
+      
+      <h1>Find your perfect stay</h1>
+      <p>Discover thousands of hotels across Bangladesh at the best prices.</p>
+      <div class="auth-features">
+        <div class="auth-feature">
+          <span class="auth-feature-icon">&#127976;</span>
+          <span>Premium Hotels</span>
+        </div>
+        <div class="auth-feature">
+          <span class="auth-feature-icon">&#128176;</span>
+          <span>Best Price Guarantee</span>
+        </div>
+        <div class="auth-feature">
+          <span class="auth-feature-icon">&#128274;</span>
+          <span>Secure Booking</span>
+        </div>
+      </div>
+    </div>
+    <div class="auth-left-footer">
+      &copy; 2026 TripNest. All rights reserved.
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-form-wrapper">
+      <div class="auth-form-header">
+        <h2>Welcome back</h2>
+        <p>Sign in to continue to your account</p>
+      </div>
+
+      @if (errorMessage) {
+        <div class="auth-error">
+          <span class="auth-error-icon">!</span>
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+
+      <form #loginForm="ngForm" (ngSubmit)="loginForm.valid && login()" novalidate>
+        <div class="auth-field">
+          <label class="auth-label">Email address</label>
+          <input
+            type="email"
+            class="auth-input"
+            [(ngModel)]="dto.email"
+            name="email"
+            #emailRef="ngModel"
+            required
+            email
+            placeholder="you@example.com"
+          />
+          @if (emailRef.invalid && emailRef.touched) {
+            <span class="auth-field-error">Please enter a valid email address.</span>
+          }
+        </div>
+
+        <div class="auth-field">
+          <div class="auth-label-row">
+            <label class="auth-label">Password</label>
+            <a routerLink="/forgot-password" class="auth-link">Forgot password?</a>
+          </div>
+          <div class="auth-password-wrap">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              class="auth-input"
+              [(ngModel)]="dto.password"
+              name="password"
+              #passwordRef="ngModel"
+              required
+              placeholder="Enter your password"
+            />
+            <button
+              type="button"
+              class="auth-password-toggle"
+              (click)="showPassword = !showPassword"
+            >
+              {{ showPassword ? '&#128065;' : '&#128064;' }}
+            </button>
+          </div>
+          @if (passwordRef.invalid && passwordRef.touched) {
+            <span class="auth-field-error">Password is required.</span>
+          }
+        </div>
+
+        <button
+          class="auth-submit"
+          type="submit"
+          [disabled]="loading"
+        >
+          @if (loading) {
+            <span class="auth-spinner"></span>
+          }
+          {{ loading ? 'Signing in...' : 'Sign in' }}
+        </button>
+      </form>
+
+      <div class="auth-divider">
+        <span>or</span>
+      </div>
+
+      <p class="auth-switch">
+        Don't have an account?
+        <a routerLink="/register" class="auth-link-bold">Create one</a>
+      </p>
+    </div>
+  </div>
+</div>

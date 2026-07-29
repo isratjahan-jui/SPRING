@@ -1,0 +1,130 @@
+<div class="container py-4">
+  <button class="btn btn-outline-secondary btn-sm mb-3" (click)="goBack()">&larr; Back to Customers</button>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else if (customer) {
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="d-flex align-items-center gap-4">
+          @if (customer.image) {
+            <img [src]="getImageUrl(customer.image)" [alt]="customer.name" class="rounded-circle" width="80" height="80" style="object-fit: cover;" />
+          } @else {
+            <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+              <span class="text-success fw-bold" style="font-size: 2rem;">{{ customer.name.charAt(0).toUpperCase() }}</span>
+            </div>
+          }
+          <div>
+            <h3 class="mb-0">{{ customer.customerName || customer.name }}</h3>
+            <small class="text-muted">{{ customer.role || 'CUSTOMER' }}</small>
+          </div>
+        </div>
+        <hr />
+        <div class="row g-3">
+          <div class="col-md-4">
+            <small class="text-muted d-block">Email</small>
+            <strong>{{ customer.email }}</strong>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted d-block">Phone</small>
+            <strong>{{ customer.phone }}</strong>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted d-block">Gender</small>
+            <strong>{{ customer.gender || '—' }}</strong>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted d-block">Address</small>
+            <strong>{{ customer.address || '—' }}</strong>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted d-block">Date of Birth</small>
+            <strong>{{ customer.dateOfBirth || '—' }}</strong>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted d-block">Customer ID</small>
+            <strong>#{{ customer.id }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <h5 class="mb-3">Bookings ({{ bookings.length }})</h5>
+        @if (bookings.length === 0) {
+          <div class="text-center py-4 text-muted">No bookings found.</div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>#</th>
+                  <th>Hotel</th>
+                  <th>Dates</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (b of bookings; track b.id) {
+                  <tr>
+                    <td>{{ b.id }}</td>
+                    <td><strong>{{ b.hotelName }}</strong></td>
+                    <td>
+                      <small>{{ b.checkInDate | date: 'mediumDate' }} – {{ b.checkOutDate | date: 'mediumDate' }}</small>
+                    </td>
+                    <td>BDT {{ b.totalAmount.toFixed(2) }}</td>
+                    <td>
+                      <span class="badge" [ngClass]="getBookingStatusBadge(b.status)">{{ b.status }}</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      <div class="col-md-6">
+        <h5 class="mb-3">Payments ({{ payments.length }})</h5>
+        @if (payments.length === 0) {
+          <div class="text-center py-4 text-muted">No payments found.</div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>#</th>
+                  <th>Method</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of payments; track p.id) {
+                  <tr>
+                    <td>{{ p.bookingReference || p.id }}</td>
+                    <td>{{ p.method }}</td>
+                    <td>BDT {{ p.amount.toFixed(2) }}</td>
+                    <td>
+                      <span class="badge" [ngClass]="getPaymentStatusBadge(p.status)">{{ p.status }}</span>
+                    </td>
+                    <td>{{ p.transactionDate | date: 'short' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="text-center py-5 text-muted">Customer not found.</div>
+  }
+</div>

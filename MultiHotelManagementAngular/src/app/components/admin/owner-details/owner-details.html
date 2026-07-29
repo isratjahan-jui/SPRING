@@ -1,0 +1,90 @@
+<div class="container py-4">
+  <button class="btn btn-outline-secondary btn-sm mb-3" (click)="goBack()">&larr; Back to Owners</button>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else if (owner) {
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="d-flex align-items-center gap-4">
+          @if (owner.image) {
+            <img [src]="getImageUrl(owner.image)" [alt]="owner.name" class="rounded-circle" width="80" height="80" style="object-fit: cover;" />
+          } @else {
+            <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+              <span class="text-primary fw-bold" style="font-size: 2rem;">{{ owner.name.charAt(0).toUpperCase() }}</span>
+            </div>
+          }
+          <div>
+            <h3 class="mb-0">{{ owner.name }}</h3>
+            <small class="text-muted">{{ owner.role || 'HOTEL_OWNER' }}</small>
+          </div>
+        </div>
+        <hr />
+        <div class="row g-3">
+          <div class="col-md-4">
+            <small class="text-muted d-block">Email</small>
+            <strong>{{ owner.email }}</strong>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted d-block">Phone</small>
+            <strong>{{ owner.phone }}</strong>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted d-block">Gender</small>
+            <strong>{{ owner.gender || '—' }}</strong>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted d-block">Address</small>
+            <strong>{{ owner.address || '—' }}</strong>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted d-block">Date of Birth</small>
+            <strong>{{ owner.dateOfBirth || '—' }}</strong>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted d-block">Owner ID</small>
+            <strong>#{{ owner.id }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h5 class="mb-3">Hotels ({{ hotels.length }})</h5>
+    @if (hotels.length === 0) {
+      <div class="text-center py-4 text-muted">No hotels registered yet.</div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>#</th>
+              <th>Hotel Name</th>
+              <th>Address</th>
+              <th>Rating</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (hotel of hotels; track hotel.id) {
+              <tr>
+                <td>{{ hotel.id }}</td>
+                <td><strong>{{ hotel.hotelName }}</strong></td>
+                <td>{{ hotel.address }}</td>
+                <td>{{ hotel.rating }}</td>
+                <td>
+                  <span class="badge" [ngClass]="getStatusBadge(hotel.status)">{{ hotel.status }}</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  } @else {
+    <div class="text-center py-5 text-muted">Owner not found.</div>
+  }
+</div>

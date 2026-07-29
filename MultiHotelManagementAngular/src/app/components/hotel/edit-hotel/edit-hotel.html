@@ -1,0 +1,69 @@
+<div class="container mt-4">
+  <h2>Edit Hotel</h2>
+  <form (ngSubmit)="updateHotel()">
+    <div class="mb-2">
+      <label class="form-label">Hotel Name</label>
+      <input
+        [(ngModel)]="hotel.hotelName"
+        name="hotelName"
+        placeholder="Hotel Name"
+        class="form-control"
+        required
+      />
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Address</label>
+      <input
+        [(ngModel)]="hotel.address"
+        name="address"
+        placeholder="Address"
+        class="form-control"
+        required
+      />
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Description</label>
+      <textarea
+        [(ngModel)]="hotel.description"
+        name="description"
+        placeholder="Description"
+        class="form-control"
+      ></textarea>
+    </div>
+    <div class="row mb-2">
+      <div class="col-md-6">
+        <label class="form-label">Rating</label>
+        <input [(ngModel)]="hotel.rating" name="rating" class="form-control" />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Status</label>
+        <select [(ngModel)]="hotel.status" name="status" class="form-select">
+          <option value="PENDING_APPROVAL">Pending Approval</option>
+          <option value="APPROVED">Approved</option>
+          <option value="REJECTED">Rejected</option>
+        </select>
+      </div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Location</label>
+      <select [(ngModel)]="hotel.locationId" name="locationId" class="form-select" required>
+        <option [ngValue]="0" disabled>Select Location</option>
+        @for (loc of locations; track loc.id) {
+          <option [ngValue]="loc.id">{{ loc.locationName }} - {{ loc.city }}</option>
+        }
+      </select>
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Hotel Image</label>
+      <input type="file" class="form-control" accept="image/*" (change)="onFileSelected($event)" />
+      @if (preview) {
+        <img [src]="preview" class="img-thumbnail mt-2" width="200" />
+      } @else if (currentImage) {
+        <img [src]="currentImage" class="img-thumbnail mt-2" width="200" />
+      }
+    </div>
+    <button type="submit" class="btn btn-primary" [disabled]="loading">
+      {{ loading ? 'Updating...' : 'Update' }}
+    </button>
+  </form>
+</div>

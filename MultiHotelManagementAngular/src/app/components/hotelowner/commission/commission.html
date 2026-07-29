@@ -1,0 +1,162 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0">My Commissions</h3>
+    <span class="badge bg-info fs-6">{{ commissions.length }} records</span>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card shadow border-0 bg-info text-white">
+        <div class="card-body text-center">
+          <h6 class="card-title">Total Commission Paid</h6>
+          <h3 class="fw-bold mb-0">&#2547;{{ totalCommissionPaid | number: '1.2-2' }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow border-0 bg-success text-white">
+        <div class="card-body text-center">
+          <h6 class="card-title">Total Commission Records</h6>
+          <h3 class="fw-bold mb-0">{{ commissions.length }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow border-0 bg-primary text-white">
+        <div class="card-body text-center">
+          <h6 class="card-title">Avg Commission Rate</h6>
+          <h3 class="fw-bold mb-0">{{ avgRate | number: '1.1-1' }}%</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="card shadow-sm border-0 mb-3">
+    <div class="card-body">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Search</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Search by Booking ID, Hotel, Customer..."
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()"
+          />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Records per page</label>
+          <select class="form-select" [(ngModel)]="pageSize" (change)="onSearch()">
+            <option [value]="5">5</option>
+            <option [value]="10">10</option>
+            <option [value]="25">25</option>
+            <option [value]="50">50</option>
+          </select>
+        </div>
+        <div class="col-md-3 text-end">
+          <button class="btn btn-outline-secondary" (click)="searchTerm = ''; onSearch()">
+            Clear Search
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted mt-2">Loading commission records...</p>
+    </div>
+  } @else if (filteredCommissions.length === 0) {
+    <div class="card shadow-sm border-0">
+      <div class="card-body text-center py-5">
+        <h5 class="text-muted">No commission records found</h5>
+        <p class="text-muted">Commissions will appear here once payments are processed.</p>
+      </div>
+    </div>
+  } @else {
+    <!-- Table -->
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Booking ID</th>
+                <th>Hotel</th>
+                <th>Customer</th>
+                <th class="text-end">Payment Amount</th>
+                <th class="text-center">Commission %</th>
+                <th class="text-end">Commission (Admin)</th>
+                <th class="text-end">Net to Owner</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of filteredCommissions; track c.id) {
+                <tr>
+                  <td>
+                    <span class="fw-semibold">#{{ c.bookingId }}</span>
+                  </td>
+                  <td>{{ c.hotelName }}</td>
+                  <td>{{ c.customerName || '—' }}</td>
+                  <td class="text-end">BDT {{ c.paymentAmount || c.bookingTotalPrice | number: '1.2-2' }}</td>
+                  <td class="text-center">
+                    <span class="badge bg-light text-dark">{{ c.commissionRate }}%</span>
+                  </td>
+                  <td class="text-end text-danger fw-bold">
+                    BDT {{ c.adminEarnings | number: '1.2-2' }}
+                  </td>
+                  <td class="text-end text-success fw-bold">
+                    BDT {{ c.hotelOwnerEarnings | number: '1.2-2' }}
+                  </td>
+                  <td>
+                    <span
+                      class="badge"
+                      [class.bg-success]="c.commissionStatus === 'ACTIVE' || c.commissionStatus === 'PAID'"
+                      [class.bg-danger]="c.commissionStatus === 'CANCELLED'"
+                      [class.bg-warning]="c.commissionStatus !== 'ACTIVE' && c.commissionStatus !== 'PAID' && c.commissionStatus !== 'CANCELLED'"
+                    >
+                      {{ c.commissionStatus || 'PENDING' }}
+                    </span>
+                  </td>
+                  <td>{{ c.createdAt | date: 'mediumDate' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <small class="text-muted">
+        Showing {{ (currentPage - 1) * pageSize + 1 }} to
+        {{ currentPage * pageSize > commissions.length ? commissions.length : currentPage * pageSize }}
+        of {{ commissions.length }} entries
+      </small>
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <button class="page-link" (click)="goToPage(currentPage - 1)">Prev</button>
+          </li>
+          @for (p of pages; track p) {
+            <li class="page-item" [class.active]="p === currentPage">
+              <button class="page-link" (click)="goToPage(p)">{{ p }}</button>
+            </li>
+          }
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <button class="page-link" (click)="goToPage(currentPage + 1)">Next</button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  }
+</div>

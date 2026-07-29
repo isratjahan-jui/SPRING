@@ -1,0 +1,167 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">My Reviews</h2>
+    <a routerLink="/customer/bookings" class="btn btn-primary">Write a Review</a>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted mt-2">Loading your reviews...</p>
+    </div>
+  } @else if (reviews.length === 0) {
+    <div class="text-center py-5">
+      <div class="mb-3" style="font-size: 3rem; color: #ccc">&#9733;</div>
+      <h5 class="text-muted">You haven't written any reviews yet</h5>
+      <p class="text-muted">After your stays, share your experience by leaving a review.</p>
+      <a routerLink="/customer/bookings" class="btn btn-primary">View My Bookings</a>
+    </div>
+  } @else {
+    <div class="row">
+      @for (review of reviews; track review.id) {
+        <div class="col-md-6 mb-4">
+          <div class="card review-card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <h5 class="card-title mb-1">{{ review.hotelName }}</h5>
+                  <small class="text-muted">
+                    Booking #{{ review.bookingId }}
+                    @if (review.roomType) {
+                      &middot; {{ review.roomType }}
+                    }
+                  </small>
+                </div>
+                <div class="review-actions">
+                  <button
+                    class="btn btn-sm btn-outline-primary me-1"
+                    (click)="startEdit(review)"
+                    title="Edit review"
+                  >
+                    &#9998;
+                  </button>
+                  <button
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="confirmDelete(review)"
+                    title="Delete review"
+                  >
+                    &#128465;
+                  </button>
+                </div>
+              </div>
+
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge" [ngClass]="{
+                  'bg-success': review.status === 'APPROVED',
+                  'bg-warning text-dark': review.status === 'PENDING',
+                  'bg-danger': review.status === 'REJECTED'
+                }">{{ review.status }}</span>
+                @if (review.editCount > 0) {
+                  <small class="text-muted">Edited {{ review.editCount }}x</small>
+                }
+              </div>
+
+              @if (editingReview?.id === review.id) {
+                <div class="edit-form mt-3">
+                  <div class="mb-2">
+                    <label class="form-label small fw-semibold">Rating</label>
+                    <div class="d-flex gap-1">
+                      @for (star of getStarArray(editRating); track star) {
+                        <button
+                          class="btn btn-sm p-0 border-0 bg-transparent star-btn"
+                          (click)="editRating = star"
+                          [class.star-active]="star <= editRating"
+                        >
+                          &#9733;
+                        </button>
+                      }
+                    </div>
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-semibold">Comment</label>
+                    <textarea
+                      class="form-control"
+                      rows="3"
+                      [(ngModel)]="editComment"
+                    ></textarea>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <button
+                      class="btn btn-sm btn-primary"
+                      (click)="saveEdit()"
+                      [disabled]="saving || !editComment.trim()"
+                    >
+                      @if (saving) {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                      }
+                      Save
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" (click)="cancelEdit()">
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              } @else {
+                <div class="review-rating mb-2">
+                  @for (star of getStarArray(review.rating); track star) {
+                    <span class="star" [class.star-filled]="star <= review.rating">&#9733;</span>
+                  }
+                  <span class="ms-2 text-muted small">{{ review.rating }}/5</span>
+                </div>
+                <p class="card-text review-comment mb-0">{{ review.comment }}</p>
+                @if (review.ownerReply) {
+                  <div class="mt-2 p-3 bg-light rounded border-start border-3 border-primary">
+                    <div class="d-flex justify-content-between">
+                      <strong class="text-primary small">Owner Reply</strong>
+                      <small class="text-muted">{{ review.replyAt | date: 'medium' }}</small>
+                    </div>
+                    <p class="mb-0 mt-1">{{ review.ownerReply }}</p>
+                  </div>
+                }
+              }
+              <small class="text-muted d-block mt-2">{{ review.createdAt | date: 'medium' }}</small>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showDeleteDialog) {
+  <div class="modal-backdrop fade show" style="z-index: 1040"></div>
+  <div class="modal fade show d-block" tabindex="-1" style="z-index: 1050">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Delete Review</h5>
+          <button type="button" class="btn-close" (click)="cancelDelete()"></button>
+        </div>
+        <div class="modal-body">
+          @if (reviewToDelete) {
+            <p>
+              Are you sure you want to delete your review for
+              <strong>{{ reviewToDelete.hotelName }}</strong>?
+            </p>
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="deleteConfirmed()"
+            [disabled]="deleting"
+          >
+            @if (deleting) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
