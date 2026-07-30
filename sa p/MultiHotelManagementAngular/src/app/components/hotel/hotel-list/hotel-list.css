@@ -1,0 +1,27 @@
+.hotel-card {
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+}
+.hotel-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg) !important;
+}
+.wishlist-heart {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  border: none;
+  transition: background 0.2s;
+  z-index: 2;
+}
+.wishlist-heart:hover {
+  background: rgba(0, 0, 0, 0.55);
+}

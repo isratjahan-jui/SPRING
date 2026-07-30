@@ -1,0 +1,414 @@
+<div class="book-page">
+  @if (loading) {
+    <div class="book-loader">
+      <div class="book-loader-spinner"></div>
+      <p>Loading booking details...</p>
+    </div>
+  } @else if (successMessage) {
+    <div class="book-success">
+      <div class="book-success-icon">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <h2>{{ successMessage }}</h2>
+      <p>{{ selectedPaymentMethod === 'OFFLINE' ? 'Booking reserved. Redirecting to your bookings...' : 'Redirecting to payment...' }}</p>
+    </div>
+  } @else {
+
+    <!-- ═══ BACK LINK ═══ -->
+    <a routerLink="/hotels" class="book-back-link">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+      Back to Hotels
+    </a>
+
+    <!-- ═══ HERO ═══ -->
+    <section class="book-hero">
+      @if (hotel?.image) {
+        <div class="book-hero-img">
+          <img [src]="imageBaseUrl + '/hotel/' + hotel!.image" [alt]="hotel!.hotelName" />
+          <div class="book-hero-overlay"></div>
+        </div>
+      }
+      <div class="book-hero-content">
+        <div class="book-hero-badges">
+          @if (hotel?.paymentType) {
+            <span class="book-badge book-badge-payment">
+              {{ hotel!.paymentType === 'FULL_ADVANCE' ? 'Full Advance Required' :
+                 hotel!.paymentType === 'PARTIAL_ADVANCE' ? (hotel!.advancePercentage || 50) + '% Advance' :
+                 'Pay at Hotel' }}
+            </span>
+          }
+        </div>
+        <h1 class="book-hero-title">{{ hotel?.hotelName }}</h1>
+        <p class="book-hero-address">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          {{ hotel?.address }}
+        </p>
+      </div>
+    </section>
+
+    <!-- ═══ MAIN GRID ═══ -->
+    <div class="book-container">
+      <div class="book-grid">
+
+        <!-- LEFT COLUMN -->
+        <div class="book-main">
+
+          <!-- Room Info Card -->
+          @if (room) {
+            <section class="book-section">
+              <div class="book-room-card">
+                <div class="book-room-header">
+                  <div>
+                    <h2 class="book-room-type">{{ room.roomType }}</h2>
+                    <p class="book-room-info">
+                      <span><strong>Adults:</strong> {{ room.adults }}</span>
+                      <span><strong>Children:</strong> {{ room.children }}</span>
+                    </p>
+                  </div>
+                  <div class="book-room-price">
+                    <span class="book-price-amount">BDT {{ room.price }}</span>
+                    <span class="book-price-unit">/night</span>
+                  </div>
+                </div>
+                <div class="book-room-meta">
+                  <span class="book-meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    {{ room.totalRooms }} total rooms
+                  </span>
+                  @if (checkingAvailability) {
+                    <span class="book-meta-item book-meta-loading">
+                      <span class="book-spinner-sm"></span> Checking...
+                    </span>
+                  } @else if (availability) {
+                    <span class="book-meta-item book-meta-available">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      {{ availability.availableForDates }} available
+                    </span>
+                  } @else {
+                    <span class="book-meta-item book-meta-available">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      {{ room.availableRooms }} available
+                    </span>
+                  }
+                </div>
+              </div>
+            </section>
+          }
+
+          <!-- Booking Form -->
+          <section class="book-section">
+            <h2 class="book-section-title">Select Dates & Guests</h2>
+
+            @if (errorMessage) {
+              <div class="book-alert book-alert-error">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                {{ errorMessage }}
+              </div>
+            }
+
+            @if (availability && availability.availableForDates === 0) {
+              <div class="book-alert book-alert-warning">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                No rooms available for the selected dates. Please choose different dates.
+              </div>
+            }
+
+            <div class="book-form-grid">
+              <div class="book-form-field">
+                <label class="book-label">Check-in Date</label>
+                <div class="book-input-wrap">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <input type="date" [(ngModel)]="checkInDate" [min]="today" (ngModelChange)="onDateChange()" />
+                </div>
+              </div>
+              <div class="book-form-field">
+                <label class="book-label">Check-out Date</label>
+                <div class="book-input-wrap">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <input type="date" [(ngModel)]="checkOutDate" [min]="minCheckOut" (ngModelChange)="onDateChange()" />
+                </div>
+              </div>
+            </div>
+
+            <div class="book-form-grid">
+              <div class="book-form-field">
+                <label class="book-label">Rooms</label>
+                <div class="book-qty">
+                  <button type="button" class="book-qty-btn" (click)="numberOfRooms = numberOfRooms - 1" [disabled]="numberOfRooms <= 1">−</button>
+                  <input type="number" [(ngModel)]="numberOfRooms" min="1" [max]="maxRooms" />
+                  <button type="button" class="book-qty-btn" (click)="numberOfRooms = numberOfRooms + 1" [disabled]="numberOfRooms >= maxRooms">+</button>
+                </div>
+                @if (checkingAvailability) {
+                  <small class="book-field-hint"><span class="book-spinner-sm"></span> Checking availability...</small>
+                } @else if (availability) {
+                  <small class="book-field-hint book-field-hint-success">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    {{ availability.availableForDates }} room(s) available
+                  </small>
+                } @else if (room) {
+                  <small class="book-field-hint">{{ room.availableRooms }} room(s) available</small>
+                }
+              </div>
+              <div class="book-form-field">
+                <label class="book-label">Total Guests</label>
+                <div class="book-qty">
+                  <button type="button" class="book-qty-btn" (click)="totalGuests = totalGuests - 1">−</button>
+                  <input type="number" [(ngModel)]="totalGuests" min="1" />
+                  <button type="button" class="book-qty-btn" (click)="totalGuests = totalGuests + 1">+</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Extra Services -->
+          @if (extraServices.length > 0) {
+            <section class="book-section">
+              <h2 class="book-section-title">Extra Services</h2>
+              <div class="book-services-list">
+                @for (s of extraServices; track s.id) {
+                  <label class="book-service-item">
+                    <input type="checkbox" [checked]="selectedExtraServiceIds.has(s.id)" (change)="toggleExtraService(s.id)" />
+                    <span class="book-service-check"></span>
+                    <div class="book-service-info">
+                      <span class="book-service-name">{{ s.serviceName }}</span>
+                      @if (s.description) {
+                        <span class="book-service-desc">{{ s.description }}</span>
+                      }
+                    </div>
+                    <span class="book-service-price">BDT {{ s.price }}</span>
+                  </label>
+                }
+              </div>
+            </section>
+          }
+
+          <!-- Food Items -->
+          @if (foodItems.length > 0) {
+            <section class="book-section">
+              <h2 class="book-section-title">Food & Dining</h2>
+              <div class="book-services-list">
+                @for (f of foodItems; track f.id) {
+                  <label class="book-service-item">
+                    <input type="checkbox" [checked]="selectedFoodItemIds.has(f.id)" (change)="toggleFoodItem(f.id)" />
+                    <span class="book-service-check"></span>
+                    <div class="book-service-info">
+                      <span class="book-service-name">{{ f.itemName }}</span>
+                      @if (f.description) {
+                        <span class="book-service-desc">{{ f.description }}</span>
+                      }
+                    </div>
+                    <span class="book-service-price">BDT {{ f.foodPrice }}</span>
+                  </label>
+                }
+              </div>
+            </section>
+          }
+
+          <!-- Deals -->
+          @if (appliedDeal) {
+            <div class="book-deal-applied">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+              <span><strong>Deal Applied:</strong> {{ appliedDeal.dealTitle }} —
+                @if (appliedDeal.discountPercent) { {{ appliedDeal.discountPercent }}% OFF }
+                @else if (appliedDeal.discountAmount) { BDT {{ appliedDeal.discountAmount }} OFF }
+              </span>
+            </div>
+          }
+
+          @if (deals.length > 0 && !appliedDeal) {
+            <div class="book-section">
+              <h2 class="book-section-title">Available Deals</h2>
+              <div class="book-deal-list">
+                @for (deal of deals; track deal.id) {
+                  <div class="book-deal-item">
+                    <span class="book-deal-badge">
+                      @if (deal.discountPercent) { -{{ deal.discountPercent }}% }
+                      @else if (deal.discountAmount) { -BDT {{ deal.discountAmount }} }
+                    </span>
+                    <div>
+                      <span class="book-deal-title">{{ deal.dealTitle }}</span>
+                      <span class="book-deal-valid">{{ deal.startDate | date: 'MMM d' }} — {{ deal.endDate | date: 'MMM d, yyyy' }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Coupon -->
+          @if (deals.length > 0 || appliedDeal) {
+            <section class="book-section">
+              <h2 class="book-section-title">Coupon Code</h2>
+              @if (couponApplied) {
+                <div class="book-alert book-alert-success">
+                  Coupon applied! +{{ couponDiscount }}% discount
+                  <button class="book-link-btn" (click)="removeCoupon()">Remove</button>
+                </div>
+              }
+              @if (couponError) {
+                <div class="book-alert book-alert-error">{{ couponError }}</div>
+              }
+              <div class="book-coupon-row">
+                <input type="text" class="book-input" placeholder="Enter coupon code" [(ngModel)]="couponCode" [disabled]="couponApplied" />
+                <button class="book-btn book-btn-outline" (click)="applyCouponCode()" [disabled]="!couponCode.trim() || applyingCoupon || couponApplied">
+                  @if (applyingCoupon) {
+                    <span class="book-spinner-sm"></span>
+                  } @else { Apply }
+                </button>
+              </div>
+            </section>
+          }
+
+          <!-- Payment Info -->
+          @if (hotelDetails || hotel) {
+            <section class="book-section">
+              <h2 class="book-section-title">Payment Information</h2>
+              <div class="book-payment-info">
+                @if (hotel?.paymentType === 'CASH_ON_STAY') {
+                  <p class="book-payment-text">
+                    <strong>Cash on Stay:</strong> No advance payment required. Pay full amount at hotel during check-in.
+                  </p>
+                } @else if (hotel?.paymentType === 'PARTIAL_ADVANCE') {
+                  <p class="book-payment-text">
+                    <strong>Partial Advance:</strong> {{ hotel!.advancePercentage || 50 }}% of total (BDT {{ advanceAmount }}) required at booking. Remaining BDT {{ dueAfterAdvance }} due at hotel.
+                  </p>
+                } @else {
+                  <p class="book-payment-text">
+                    <strong>Full Advance:</strong> 100% payment required at booking.
+                  </p>
+                }
+                @if (selectedPaymentMethod === 'ONLINE') {
+                  <p class="book-payment-sub">You will be redirected to SSLCommerz to complete online payment.</p>
+                } @else if (hotel?.paymentType !== 'CASH_ON_STAY') {
+                  <p class="book-payment-sub">Offline booking: Payment due at hotel.</p>
+                }
+                @if (hotelDetails?.cancellationDepositRefundable === 'FULL_REFUND') {
+                  <p class="book-payment-sub book-text-success">Deposit is fully refundable on early cancellation.</p>
+                } @else if (hotelDetails?.cancellationDepositRefundable === 'PARTIAL_REFUND') {
+                  <p class="book-payment-sub book-text-warning">Partial refund on cancellation (50% refund, 50% retained as commission).</p>
+                } @else if (hotelDetails?.cancellationDepositRefundable === 'CONDITIONAL_REFUND') {
+                  <p class="book-payment-sub book-text-info">Refund depends on timing: Early cancel = full refund, Late cancel = partial.</p>
+                } @else if (hotelDetails?.cancellationDepositRefundable === 'NON_REFUNDABLE') {
+                  <p class="book-payment-sub book-text-danger">Deposit is non-refundable on cancellation.</p>
+                }
+              </div>
+            </section>
+          }
+
+          <!-- Payment Method -->
+          <section class="book-section">
+            <h2 class="book-section-title">Payment Method</h2>
+            <div class="book-payment-methods">
+              <label class="book-payment-option">
+                <input type="radio" value="ONLINE" [(ngModel)]="selectedPaymentMethod" />
+                <span class="book-payment-radio"></span>
+                <div class="book-payment-label">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                  <span>Online — SSLCommerz</span>
+                </div>
+              </label>
+              <label class="book-payment-option">
+                <input type="radio" value="OFFLINE" [(ngModel)]="selectedPaymentMethod" />
+                <span class="book-payment-radio"></span>
+                <div class="book-payment-label">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  <span>Offline — Pay at hotel</span>
+                </div>
+              </label>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        @if (checkInDate && checkOutDate && room) {
+          <aside class="book-sidebar">
+            <div class="book-sidebar-card">
+              <h3 class="book-sidebar-title">Price Summary</h3>
+
+              <div class="book-price-row">
+                <span>Room ({{ calculateNights() }} night{{ calculateNights() > 1 ? 's' : '' }} × {{ numberOfRooms }} room{{ numberOfRooms > 1 ? 's' : '' }} × BDT {{ room.price }}/night)</span>
+                <span>BDT {{ roomSubtotal }}</span>
+              </div>
+
+              @if (effectiveDiscountRate > 0) {
+                <div class="book-price-row book-price-discount">
+                  <span>Discount ({{ effectiveDiscountRate }}%)</span>
+                  <span>-BDT {{ discountAmount }}</span>
+                </div>
+              }
+
+              @if (extraServicesTotal > 0) {
+                <div class="book-price-row book-price-accent">
+                  <span>Extra Services</span>
+                  <span>+BDT {{ extraServicesTotal }}</span>
+                </div>
+              }
+
+              @if (foodItemsTotal > 0) {
+                <div class="book-price-row book-price-accent">
+                  <span>Food Items</span>
+                  <span>+BDT {{ foodItemsTotal }}</span>
+                </div>
+              }
+
+              <hr class="book-divider" />
+
+              <div class="book-price-row book-price-total">
+                <strong>Estimated Total</strong>
+                <strong>BDT {{ estimatedTotal }}</strong>
+              </div>
+
+              @if (hotel?.paymentType === 'CASH_ON_STAY') {
+                <div class="book-price-row book-price-info">
+                  <span>Pay at Hotel</span>
+                  <span>BDT {{ estimatedTotal }}</span>
+                </div>
+              } @else if (advanceAmount > 0) {
+                <div class="book-price-row book-price-info">
+                  <span>
+                    {{ hotel?.paymentType === 'PARTIAL_ADVANCE' ? 'Advance (' + (hotel!.advancePercentage || 50) + '%)' : 'Advance Payment' }}
+                  </span>
+                  <span>BDT {{ advanceAmount }}</span>
+                </div>
+                <div class="book-price-row book-price-due">
+                  <span>Due at Hotel</span>
+                  <span>BDT {{ dueAfterAdvance }}</span>
+                </div>
+              }
+
+              <button class="book-book-btn" (click)="submit()" [disabled]="submitting || !customerId">
+                @if (submitting) {
+                  <span class="book-spinner-sm"></span> Processing...
+                } @else {
+                  Confirm Booking
+                }
+              </button>
+
+              @if (!customerId) {
+                <p class="book-auth-hint">Please log in as a customer to book.</p>
+              }
+
+              <div class="book-trust">
+                <div class="book-trust-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <span>Secure booking</span>
+                </div>
+                <div class="book-trust-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Best price guarantee</span>
+                </div>
+                <div class="book-trust-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span>Free cancellation</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+        }
+
+      </div>
+    </div>
+
+  }
+</div>

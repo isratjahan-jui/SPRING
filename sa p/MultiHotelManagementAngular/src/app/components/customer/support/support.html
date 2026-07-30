@@ -1,0 +1,357 @@
+<div class="support-page">
+  <div class="support-header">
+    <div class="header-content">
+      <h1>Help Center</h1>
+      <p>We're here to help. Submit a ticket and our team will get back to you.</p>
+    </div>
+    <button class="btn-new-ticket" (click)="openForm()">
+      <span class="btn-icon">+</span>
+      New Support Ticket
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading your tickets...</p>
+    </div>
+  } @else {
+    @if (successMsg) {
+      <div class="alert-success-custom">
+        <span class="alert-icon">&#10003;</span>
+        {{ successMsg }}
+      </div>
+    }
+    @if (errorMsg) {
+      <div class="alert-error-custom">
+        <span class="alert-icon">&#10006;</span>
+        {{ errorMsg }}
+      </div>
+    }
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-number">{{ tickets.length }}</span>
+        <span class="stat-label">Total Tickets</span>
+      </div>
+      <div class="stat-card stat-pending">
+        <span class="stat-number">{{ tickets.filter((t) => t.status === 'PENDING').length }}</span>
+        <span class="stat-label">Awaiting Response</span>
+      </div>
+      <div class="stat-card stat-progress">
+        <span class="stat-number">{{
+          tickets.filter((t) => t.status === 'IN_PROGRESS').length
+        }}</span>
+        <span class="stat-label">In Progress</span>
+      </div>
+      <div class="stat-card stat-resolved">
+        <span class="stat-number">{{
+          tickets.filter((t) => t.status === 'RESOLVED' || t.status === 'CLOSED').length
+        }}</span>
+        <span class="stat-label">Resolved</span>
+      </div>
+    </div>
+
+    <div class="filters-bar">
+      <div class="search-box">
+        <span class="search-icon">&#128269;</span>
+        <input
+          type="text"
+          placeholder="Search tickets..."
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onFilterChange()"
+        />
+      </div>
+      <div class="filter-group">
+        <select [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()">
+          <option value="">All Statuses</option>
+          <option value="PENDING">Awaiting Response</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="ESCALATED">Escalated</option>
+          <option value="RESOLVED">Resolved</option>
+          <option value="CLOSED">Closed</option>
+        </select>
+        <select [(ngModel)]="filterPriority" (ngModelChange)="onFilterChange()">
+          <option value="">All Priorities</option>
+          <option value="URGENT">Urgent</option>
+          <option value="HIGH">High</option>
+          <option value="MEDIUM">Medium</option>
+          <option value="LOW">Low</option>
+        </select>
+      </div>
+    </div>
+
+    @if (filteredTickets.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">&#128222;</div>
+        <h3>No support tickets</h3>
+        <p>Need help? Create a support ticket and our team will assist you.</p>
+        <button class="btn-new-ticket" (click)="openForm()">+ Create Your First Ticket</button>
+      </div>
+    } @else {
+      <div class="tickets-list">
+        @for (ticket of filteredTickets; track ticket.id) {
+          <div class="ticket-card" (click)="openDetail(ticket)">
+            <div class="ticket-left">
+              <div class="ticket-id">#{{ ticket.id }}</div>
+              <div class="ticket-main">
+                <h4 class="ticket-subject">{{ ticket.subject }}</h4>
+                <div class="ticket-meta">
+                  <span class="meta-category">
+                    <span
+                      [innerHTML]="categoryIcons[ticket.category || 'OTHER'] || '&#128221;'"
+                    ></span>
+                    {{ getCategoryLabel(ticket.category || '') }}
+                  </span>
+                  @if (ticket.hotelName) {
+                    <span class="meta-hotel">&#127976; {{ ticket.hotelName }}</span>
+                  }
+                  <span class="meta-time">{{ getTimeAgo(ticket.createdAt) }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="ticket-right">
+              <span class="status-badge {{ statusClass(ticket.status) }}">
+                {{ getStatusLabel(ticket.status) }}
+              </span>
+              <span class="priority-badge {{ priorityClass(ticket.priority) }}">
+                {{ ticket.priority }}
+              </span>
+              <div class="ticket-agent">
+                @if (ticket.agentName) {
+                  <span class="agent-assigned">&#128100; {{ ticket.agentName }}</span>
+                } @else {
+                  <span class="agent-pending">Awaiting assignment</span>
+                }
+              </div>
+              <div class="ticket-replies">
+                <span class="reply-count">{{ ticket.replyCount }}</span> replies
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>
+
+@if (showForm) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal fade show d-block" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content custom-modal">
+        <div class="modal-header-custom">
+          <h5 class="modal-title">Submit a Support Ticket</h5>
+          <button type="button" class="btn-close-custom" (click)="closeForm()">&times;</button>
+        </div>
+        <div class="modal-body-custom">
+          <div class="form-group">
+            <label class="form-label">Subject <span class="required">*</span></label>
+            <input
+              type="text"
+              class="form-input"
+              [(ngModel)]="form.subject"
+              placeholder="Brief description of your issue"
+            />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-select" [(ngModel)]="form.category">
+                <option value="">General Inquiry</option>
+                <option value="BOOKING">Booking Issue</option>
+                <option value="PAYMENT">Payment Problem</option>
+                <option value="CANCELATION">Cancellation</option>
+                <option value="REFUND">Refund Request</option>
+                <option value="HOTEL_SERVICE">Hotel Service</option>
+                <option value="ROOM">Room Issue</option>
+                <option value="STAFF">Staff Behavior</option>
+                <option value="BILLING">Billing Dispute</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Priority</label>
+              <select class="form-select" [(ngModel)]="form.priority">
+                <option value="LOW">Low - General question</option>
+                <option value="MEDIUM">Medium - Need assistance</option>
+                <option value="HIGH">High - Urgent issue</option>
+                <option value="URGENT">Urgent - Immediate attention</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Related Hotel (optional)</label>
+            <select class="form-select" [(ngModel)]="form.hotelId">
+              <option value="">Select a hotel (if applicable)</option>
+              @for (hotel of hotels; track hotel.id) {
+                <option [value]="hotel.id">{{ hotel.hotelName }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description <span class="required">*</span></label>
+            <textarea
+              class="form-textarea"
+              rows="5"
+              [(ngModel)]="form.description"
+              placeholder="Please describe your issue in detail. Include any booking references, dates, or other relevant information."
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer-custom">
+          <button type="button" class="btn-cancel" (click)="closeForm()">Cancel</button>
+          <button
+            type="button"
+            class="btn-submit"
+            (click)="submitTicket()"
+            [disabled]="submitting || !form.subject.trim() || !form.description.trim()"
+          >
+            @if (submitting) {
+              <span class="spinner-sm"></span>
+              Submitting...
+            } @else {
+              Submit Ticket
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showDetailModal) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal fade show d-block" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content custom-modal modal-detail">
+        <div class="modal-header-custom">
+          <div>
+            <h5 class="modal-title">Ticket #{{ selectedTicket?.id }}</h5>
+            <p class="modal-subtitle">{{ selectedTicket?.subject }}</p>
+          </div>
+          <button type="button" class="btn-close-custom" (click)="closeDetailModal()">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body-custom">
+          <div class="detail-info-grid">
+            <div class="detail-item">
+              <span class="detail-label">Status</span>
+              <span class="status-badge {{ statusClass(selectedTicket?.status || '') }}">
+                {{ getStatusLabel(selectedTicket?.status || '') }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Priority</span>
+              <span class="priority-badge {{ priorityClass(selectedTicket?.priority || '') }}">
+                {{ selectedTicket?.priority }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Category</span>
+              <span class="detail-value">{{
+                getCategoryLabel(selectedTicket?.category || '')
+              }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Assigned To</span>
+              <span class="detail-value">{{
+                selectedTicket?.agentName || 'Awaiting assignment'
+              }}</span>
+            </div>
+          </div>
+          @if (selectedTicket?.hotelName) {
+            <div class="detail-hotel">
+              <span class="detail-label">Related Hotel</span>
+              <span class="detail-value">&#127976; {{ selectedTicket?.hotelName }}</span>
+            </div>
+          }
+          <div class="detail-description">
+            <span class="detail-label">Description</span>
+            <p>{{ selectedTicket?.description }}</p>
+          </div>
+
+          <div class="conversation-section">
+            <h6 class="conversation-title">Conversation</h6>
+            @if (replies.length === 0) {
+              <div class="no-replies">
+                <p>No replies yet. Our team will get back to you soon.</p>
+              </div>
+            } @else {
+              <div class="conversation-list">
+                @for (reply of replies; track reply.id) {
+                  <div
+                    class="conversation-message"
+                    [class.staff-message]="
+                      reply.replierRole === 'ADMIN' || reply.replierRole === 'HOTEL_OWNER'
+                    "
+                  >
+                    <div class="message-header">
+                      <div class="message-author">
+                        <span class="author-avatar">
+                          {{
+                            reply.replierRole === 'ADMIN'
+                              ? 'A'
+                              : reply.replierRole === 'HOTEL_OWNER'
+                                ? 'O'
+                                : 'C'
+                          }}
+                        </span>
+                        <span class="author-name">{{ reply.replierName }}</span>
+                        <span class="author-role">{{
+                          reply.replierRole === 'ADMIN'
+                            ? 'Support Team'
+                            : reply.replierRole === 'HOTEL_OWNER'
+                              ? 'Hotel Staff'
+                              : 'You'
+                        }}</span>
+                      </div>
+                      <span class="message-time">{{ getTimeAgo(reply.createdAt) }}</span>
+                    </div>
+                    <p class="message-text">{{ reply.message }}</p>
+                  </div>
+                }
+              </div>
+            }
+            @if (selectedTicket?.status !== 'CLOSED' && selectedTicket?.status !== 'RESOLVED') {
+              <div class="reply-input">
+                <input
+                  type="text"
+                  class="form-input"
+                  placeholder="Type your reply..."
+                  [(ngModel)]="replyMessage"
+                  (keyup.enter)="sendReply()"
+                />
+                <button
+                  class="btn-send"
+                  (click)="sendReply()"
+                  [disabled]="sendingReply || !replyMessage.trim()"
+                >
+                  @if (sendingReply) {
+                    <span class="spinner-sm"></span>
+                  } @else {
+                    Send
+                  }
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="modal-footer-custom">
+          @if (selectedTicket?.status !== 'CLOSED' && selectedTicket?.status !== 'RESOLVED') {
+            <button class="btn-close-ticket" (click)="closeTicket(selectedTicket!.id)">
+              Close Ticket
+            </button>
+          }
+          @if (selectedTicket?.status === 'CLOSED' || selectedTicket?.status === 'RESOLVED') {
+            <button class="btn-reopen" (click)="reopenTicket(selectedTicket!.id)">
+              &#8634; Reopen Ticket
+            </button>
+          }
+          <button class="btn-cancel" (click)="closeDetailModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

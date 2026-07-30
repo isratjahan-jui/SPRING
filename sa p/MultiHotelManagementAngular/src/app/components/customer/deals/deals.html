@@ -1,0 +1,79 @@
+<div class="container mt-4">
+  <h2 class="mb-3">Deals & Offers</h2>
+
+  <!-- Filter Bar -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body py-3">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label fw-semibold small">Hotel</label>
+          <select class="form-select" [(ngModel)]="selectedHotelId" (ngModelChange)="applyFilters()">
+            <option [ngValue]="null">All Hotels</option>
+            @for (hotel of hotels; track hotel.id) {
+              <option [ngValue]="hotel.id">{{ hotel.hotelName }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-5">
+          <label class="form-label fw-semibold small">Search</label>
+          <input type="text" class="form-control" placeholder="Search by title, hotel, description..."
+            [(ngModel)]="searchText" (ngModelChange)="applyFilters()" />
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">Clear Filters</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+      <p class="text-muted mt-2">Loading deals...</p>
+    </div>
+  } @else if (filteredDeals.length === 0) {
+    <div class="text-center py-5">
+      <div class="text-muted mb-3" style="font-size: 3rem">&#127873;</div>
+      <h5>No Deals Found</h5>
+      <p class="text-muted">
+        @if (deals.length === 0) {
+          No active deals available right now. Check back later!
+        } @else {
+          No deals match your current filters. Try adjusting them.
+        }
+      </p>
+    </div>
+  } @else {
+    <div class="row">
+      @for (deal of filteredDeals; track deal.id) {
+        <div class="col-md-4 mb-3">
+          <div class="card h-100 border-primary shadow-sm">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="card-title mb-0">{{ deal.dealTitle }}</h5>
+                <span class="badge bg-danger fs-6">
+                  @if (deal.discountPercent) {
+                    {{ deal.discountPercent }}% OFF
+                  } @else if (deal.discountAmount) {
+                    BDT {{ deal.discountAmount }} OFF
+                  }
+                </span>
+              </div>
+              @if (deal.description) {
+                <p class="card-text text-muted small">{{ deal.description }}</p>
+              }
+              <p class="card-text small mb-1"><strong>Hotel:</strong> {{ deal.hotelName }}</p>
+              @if (deal.roomType) {
+                <p class="card-text small mb-1"><strong>Room:</strong> {{ deal.roomType }}</p>
+              }
+              <p class="card-text small text-muted">
+                Valid: {{ deal.startDate | date: 'mediumDate' }} - {{ deal.endDate | date: 'mediumDate' }}
+              </p>
+              <a [routerLink]="['/hotels']" class="btn btn-sm btn-outline-primary">Browse Hotels</a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

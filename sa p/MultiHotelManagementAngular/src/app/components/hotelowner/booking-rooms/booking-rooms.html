@@ -1,0 +1,192 @@
+<div class="container-fluid py-3">
+  <h3 class="mb-3">Booking Rooms</h3>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted mt-2">Loading booking rooms...</p>
+    </div>
+  } @else {
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+      <div class="col-md-3 col-sm-6 mb-2">
+        <div class="card summary-card bg-primary text-white">
+          <div class="card-body text-center py-3">
+            <h6 class="card-title mb-1">Total Hotels</h6>
+            <h2 class="mb-0">{{ hotels.length }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 mb-2">
+        <div class="card summary-card bg-success text-white">
+          <div class="card-body text-center py-3">
+            <h6 class="card-title mb-1">Rooms Booked</h6>
+            <h2 class="mb-0">{{ totalRooms }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 mb-2">
+        <div class="card summary-card bg-info text-white">
+          <div class="card-body text-center py-3">
+            <h6 class="card-title mb-1">Booking Entries</h6>
+            <h2 class="mb-0">{{ filteredBookingRooms.length }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 mb-2">
+        <div class="card summary-card bg-warning text-dark">
+          <div class="card-body text-center py-3">
+            <h6 class="card-title mb-1">Total Revenue</h6>
+            <h2 class="mb-0">&#2547;{{ totalPrice | number: '1.0-0' }}</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-body py-3">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3 col-sm-6">
+            <label class="form-label fw-semibold small">Hotel</label>
+            <select class="form-select" [(ngModel)]="selectedHotelId" (ngModelChange)="onFilterChange()">
+              <option [ngValue]="null">All Hotels</option>
+              @for (hotel of hotels; track hotel.id) {
+                <option [ngValue]="hotel.id">{{ hotel.hotelName }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-3 col-sm-6">
+            <label class="form-label fw-semibold small">Status</label>
+            <select class="form-select" [(ngModel)]="selectedStatus" (ngModelChange)="onFilterChange()">
+              <option value="">All Statuses</option>
+              @for (status of statusOptions; track status) {
+                <option [value]="status">{{ status }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-4 col-sm-8">
+            <label class="form-label fw-semibold small">Search</label>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Search by customer, room type, hotel, booking ID..."
+              [(ngModel)]="searchText"
+              (ngModelChange)="onFilterChange()"
+            />
+          </div>
+          <div class="col-md-2 col-sm-4">
+            <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+              Clear Filters
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Table -->
+    @if (filteredBookingRooms.length === 0) {
+      <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+          <div class="text-muted mb-3" style="font-size: 3rem">&#128203;</div>
+          <h5>No Booking Rooms Found</h5>
+          <p class="text-muted">
+            @if (allBookingRooms.length === 0) {
+              No bookings exist for your hotels yet.
+            } @else {
+              No results match your current filters. Try adjusting them.
+            }
+          </p>
+        </div>
+      </div>
+    } @else {
+      <div class="card shadow-sm">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-dark">
+                <tr>
+                  <th>#</th>
+                  <th>Booking</th>
+                  <th>Customer</th>
+                  <th>Hotel</th>
+                  <th>Room Type</th>
+                  <th class="text-center">Rooms</th>
+                  <th class="text-center">Adults</th>
+                  <th class="text-center">Children</th>
+                  <th>Room Price</th>
+                  <th>Total Price</th>
+                  <th>Check-In</th>
+                  <th>Check-Out</th>
+                  <th>Status</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (br of filteredBookingRooms; track br.id; let i = $index) {
+                  <tr [class.table-active]="editingId === br.id">
+                    <td>{{ i + 1 }}</td>
+                    <td><strong>#{{ br.bookingId }}</strong></td>
+                    <td>{{ br.customerName || '—' }}</td>
+                    <td>
+                      <span class="text-truncate d-inline-block" style="max-width: 140px" [title]="br.hotelName">
+                        {{ br.hotelName || '—' }}
+                      </span>
+                    </td>
+                    <td>{{ br.roomType || '—' }}</td>
+
+                    @if (editingId === br.id) {
+                      <td class="text-center">
+                        <input type="number" class="form-control form-control-sm" style="width:60px"
+                          [(ngModel)]="editForm.numberOfRooms" min="1" />
+                      </td>
+                      <td class="text-center">
+                        <input type="number" class="form-control form-control-sm" style="width:60px"
+                          [(ngModel)]="editForm.adults" min="1" />
+                      </td>
+                      <td class="text-center">
+                        <input type="number" class="form-control form-control-sm" style="width:60px"
+                          [(ngModel)]="editForm.children" min="0" />
+                      </td>
+                    } @else {
+                      <td class="text-center"><span class="badge bg-secondary">{{ br.numberOfRooms }}</span></td>
+                      <td class="text-center">{{ br.adults }}</td>
+                      <td class="text-center">{{ br.children }}</td>
+                    }
+
+                    <td>&#2547;{{ br.roomPrice | number: '1.0-0' }}</td>
+                    <td><strong>&#2547;{{ br.price | number: '1.0-0' }}</strong></td>
+                    <td><small>{{ formatDate(br.checkIn) }}</small></td>
+                    <td><small>{{ formatDate(br.checkOut) }}</small></td>
+                    <td>
+                      <span class="badge {{ getStatusClass(br.bookingStatus) }}">
+                        {{ br.bookingStatus === 'NO_SHOW' ? 'No Show' : br.bookingStatus }}
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      @if (editingId === br.id) {
+                        <button class="btn btn-sm btn-success me-1" (click)="saveEdit(br.id)">Save</button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="cancelEdit()">Cancel</button>
+                      } @else {
+                        <button class="btn btn-sm btn-outline-primary me-1" (click)="startEdit(br)"
+                          title="Edit rooms/adults/children">
+                          <i class="bi bi-pencil"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" (click)="deleteBookingRoom(br.id)"
+                          title="Delete this entry">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

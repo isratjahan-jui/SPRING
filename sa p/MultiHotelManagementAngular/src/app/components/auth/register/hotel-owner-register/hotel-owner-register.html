@@ -1,0 +1,155 @@
+<div class="auth-page">
+  <div class="auth-left">
+    <div class="auth-brand">
+      <span class="auth-brand-icon">T</span>
+      <span class="auth-brand-text">Trip<span>Nest</span></span>
+    </div>
+    <div class="auth-hero-content">
+      <h1>Grow your hotel business</h1>
+      <p>Join TripNest as a hotel owner and reach thousands of travelers.</p>
+      <div class="auth-features">
+        <div class="auth-feature">
+          <span class="auth-feature-icon">&#128200;</span>
+          <span>Increase bookings</span>
+        </div>
+        <div class="auth-feature">
+          <span class="auth-feature-icon">&#128176;</span>
+          <span>Manage payments easily</span>
+        </div>
+        <div class="auth-feature">
+          <span class="auth-feature-icon">&#128295;</span>
+          <span>Full management tools</span>
+        </div>
+      </div>
+    </div>
+    <div class="auth-left-footer">
+      &copy; 2026 TripNest. All rights reserved.
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-form-wrapper">
+      <div class="auth-form-header">
+        <h2>Create hotel owner account</h2>
+        <p>Set up your business profile to start listing hotels</p>
+      </div>
+
+      <form #registerForm="ngForm" (ngSubmit)="registerForm.valid && saveOwner()" novalidate>
+        <div class="auth-field">
+          <label class="auth-label">Full name</label>
+          <input
+            type="text"
+            class="auth-input"
+            [(ngModel)]="dto.name"
+            name="name"
+            #nameRef="ngModel"
+            required
+            placeholder="Your full name"
+          />
+          @if (nameRef.invalid && nameRef.touched) {
+            <span class="auth-field-error">Name is required.</span>
+          }
+        </div>
+
+        <div class="auth-row-2">
+          <div class="auth-field">
+            <label class="auth-label">Email address</label>
+            <input
+              type="email"
+              class="auth-input"
+              [(ngModel)]="dto.email"
+              name="email"
+              #emailRef="ngModel"
+              required
+              email
+              placeholder="you@business.com"
+            />
+            @if (emailRef.invalid && emailRef.touched) {
+              <span class="auth-field-error">Enter a valid email.</span>
+            }
+          </div>
+
+          <div class="auth-field">
+            <label class="auth-label">Phone number</label>
+            <input
+              type="tel"
+              class="auth-input"
+              [(ngModel)]="dto.phone"
+              name="phone"
+              #phoneRef="ngModel"
+              required
+              placeholder="+880 1XXX-XXXXXX"
+            />
+            @if (phoneRef.invalid && phoneRef.touched) {
+              <span class="auth-field-error">Phone is required.</span>
+            }
+          </div>
+        </div>
+
+        <div class="auth-row-2">
+          <div class="auth-field">
+            <label class="auth-label">Password</label>
+            <div class="auth-password-wrap">
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                class="auth-input"
+                [(ngModel)]="dto.password"
+                name="password"
+                #passwordRef="ngModel"
+                required
+                minlength="6"
+                placeholder="Min 6 characters"
+              />
+              <button
+                type="button"
+                class="auth-password-toggle"
+                (click)="showPassword = !showPassword"
+              >
+                {{ showPassword ? '&#128065;' : '&#128064;' }}
+              </button>
+            </div>
+            @if (passwordRef.invalid && passwordRef.touched) {
+              <span class="auth-field-error">Min 6 characters required.</span>
+            }
+          </div>
+
+          <div class="auth-field">
+            <label class="auth-label">Confirm password</label>
+            <input
+              type="password"
+              class="auth-input"
+              [(ngModel)]="confirmPassword"
+              name="confirmPassword"
+              #confirmRef="ngModel"
+              required
+              placeholder="Re-enter password"
+            />
+            @if (confirmRef.touched && confirmPassword && dto.password !== confirmPassword) {
+              <span class="auth-field-error">Passwords do not match.</span>
+            }
+          </div>
+        </div>
+
+        <button
+          class="auth-submit"
+          type="submit"
+          [disabled]="loading || dto.password !== confirmPassword"
+        >
+          @if (loading) {
+            <span class="auth-spinner"></span>
+          }
+          {{ loading ? 'Creating account...' : 'Create account' }}
+        </button>
+      </form>
+
+      <div class="auth-divider">
+        <span>or</span>
+      </div>
+
+      <p class="auth-switch">
+        Already have an account?
+        <a routerLink="/login" class="auth-link-bold">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,119 @@
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Hotel Reviews</h3>
+    <span class="badge bg-info fs-6">{{ filteredReviews.length }} reviews</span>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label fw-bold">Select Hotel</label>
+    <select [(ngModel)]="selectedHotelId" (change)="onHotelChange()" class="form-select">
+      <option [ngValue]="0" disabled>-- Choose a hotel --</option>
+      @for (h of hotels; track h.id) {
+        <option [ngValue]="h.id">{{ h.hotelName }}</option>
+      }
+    </select>
+  </div>
+
+  @if (selectedHotelId) {
+    <div class="row mb-3 g-2">
+      <div class="col-md-3">
+        <select class="form-select" [(ngModel)]="filterStatus" (change)="onSearch()">
+          <option value="ALL">All Status</option>
+          <option value="APPROVED">Approved</option>
+          <option value="PENDING">Pending</option>
+          <option value="REJECTED">Rejected</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Search by customer, comment..."
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()"
+        />
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted mt-2">Loading reviews...</p>
+      </div>
+    } @else if (filteredReviews.length === 0) {
+      <div class="text-center py-5">
+        <p class="text-muted fs-5">No reviews found for this hotel.</p>
+      </div>
+    } @else {
+      @for (review of filteredReviews; track review.id) {
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h6 class="mb-1">
+                  <strong>{{ review.customerName }}</strong>
+                  <small class="text-muted ms-2">Booking #{{ review.bookingId }}</small>
+                </h6>
+                <div class="mb-1">
+                  @for (s of getStars(review.rating); track s) {
+                    <span class="text-warning" [class.text-muted]="s > review.rating">&#9733;</span>
+                  }
+                  <small class="text-muted ms-1">{{ review.rating }}/5</small>
+                </div>
+              </div>
+              <div class="text-end">
+                <span class="badge" [ngClass]="getStatusBadge(review.status)">{{ review.status }}</span>
+                <div><small class="text-muted">{{ review.createdAt | date: 'dd MMM yyyy, h:mm a' }}</small></div>
+              </div>
+            </div>
+
+            <p class="mb-2">{{ review.comment }}</p>
+
+            @if (review.roomType) {
+              <small class="text-muted">Room: {{ review.roomType }}</small>
+            }
+
+            @if (review.ownerReply) {
+              <div class="mt-2 p-3 bg-light rounded border-start border-3 border-primary">
+                <div class="d-flex justify-content-between">
+                  <strong class="text-primary small">Owner Reply</strong>
+                  <small class="text-muted">{{ review.replyAt | date: 'dd MMM yyyy, h:mm a' }}</small>
+                </div>
+                <p class="mb-0 mt-1">{{ review.ownerReply }}</p>
+              </div>
+            } @else {
+              <div class="mt-3">
+                <div class="input-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Write a reply..."
+                    [(ngModel)]="replyText[review.id]"
+                    (keyup.enter)="submitReply(review.id)"
+                  />
+                  <button
+                    class="btn btn-primary"
+                    (click)="submitReply(review.id)"
+                    [disabled]="submittingReply[review.id] || !replyText[review.id]?.trim()"
+                  >
+                    @if (submittingReply[review.id]) {
+                      <span class="spinner-border spinner-border-sm"></span>
+                    } @else {
+                      Reply
+                    }
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  } @else {
+    <div class="text-center py-5">
+      <p class="text-muted fs-5">Please select a hotel to view reviews.</p>
+    </div>
+  }
+</div>

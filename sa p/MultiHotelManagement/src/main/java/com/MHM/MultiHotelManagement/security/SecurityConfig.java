@@ -1,0 +1,234 @@
+package com.MHM.MultiHotelManagement.security;
+
+
+import com.MHM.MultiHotelManagement.serviceimplement.CustomUserDetailsService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity          // enables @PreAuthorize on controllers
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+    private final JwtAuthFilter jwtAuthFilter;
+    private final CustomUserDetailsService userDetailsService;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
+
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+
+                        //  Public endpoints (no token needed) 
+                        .requestMatchers(
+                                //  auth_api
+                                "/api/auth/login",
+                                "/api/auth/register",
+                                "/api/auth/verify",
+                                "/api/auth/forgot-password",
+                                "/api/auth/reset-password"
+                        ).permitAll()
+
+                        // Hotel Search APIs (public - regex for path variables)
+                        .requestMatchers(HttpMethod.GET, "/api/hotels/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/hotels/city/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/hotels/location/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/hotels/approved").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/hotels/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/hotels/owner/**").hasAnyRole("HOTEL_OWNER", "ADMIN")
+
+                        // Location APIs (public read)
+                        .requestMatchers(HttpMethod.GET, "/api/locations").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/locations/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/locations/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/locations/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/locations/**").hasRole("ADMIN")
+
+                        // Review APIs (public read)
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/reviews/*/reply").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.PUT, "/api/reviews/*/approve").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/reviews/*/reject").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").hasRole("ADMIN")
+
+                        // Media APIs (image serving paths from WebConfig)
+                        .requestMatchers("/images/**").permitAll()
+                        .requestMatchers("/hotel/**").permitAll()
+                        .requestMatchers("/room/**").permitAll()
+                        .requestMatchers("/food/**").permitAll()
+                        .requestMatchers("/owners/**").permitAll()
+                        .requestMatchers("/gallery/**").permitAll()
+                        .requestMatchers("/customer/**").permitAll()
+                        .requestMatchers("/checkin-id/**").permitAll()
+                        .requestMatchers("/location/**").permitAll()
+
+                        // Ã¢â€â‚¬Ã¢â€â‚¬ Admin only endpoints Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+                        .requestMatchers("/api/admins/**").hasRole("ADMIN")
+
+                        // Ã¢â€â‚¬Ã¢â€â‚¬ Public read for hotel sub-resources Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+                        .requestMatchers(HttpMethod.GET, "/api/hotel-details/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/facilities/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/gallery/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/food-items/**").permitAll()
+
+                        // Ã¢â€â‚¬Ã¢â€â‚¬ Admin hotel management (approve/reject) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+                        .requestMatchers(HttpMethod.PUT, "/api/hotels/*/approve").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/hotels/*/reject").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/hotels/all").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/hotels/pending").hasRole("ADMIN")
+
+                        // Ã¢â€â‚¬Ã¢â€â‚¬ SSLCommerz callbacks (public - no auth) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+                        .requestMatchers("/api/payments/sslcommerz/success").permitAll()
+                        .requestMatchers("/api/payments/sslcommerz/fail").permitAll()
+                        .requestMatchers("/api/payments/sslcommerz/cancel").permitAll()
+                        .requestMatchers("/api/payments/sslcommerz/ipn").permitAll()
+
+                        // Static resources & browser probes
+                        .requestMatchers("/favicon.ico").permitAll()
+                        .requestMatchers("/.well-known/**").permitAll()
+
+                        // Ã¢â€â‚¬Ã¢â€â‚¬ Hotel Owner endpoints Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+                        .requestMatchers(HttpMethod.POST, "/api/hotels").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.PUT, "/api/hotels/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/hotels/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.POST, "/api/hotel-owners").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/hotel-owners").hasAnyRole("ADMIN", "HOTEL_OWNER")
+                        .requestMatchers("/api/hotel-owners/**").hasAnyRole("HOTEL_OWNER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/hotel-details/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.PUT, "/api/hotel-details/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/hotel-details/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.POST, "/api/rooms/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.PUT, "/api/rooms/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/rooms/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/rooms/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.POST, "/api/facilities/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.PUT, "/api/facilities/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/facilities/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.POST, "/api/gallery/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.PUT, "/api/gallery/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/gallery/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.POST, "/api/food-items/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.PUT, "/api/food-items/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/food-items/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.GET, "/api/deals/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/deals/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.PUT, "/api/deals/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/deals/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.GET, "/api/coupons/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/coupons/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.PUT, "/api/coupons/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/coupons/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers("/api/reports/platform-summary").hasRole("ADMIN")
+                        .requestMatchers("/api/reports/**").hasRole("HOTEL_OWNER")
+
+                        // Ã¢â€â‚¬Ã¢â€â‚¬ Customer endpoints Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+                        .requestMatchers(HttpMethod.POST, "/api/customers").permitAll()
+                        .requestMatchers("/api/customers/**").hasAnyRole("CUSTOMER", "ADMIN")
+                        .requestMatchers("/api/bookings/**").hasAnyRole("CUSTOMER", "ADMIN", "HOTEL_OWNER")
+                        .requestMatchers("/api/booking-rooms/**").hasAnyRole("CUSTOMER", "ADMIN", "HOTEL_OWNER")
+                        .requestMatchers("/api/payments/**").hasAnyRole("CUSTOMER", "ADMIN", "HOTEL_OWNER")
+                        .requestMatchers("/api/invoices/**").hasAnyRole("CUSTOMER", "ADMIN", "HOTEL_OWNER")
+                        .requestMatchers("/api/wishlists/**").hasAnyRole("CUSTOMER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/hotel-extra-services/**").permitAll()
+                        .requestMatchers("/api/hotel-extra-services/**").hasRole("HOTEL_OWNER")
+                        .requestMatchers("/api/extra-services/**").hasAnyRole("CUSTOMER", "ADMIN", "HOTEL_OWNER")
+
+                        // Ã¢â€â‚¬Ã¢â€â‚¬ Admin + Owner endpoints Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+                        .requestMatchers("/api/commissions/**").hasAnyRole("ADMIN", "HOTEL_OWNER")
+                        .requestMatchers("/api/support/**").hasAnyRole("ADMIN", "CUSTOMER", "HOTEL_OWNER")
+                        .requestMatchers("/api/support-replies/**").hasAnyRole("ADMIN", "CUSTOMER", "HOTEL_OWNER")
+                        .requestMatchers("/api/notifications/**").hasAnyRole("ADMIN", "CUSTOMER", "HOTEL_OWNER")
+
+                        // Ã¢â€â‚¬Ã¢â€â‚¬ All other requests need authentication Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+                        .anyRequest().authenticated()
+
+                ).authenticationProvider(authenticationProvider())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
+        // 1. Gateway callbacks — permissive since these are top-level redirects,
+        //    not credentialed script reads. Must be registered before "/**".
+        CorsConfiguration sslCommerz = new CorsConfiguration();
+        sslCommerz.setAllowedOriginPatterns(List.of("*"));
+        sslCommerz.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
+        sslCommerz.setAllowedHeaders(List.of("*"));
+        sslCommerz.setAllowCredentials(false);
+        source.registerCorsConfiguration("/api/payments/sslcommerz/success", sslCommerz);
+        source.registerCorsConfiguration("/api/payments/sslcommerz/fail", sslCommerz);
+        source.registerCorsConfiguration("/api/payments/sslcommerz/cancel", sslCommerz);
+        source.registerCorsConfiguration("/api/payments/sslcommerz/ipn", sslCommerz);
+
+        // 2. Everything else (including /init/{bookingId}) — your Angular frontend
+        CorsConfiguration strict = new CorsConfiguration();
+        strict.setAllowedOrigins(List.of(
+                "http://localhost:4200",
+                "http://192.168.88.250:4200"
+                // add your real production frontend origin here
+        ));
+        strict.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        strict.setAllowedHeaders(List.of("*"));
+        strict.setAllowCredentials(true);
+        strict.setExposedHeaders(List.of("Authorization"));
+        source.registerCorsConfiguration("/**", strict); // must stay last
+
+        return source;
+    }
+}

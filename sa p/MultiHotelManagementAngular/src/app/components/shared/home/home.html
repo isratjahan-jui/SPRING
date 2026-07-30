@@ -1,0 +1,265 @@
+<div class="tn-home">
+  <!-- ===== 1. HERO + SEARCH ===== -->
+  <section class="tn-hero">
+    <div class="tn-hero-overlay"></div>
+    <div class="container tn-hero-inner">
+      <span class="tn-hero-eyebrow">✦ Discover Your Next Adventure</span>
+      <h1 class="tn-hero-title">Discover Your <span class="tn-gold">Perfect Escape</span></h1>
+      <p class="tn-hero-sub">Curated collection of the finest hotels, unique stays, and luxury retreats across Bangladesh.</p>
+
+      <div class="tn-search-card">
+        <div class="row g-2 align-items-end">
+          <div class="col-lg col-md-6">
+            <label class="tn-search-label">📍 Destination</label>
+            <input type="text" class="form-control tn-search-input" placeholder="Where to?"
+                   [(ngModel)]="searchKeyword" (keyup.enter)="search()" />
+          </div>
+          <div class="col-lg col-md-6">
+            <label class="tn-search-label">📅 Check-in</label>
+            <input type="date" class="form-control tn-search-input" />
+          </div>
+          <div class="col-lg col-md-6">
+            <label class="tn-search-label">📅 Check-out</label>
+            <input type="date" class="form-control tn-search-input" />
+          </div>
+          <div class="col-lg col-md-6">
+            <label class="tn-search-label">👥 Guests</label>
+            <input type="number" min="1" value="2" class="form-control tn-search-input" />
+          </div>
+          <div class="col-lg-auto col-12">
+            <button class="btn tn-search-btn w-100" (click)="search()">🔍 Search</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tn-quick-filters">
+        @for (f of quickFilters; track f) {
+          <button class="tn-chip" (click)="browseDestination(f)">{{ f }}</button>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 2. STATISTICS ===== -->
+  <section class="container tn-section">
+    <div class="row g-3">
+      @for (s of stats; track s.label) {
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="tn-stat-card">
+            <span class="tn-stat-icon">{{ s.icon }}</span>
+            <div class="tn-stat-value">{{ s.value }}</div>
+            <div class="tn-stat-label">{{ s.label }}</div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- ===== 3. EXPLORE DESTINATIONS (real divisions + real counts) ===== -->
+  <section class="container tn-section">
+    <div class="tn-section-head">
+      <div>
+        <h2 class="tn-section-title">Explore <span class="tn-gold">Destinations</span></h2>
+        <p class="tn-section-sub">Browse hotels across Bangladesh's divisions</p>
+      </div>
+    </div>
+    <div class="row g-3">
+      @for (d of divisions; track d.name) {
+        <div class="col-6 col-md-4 col-lg-3">
+          <button class="tn-dest-card" [class.tn-dest-active]="activeDivision === d.name" (click)="browseDestination(d.name)">
+            <span class="tn-dest-icon">{{ d.icon }}</span>
+            <div class="tn-dest-body">
+              <h5 class="tn-dest-name">{{ d.name }}</h5>
+              <div class="tn-dest-meta">{{ countForCity(d.name) }} hotel{{ countForCity(d.name) === 1 ? '' : 's' }}</div>
+            </div>
+          </button>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- ===== 5. FEATURED HOTELS ===== -->
+  <section class="container tn-section" id="featured-hotels">
+    <div class="tn-section-head">
+      <div>
+        <h2 class="tn-section-title">
+          @if (activeDivision) { Hotels in {{ activeDivision }} }
+          @else if (searchActive) { Search Results }
+          @else { Featured <span class="tn-gold">Hotels</span> }
+        </h2>
+        <p class="tn-section-sub">Exceptional stays, verified and ready to book</p>
+      </div>
+      @if (activeDivision || searchActive) {
+        <button class="btn tn-btn-outline" (click)="activeDivision ? clearDivisionFilter() : clearSearch()">Show all</button>
+      }
+    </div>
+
+    @if (loadingHotels) {
+      <div class="text-center py-5"><div class="spinner-border" style="color:var(--primary)"></div></div>
+    } @else {
+      <div class="row g-4">
+        @for (hotel of hotels; track hotel.id) {
+          <div class="col-md-6 col-lg-4 col-xl-3">
+            <div class="tn-hotel-card">
+              <div class="tn-hotel-img-wrap">
+                @if (hotel.image) {
+                  <img [src]="imageBaseUrl + '/hotel/' + hotel.image" class="tn-hotel-img" [alt]="hotel.hotelName" />
+                } @else {
+                  <div class="tn-hotel-img tn-hotel-img-ph">🏨</div>
+                }
+                <button class="tn-fav" title="Save to wishlist">♡</button>
+                @if (hotel.rating) {
+                  <span class="tn-badge-cancel">★ {{ hotel.rating }} rating</span>
+                }
+              </div>
+              <div class="tn-hotel-body">
+                <h5 class="tn-hotel-name">{{ hotel.hotelName }}</h5>
+                <p class="tn-hotel-loc">📍 {{ hotel.address }}</p>
+                @if (hotel.locationName || hotel.city) {
+                  <div class="tn-hotel-tags">
+                    <span class="tn-tag">📍 {{ hotel.city || hotel.locationName }}</span>
+                    @if (hotel.paymentType) { <span class="tn-tag">💳 {{ hotel.paymentType }}</span> }
+                  </div>
+                }
+                <div class="tn-hotel-foot">
+                  <span class="tn-hotel-night">View rooms & live prices inside</span>
+                </div>
+                <div class="d-flex gap-2 mt-2">
+                  <a [routerLink]="['/hotels', hotel.id]" class="btn tn-btn-primary flex-grow-1">Book Now</a>
+                  <a [routerLink]="['/hotels', hotel.id]" class="btn tn-btn-outline">Details</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="col-12 text-center py-5">
+            <p style="font-size:2rem">🔍</p>
+            <p class="text-muted">No hotels found.</p>
+            @if (activeDivision || searchActive) {
+              <button class="btn tn-btn-primary" (click)="activeDivision ? clearDivisionFilter() : clearSearch()">Show all hotels</button>
+            }
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- ===== 6. TODAY'S DEALS ===== -->
+  @if (deals.length > 0) {
+    <section class="container tn-section">
+      <div class="tn-section-head">
+        <div>
+          <h2 class="tn-section-title">Today's <span class="tn-gold">Deals</span></h2>
+          <p class="tn-section-sub">Limited-time offers — book before they're gone</p>
+        </div>
+      </div>
+      <div class="row g-4">
+        @for (deal of deals; track deal.id) {
+          <div class="col-md-6 col-lg-4">
+            <div class="tn-deal-banner">
+              <div class="tn-deal-discount">
+                @if (deal.discountPercent) { -{{ deal.discountPercent }}% }
+                @else if (deal.discountAmount) { -৳{{ deal.discountAmount }} }
+                @else { DEAL }
+              </div>
+              <h4 class="tn-deal-title">{{ deal.dealTitle }}</h4>
+              @if (deal.description) { <p class="tn-deal-desc">{{ deal.description }}</p> }
+              <div class="tn-deal-hotel">🏨 {{ deal.hotelName }}</div>
+              <a [routerLink]="['/hotels']" class="btn tn-btn-gold mt-2">Book Now</a>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- ===== 7. FEATURED AMENITIES ===== -->
+  <section class="tn-band-light">
+    <div class="container tn-section">
+      <div class="tn-section-head justify-content-center text-center">
+        <div>
+          <h2 class="tn-section-title">Featured <span class="tn-gold">Amenities</span></h2>
+          <p class="tn-section-sub">Everything you need for a comfortable stay</p>
+        </div>
+      </div>
+      <div class="row g-3">
+        @for (a of amenities; track a.name) {
+          <div class="col-6 col-md-3 col-lg-3">
+            <div class="tn-amenity-card">
+              <span class="tn-amenity-icon">{{ a.icon }}</span>
+              <span class="tn-amenity-name">{{ a.name }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 8. WHY CHOOSE TRIPNEST ===== -->
+  <section class="container tn-section">
+    <div class="tn-section-head justify-content-center text-center">
+      <div>
+        <h2 class="tn-section-title">Why Choose <span class="tn-gold">TripNest</span></h2>
+        <p class="tn-section-sub">A premium booking experience, end to end</p>
+      </div>
+    </div>
+    <div class="row g-4">
+      @for (f of features; track f.title) {
+        <div class="col-md-6 col-lg-4">
+          <div class="tn-feature-card">
+            <span class="tn-feature-icon">{{ f.icon }}</span>
+            <h5 class="tn-feature-title">{{ f.title }}</h5>
+            <p class="tn-feature-text">{{ f.text }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- ===== 9. GUEST REVIEWS ===== -->
+  <section class="tn-band">
+    <div class="container tn-section">
+      <div class="tn-section-head justify-content-center text-center">
+        <div>
+          <h2 class="tn-section-title tn-on-dark">Guest <span class="tn-gold">Reviews</span></h2>
+          <p class="tn-section-sub tn-on-dark-sub">Trusted by travellers across the country</p>
+        </div>
+      </div>
+      <div class="row g-4">
+        @for (t of testimonials; track t.name) {
+          <div class="col-md-4">
+            <div class="tn-review-card">
+              <div class="tn-review-stars">
+                @for (star of [1,2,3,4,5]; track star) {
+                  <span [class.tn-star-off]="star > t.rating">★</span>
+                }
+              </div>
+              <p class="tn-review-text">"{{ t.comment }}"</p>
+              <div class="tn-review-author">
+                <span class="tn-review-avatar">{{ t.name.charAt(0) }}</span>
+                <div>
+                  <div class="tn-review-name">{{ t.name }}</div>
+                  <div class="tn-review-country">{{ t.country }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 10. NEWSLETTER ===== -->
+  <section class="container tn-section">
+    <div class="tn-newsletter">
+      <div class="tn-newsletter-inner">
+        <h2 class="tn-newsletter-title">Stay <span class="tn-gold">Updated</span></h2>
+        <p class="tn-newsletter-sub">Get the best hotel deals and travel inspiration delivered to your inbox.</p>
+        <div class="tn-newsletter-form">
+          <input type="email" class="form-control" placeholder="Enter your email" [(ngModel)]="newsletterEmail" />
+          <button class="btn tn-btn-gold" (click)="subscribeNewsletter()">Subscribe</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
