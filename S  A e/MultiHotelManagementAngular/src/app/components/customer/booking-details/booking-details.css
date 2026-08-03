@@ -1,0 +1,18 @@
+@media print {
+  .btn,
+  .btn-outline-secondary,
+  .btn-outline-primary {
+    display: none;
+  }
+  .card {
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .container {
+    max-width: 100% !important;
+  }
+}
+
+.bg-orange {
+  background-color: var(--accent-orange) !important;
+}

@@ -1,0 +1,387 @@
+<div class="hd-page">
+  <h3 class="hd-page-title">Hotel Details</h3>
+
+  <div class="hd-selector-card">
+    <label class="hd-selector-label">Select Hotel</label>
+    <div class="hd-selector-row">
+      @if (selectedHotel?.image) {
+        <img class="hd-selector-thumb" [src]="imageBaseUrl + '/hotel/' + selectedHotel!.image" [alt]="selectedHotel!.hotelName" />
+      } @else {
+        <div class="hd-selector-thumb hd-selector-thumb-empty">&#127976;</div>
+      }
+      <select [(ngModel)]="selectedHotelId" (change)="onHotelChange()" class="form-select hd-selector-select">
+        <option [ngValue]="0" disabled>-- Choose a hotel --</option>
+        @for (h of hotels; track h.id) {
+          <option [ngValue]="h.id">{{ h.hotelName }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (selectedHotelId && !showForm && !details) {
+    <div class="alert alert-info">
+      No details added yet for this hotel.
+      <button class="btn btn-primary btn-sm ms-2" (click)="addNew()">+ Add Details</button>
+    </div>
+  }
+
+  @if (selectedHotelId && !showForm && details) {
+    <!-- Details Information -->
+    <div class="hd-card">
+      <div class="hd-card-head">
+        <div class="hd-card-head-left">
+          <span class="hd-head-icon">&#127974;</span>
+          <h5 class="hd-card-title">Details Information</h5>
+        </div>
+        <div class="hd-card-actions">
+          <button class="hd-btn hd-btn-edit" (click)="edit()">&#9998; Edit</button>
+          <button class="hd-btn hd-btn-delete" (click)="deleteDetails()">&#128465; Delete</button>
+        </div>
+      </div>
+
+      <div class="hd-info-grid">
+        @if (details.description) {
+          <div class="hd-info-row">
+            <span class="hd-info-icon">&#128196;</span>
+            <div class="hd-info-text">
+              <span class="hd-info-label">Description</span>
+              <span class="hd-info-value">{{ details.description }}</span>
+            </div>
+          </div>
+        }
+        @if (details.hotelPolicy) {
+          <div class="hd-info-row">
+            <span class="hd-info-icon">&#128737;</span>
+            <div class="hd-info-text">
+              <span class="hd-info-label">Hotel Policy</span>
+              <span class="hd-info-value">{{ details.hotelPolicy }}</span>
+            </div>
+          </div>
+        }
+        @if (details.ownerSpeach) {
+          <div class="hd-info-row">
+            <span class="hd-info-icon">&#128172;</span>
+            <div class="hd-info-text">
+              <span class="hd-info-label">Owner Speech</span>
+              <span class="hd-info-value">{{ details.ownerSpeach }}</span>
+            </div>
+          </div>
+        }
+        @if (details.cancellationPolicy) {
+          <div class="hd-info-row">
+            <span class="hd-info-icon">&#10060;</span>
+            <div class="hd-info-text">
+              <span class="hd-info-label">Cancellation Policy</span>
+              <span class="hd-info-value">{{ details.cancellationPolicy }}</span>
+            </div>
+          </div>
+        }
+        @if (details.pricePerNight) {
+          <div class="hd-info-row">
+            <span class="hd-info-icon">&#127991;</span>
+            <div class="hd-info-text">
+              <span class="hd-info-label">Price per Night</span>
+              <span class="hd-info-value">&#2547;{{ details.pricePerNight | number }}</span>
+            </div>
+          </div>
+        }
+        @if (details.smokingPolicy) {
+          <div class="hd-info-row">
+            <span class="hd-info-icon">&#128685;</span>
+            <div class="hd-info-text">
+              <span class="hd-info-label">Smoking Policy</span>
+              <span class="hd-info-value">{{ details.smokingPolicy }}</span>
+            </div>
+          </div>
+        }
+        @if (details.checkInTime || details.checkOutTime) {
+          <div class="hd-info-row">
+            <span class="hd-info-icon">&#128340;</span>
+            <div class="hd-info-text">
+              <span class="hd-info-label">Check-in / Check-out</span>
+              <span class="hd-info-value">{{ details.checkInTime || 'N/A' }} / {{ details.checkOutTime || 'N/A' }}</span>
+            </div>
+          </div>
+        }
+        @if (details.childPolicy) {
+          <div class="hd-info-row">
+            <span class="hd-info-icon">&#128106;</span>
+            <div class="hd-info-text">
+              <span class="hd-info-label">Child Policy</span>
+              <span class="hd-info-value">{{ details.childPolicy }}</span>
+            </div>
+          </div>
+        }
+        @if (details.contactEmail || details.contactPhone) {
+          <div class="hd-info-row">
+            <span class="hd-info-icon">&#128222;</span>
+            <div class="hd-info-text">
+              <span class="hd-info-label">Contact</span>
+              <span class="hd-info-value">{{ details.contactEmail || '' }}{{ details.contactPhone ? '  |  ' + details.contactPhone : '' }}</span>
+            </div>
+          </div>
+        }
+        @if (details.languages) {
+          <div class="hd-info-row">
+            <span class="hd-info-icon">&#127760;</span>
+            <div class="hd-info-text">
+              <span class="hd-info-label">Languages</span>
+              <span class="hd-info-value">{{ details.languages }}</span>
+            </div>
+          </div>
+        }
+        @if (details.nearbyAttractions) {
+          <div class="hd-info-row">
+            <span class="hd-info-icon">&#128205;</span>
+            <div class="hd-info-text">
+              <span class="hd-info-label">Nearby Attractions</span>
+              <span class="hd-info-value">{{ details.nearbyAttractions }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Payment Options -->
+    @if (details.paymentOption) {
+      <div class="hd-card">
+        <div class="hd-card-head">
+          <div class="hd-card-head-left">
+            <span class="hd-head-icon hd-head-icon-purple">&#128179;</span>
+            <h5 class="hd-card-title">Payment Options</h5>
+          </div>
+        </div>
+        <div class="hd-pay-grid">
+          <div class="hd-pay-card hd-pay-purple">
+            <span class="hd-pay-icon">&#128179;</span>
+            <div>
+              <span class="hd-pay-label">Payment Method</span>
+              <span class="hd-pay-value">{{ paymentMethodLabel(details.paymentOption) }}</span>
+            </div>
+          </div>
+          <div class="hd-pay-card hd-pay-orange">
+            <span class="hd-pay-icon">&#37;</span>
+            <div>
+              <span class="hd-pay-label">Deposit Percentage</span>
+              <span class="hd-pay-value">{{ details.depositPercentage || 0 }}%</span>
+            </div>
+          </div>
+          <div class="hd-pay-card hd-pay-blue">
+            <span class="hd-pay-icon">&#128737;</span>
+            <div>
+              <span class="hd-pay-label">Deposit Refund Policy</span>
+              <span class="hd-pay-value">
+                @switch (details.cancellationDepositRefundable) {
+                  @case ('FULL_REFUND') { Full Refund }
+                  @case ('PARTIAL_REFUND') { Partial Refund }
+                  @case ('CONDITIONAL_REFUND') { Conditional Refund }
+                  @case ('NON_REFUNDABLE') { Non-Refundable }
+                  @default { {{ details.cancellationDepositRefundable }} }
+                }
+              </span>
+              <span class="hd-pay-sub">
+                @switch (details.cancellationDepositRefundable) {
+                  @case ('FULL_REFUND') { 100% refund on early cancel }
+                  @case ('PARTIAL_REFUND') { 50% refund, 50% commission }
+                  @case ('CONDITIONAL_REFUND') { based on cancel timing }
+                  @case ('NON_REFUNDABLE') { no refund on cancel }
+                }
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
+
+  @if (showForm) {
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5>{{ editingId ? 'Edit Hotel Details' : 'Add Hotel Details' }}</h5>
+        <form (ngSubmit)="save()">
+          <div class="row">
+            <div class="col-md-12 mb-2">
+              <label class="form-label">Description</label>
+              <textarea
+                [(ngModel)]="form.description"
+                name="description"
+                class="form-control"
+                rows="3"
+              ></textarea>
+            </div>
+            <div class="col-md-12 mb-2">
+              <label class="form-label">Owner Speech</label>
+              <textarea
+                [(ngModel)]="form.ownerSpeach"
+                name="ownerSpeach"
+                class="form-control"
+                rows="2"
+              ></textarea>
+            </div>
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Price per Night (&#2547;)</label>
+              <input
+                [(ngModel)]="form.pricePerNight"
+                name="pricePerNight"
+                type="number"
+                class="form-control"
+              />
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label">Check-in Time</label>
+              <input
+                [(ngModel)]="form.checkInTime"
+                name="checkInTime"
+                class="form-control"
+                placeholder="14:00"
+              />
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label">Check-out Time</label>
+              <input
+                [(ngModel)]="form.checkOutTime"
+                name="checkOutTime"
+                class="form-control"
+                placeholder="12:00"
+              />
+            </div>
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Contact Email</label>
+              <input
+                [(ngModel)]="form.contactEmail"
+                name="contactEmail"
+                type="email"
+                class="form-control"
+              />
+            </div>
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Contact Phone</label>
+              <input [(ngModel)]="form.contactPhone" name="contactPhone" class="form-control" />
+            </div>
+            <div class="col-md-12 mb-2">
+              <label class="form-label">Hotel Policy</label>
+              <textarea
+                [(ngModel)]="form.hotelPolicy"
+                name="hotelPolicy"
+                class="form-control"
+                rows="2"
+              ></textarea>
+            </div>
+            <div class="col-md-12 mb-2">
+              <label class="form-label">Cancellation Policy</label>
+              <textarea
+                [(ngModel)]="form.cancellationPolicy"
+                name="cancellationPolicy"
+                class="form-control"
+                rows="2"
+              ></textarea>
+            </div>
+            <div class="col-md-4 mb-2">
+              <label class="form-label">Deposit Refund Policy</label>
+              <select
+                [(ngModel)]="form.cancellationDepositRefundable"
+                name="cancellationDepositRefundable"
+                class="form-select"
+              >
+                <option value="FULL_REFUND">Full Refund (100% refund on early cancel)</option>
+                <option value="PARTIAL_REFUND">
+                  Partial Refund (e.g. 50% refund, 50% commission)
+                </option>
+                <option value="CONDITIONAL_REFUND">
+                  Conditional Refund (based on cancel timing)
+                </option>
+                <option value="NON_REFUNDABLE">Non-Refundable (no refund on cancel)</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-2">
+              <label class="form-label">Smoking Policy</label>
+              <input [(ngModel)]="form.smokingPolicy" name="smokingPolicy" class="form-control" />
+            </div>
+            <div class="col-md-4 mb-2">
+              <label class="form-label">Child Policy</label>
+              <input [(ngModel)]="form.childPolicy" name="childPolicy" class="form-control" />
+            </div>
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Languages</label>
+              <input
+                [(ngModel)]="form.languages"
+                name="languages"
+                class="form-control"
+                placeholder="English, Bengali"
+              />
+            </div>
+            <div class="col-md-6 mb-2">
+              <label class="form-label">Nearby Attractions</label>
+              <input
+                [(ngModel)]="form.nearbyAttractions"
+                name="nearbyAttractions"
+                class="form-control"
+              />
+            </div>
+          </div>
+          <hr />
+          <h6 class="text-primary mb-3">Payment Options</h6>
+          <div class="row">
+            <div class="col-md-4 mb-2">
+              <label class="form-label">Payment Option</label>
+              <select [(ngModel)]="form.paymentOption" name="paymentOption" class="form-select">
+                <option value="ADVANCE">Advance Payment (Full payment online)</option>
+                <option value="DEPOSIT">Partial Deposit (Pay partial now, rest at hotel)</option>
+                <option value="PAY_AT_HOTEL">Pay at Hotel (With mandatory deposit)</option>
+              </select>
+            </div>
+            @if (form.paymentOption !== 'ADVANCE') {
+              <div class="col-md-4 mb-2">
+                <label class="form-label">Deposit Percentage (%)</label>
+                <input
+                  [(ngModel)]="form.depositPercentage"
+                  name="depositPercentage"
+                  type="number"
+                  class="form-control"
+                  min="10"
+                  max="50"
+                  step="1"
+                />
+                <small class="text-muted">Minimum 10%, Maximum 50%</small>
+              </div>
+            }
+            @if (form.paymentOption === 'PAY_AT_HOTEL') {
+              <div class="col-md-4 mb-2">
+                <label class="form-label">Pre-authorization Required</label>
+                <select
+                  [(ngModel)]="form.preAuthRequired"
+                  name="preAuthRequired"
+                  class="form-select"
+                >
+                  <option [ngValue]="true">Yes (Card hold until check-in)</option>
+                  <option [ngValue]="false">No</option>
+                </select>
+              </div>
+            }
+            <div class="col-md-4 mb-2">
+              <label class="form-label">Deposit Refund Policy</label>
+              <select
+                [(ngModel)]="form.cancellationDepositRefundable"
+                name="cancellationDepositRefundable"
+                class="form-select"
+              >
+                <option value="FULL_REFUND">Full Refund (100% refund on early cancel)</option>
+                <option value="PARTIAL_REFUND">Partial Refund (50% refund, 50% commission)</option>
+                <option value="CONDITIONAL_REFUND">
+                  Conditional Refund (based on cancel timing)
+                </option>
+                <option value="NON_REFUNDABLE">Non-Refundable (no refund on cancel)</option>
+              </select>
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-2">
+            <button type="submit" class="btn btn-success" [disabled]="loading">
+              {{ editingId ? 'Update' : 'Create' }} {{ loading ? '...' : '' }}
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="cancelForm()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

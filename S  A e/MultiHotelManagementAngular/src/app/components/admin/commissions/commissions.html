@@ -1,0 +1,80 @@
+<div class="container mt-4">
+  <h2>Commission Management</h2>
+
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card bg-primary text-white">
+        <div class="card-body">
+          <h5 class="card-title">Total Admin Earnings</h5>
+          <p class="card-text fs-3 fw-bold">BDT {{ totalEarnings }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card bg-success text-white">
+        <div class="card-body">
+          <h5 class="card-title">Total Commissions</h5>
+          <p class="card-text fs-3 fw-bold">{{ commissions.length }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card bg-info text-white">
+        <div class="card-body">
+          <h5 class="card-title">Avg Commission Rate</h5>
+          <p class="card-text fs-3 fw-bold">{{ avgRate | number: '1.1-1' }}%</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <p class="text-muted">Loading commissions...</p>
+  } @else if (commissions.length === 0) {
+    <p class="text-muted">No commissions found.</p>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Booking ID</th>
+            <th>Hotel</th>
+            <th>Customer</th>
+            <th>Payment Amount</th>
+            <th>Commission %</th>
+            <th>Commission (Admin)</th>
+            <th>Net to Owner</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of commissions; track c.id) {
+            <tr>
+              <td>#{{ c.bookingId }}</td>
+              <td>{{ c.hotelName }}</td>
+              <td>{{ c.customerName }}</td>
+              <td>BDT {{ c.paymentAmount || c.bookingTotalPrice | number: '1.2-2' }}</td>
+              <td>{{ c.commissionRate }}%</td>
+              <td class="text-success fw-bold">BDT {{ c.adminEarnings | number: '1.2-2' }}</td>
+              <td>BDT {{ c.hotelOwnerEarnings | number: '1.2-2' }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [class.bg-success]="c.commissionStatus === 'ACTIVE' || c.commissionStatus === 'PAID'"
+                  [class.bg-danger]="c.commissionStatus === 'CANCELLED'"
+                  [class.bg-warning]="
+                    c.commissionStatus !== 'ACTIVE' && c.commissionStatus !== 'PAID' && c.commissionStatus !== 'CANCELLED'
+                  "
+                >
+                  {{ c.commissionStatus || 'PENDING' }}
+                </span>
+              </td>
+              <td>{{ c.createdAt | date: 'medium' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
